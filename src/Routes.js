@@ -10,6 +10,8 @@ import HairDyeingServiceDetail from "./components/ServicePage/HairDyeingService/
 import HairPermServiceDetail from "./components/ServicePage/HairPermService/HairPermServiceDetail/HairPermServiceDetail";
 import BookingService from "./components/BookingService/BookingService";
 import NotFound from "./components/NotFound/NotFound";
+import DashboardSalonStaff from "./components/Dashboard/DashboardSalonStaff";
+import StylistDetail from "./components/Dashboard/StylistDetail";
 
 const AppRoutes = () => {
   return (
@@ -23,6 +25,8 @@ const AppRoutes = () => {
       <Route path="/dyeing-service/:id" element={<HairDyeingServiceDetail />} />
       <Route path="/perm-service/:id" element={<HairPermServiceDetail />} />
       <Route path="/booking-service" element={<BookingService />} />
+      <Route path="/dashboard" element={<DashboardSalonStaff />} />
+      <Route path="/stylist/:id" element={<StylistDetail />} />
       {/* Catch all unmatched routes */}
       <Route path="*" element={<NotFound />} />
     </Routes>
