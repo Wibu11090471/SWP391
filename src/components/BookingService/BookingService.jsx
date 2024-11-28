@@ -16,7 +16,7 @@ const BookingService = () => {
   const [selectedStylist, setSelectedStylist] = useState(null);
   const [selectedDateTime, setSelectedDateTime] = useState(null);
 
-  // Data từ các file đã cung cấp
+  // Branches Data
   const branches = [
     {
       id: 1,
@@ -59,14 +59,6 @@ const BookingService = () => {
     {
       id: 6,
       name: "HAIR HARMONY 6",
-      address:
-        "C1/3 Lê Văn Việt, Lê Văn Việt, Tăng Nhơn Phú A, Quận 9, Hồ Chí Minh, Việt Nam",
-      rating: "5/5 (4 đánh giá)",
-      image: "/assets/image/Branch.png",
-    },
-    {
-      id: 7,
-      name: "HAIR HARMONY 7",
       address:
         "C1/3 Lê Văn Việt, Lê Văn Việt, Tăng Nhơn Phú A, Quận 9, Hồ Chí Minh, Việt Nam",
       rating: "5/5 (4 đánh giá)",
@@ -256,83 +248,172 @@ const BookingService = () => {
       experience: "7 năm",
       imageUrl: "/assets/image/cáooooooo.jpg",
     },
-    {
-      id: 5,
-      name: "Quang Minh",
-      specialty: "Chuyên gia tóc nam đương đại",
-      experience: "5 năm",
-      imageUrl: "/assets/image/cáooooooo.jpg",
-    },
-    {
-      id: 6,
-      name: "Mai Ly",
-      specialty: "Chuyên gia uốn và duỗi",
-      experience: "9 năm",
-      imageUrl: "/assets/image/cáooooooo.jpg",
-    },
-    {
-      id: 7,
-      name: "Đức Trọng",
-      specialty: "Chuyên gia tạo kiểu nghệ thuật",
-      experience: "12 năm",
-      imageUrl: "/assets/image/cáooooooo.jpg",
-    },
-    {
-      id: 8,
-      name: "Thảo Linh",
-      specialty: "Chuyên gia nhuộm màu hiện đại",
-      experience: "6 năm",
-      imageUrl: "/assets/image/cáooooooo.jpg",
-    },
-    {
-      id: 9,
-      name: "Minh Khang",
-      specialty: "Chuyên gia tóc nam phong cách",
-      experience: "7 năm",
-      imageUrl: "/assets/image/cáooooooo.jpg",
-    },
-    {
-      id: 10,
-      name: "Phương Anh",
-      specialty: "Chuyên gia tạo kiểu Âu Mỹ",
-      experience: "8 năm",
-      imageUrl: "/assets/image/cáooooooo.jpg",
-    },
   ];
 
-  // Tạo mảng các ngày trong tuần
-  const generateTimeSlots = () => {
-    const slots = [];
-    for (let hour = 9; hour <= 20; hour++) {
-      slots.push(`${hour}:00`);
-      if (hour !== 20) slots.push(`${hour}:30`);
-    }
-    return slots;
+  // Stylist Availability Mock Data
+  const stylistAvailability = {
+    1: {
+      workDays: [0, 1, 2, 3, 4, 5, 6], // All days of the week
+      timeSlots: [
+        "08:00",
+        "08:30",
+        "09:00",
+        "09:30",
+        "10:00",
+        "10:30",
+        "11:00",
+        "11:30",
+        "12:00",
+        "12:30",
+        "13:00",
+        "13:30",
+        "14:00",
+        "14:30",
+        "15:00",
+        "15:30",
+        "16:00",
+        "16:30",
+        "17:00",
+        "17:30",
+        "18:00",
+        "18:30",
+        "19:00",
+        "19:30",
+        "20:00",
+      ],
+    },
+    2: {
+      workDays: [0, 1, 2, 3, 4, 5, 6], // All days of the week
+      timeSlots: [
+        "08:00",
+        "08:30",
+        "09:00",
+        "09:30",
+        "10:00",
+        "10:30",
+        "11:00",
+        "11:30",
+        "12:00",
+        "12:30",
+        "13:00",
+        "13:30",
+        "14:00",
+        "14:30",
+        "15:00",
+        "15:30",
+        "16:00",
+        "16:30",
+        "17:00",
+        "17:30",
+        "18:00",
+        "18:30",
+        "19:00",
+        "19:30",
+        "20:00",
+      ],
+    },
+    3: {
+      workDays: [0, 1, 2, 3, 4, 5, 6], // All days of the week
+      timeSlots: [
+        "08:00",
+        "08:30",
+        "09:00",
+        "09:30",
+        "10:00",
+        "10:30",
+        "11:00",
+        "11:30",
+        "12:00",
+        "12:30",
+        "13:00",
+        "13:30",
+        "14:00",
+        "14:30",
+        "15:00",
+        "15:30",
+        "16:00",
+        "16:30",
+        "17:00",
+        "17:30",
+        "18:00",
+        "18:30",
+        "19:00",
+        "19:30",
+        "20:00",
+      ],
+    },
+    4: {
+      workDays: [0, 1, 2, 3, 4, 5, 6], // All days of the week
+      timeSlots: [
+        "08:00",
+        "08:30",
+        "09:00",
+        "09:30",
+        "10:00",
+        "10:30",
+        "11:00",
+        "11:30",
+        "12:00",
+        "12:30",
+        "13:00",
+        "13:30",
+        "14:00",
+        "14:30",
+        "15:00",
+        "15:30",
+        "16:00",
+        "16:30",
+        "17:00",
+        "17:30",
+        "18:00",
+        "18:30",
+        "19:00",
+        "19:30",
+        "20:00",
+      ],
+    },
   };
 
-  const timeSlots = generateTimeSlots();
-
-  const generateDates = () => {
+  // Helper function to generate stylist-specific dates
+  const generateStylistSpecificDates = (stylistId) => {
+    const stylist = stylistAvailability[stylistId];
     const dates = [];
     const today = new Date();
+
     for (let i = 0; i < 7; i++) {
       const date = new Date(today);
       date.setDate(today.getDate() + i);
-      dates.push(date);
+
+      // Check if the day of week matches stylist's work days
+      if (stylist.workDays.includes(date.getDay())) {
+        dates.push(date);
+      }
     }
+
     return dates;
   };
 
-  const dates = generateDates();
+  // Helper function to get stylist-specific time slots
+  const getStylistTimeSlots = (stylistId) => {
+    return stylistAvailability[stylistId]?.timeSlots || [];
+  };
 
+  // Navigation handlers
   const handleNext = () => {
-    if (currentStep < 4) setCurrentStep(currentStep + 1);
+    if (currentStep < 3) setCurrentStep(currentStep + 1);
   };
 
   const handleBack = () => {
     if (currentStep > 1) setCurrentStep(currentStep - 1);
   };
 
+  const handleStylistSelect = (stylist) => {
+    setSelectedStylist(stylist);
+    // Reset date and time when changing stylist
+    setSelectedDateTime(null);
+  };
+
+  // Render different steps of booking process
   const renderStep = () => {
     switch (currentStep) {
       case 1:
@@ -414,83 +495,98 @@ const BookingService = () => {
 
       case 3:
         return (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {stylists.map((stylist) => (
-              <Card
-                key={stylist.id}
-                className={`cursor-pointer transition-all duration-300 ${
-                  selectedStylist?.id === stylist.id
-                    ? "border-2 border-[#8B4513]"
-                    : "hover:shadow-lg"
-                }`}
-                onClick={() => setSelectedStylist(stylist)}
-              >
-                <CardContent className="p-0">
-                  <img
-                    src={stylist.imageUrl}
-                    alt={stylist.name}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="p-4">
-                    <h3 className="font-semibold text-[#3E2723] mb-1">
-                      {stylist.name}
-                    </h3>
-                    <p className="text-sm text-[#5D4037] mb-1">
-                      {stylist.specialty}
-                    </p>
-                    <p className="text-sm text-[#8B4513]">
-                      Kinh nghiệm: {stylist.experience}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        );
+          <div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              {stylists.map((stylist) => (
+                <Card
+                  key={stylist.id}
+                  className={`cursor-pointer transition-all duration-300 ${
+                    selectedStylist?.id === stylist.id
+                      ? "border-2 border-[#8B4513]"
+                      : "hover:shadow-lg"
+                  }`}
+                  onClick={() => handleStylistSelect(stylist)}
+                >
+                  <CardContent className="p-0">
+                    <img
+                      src={stylist.imageUrl}
+                      alt={stylist.name}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="p-4">
+                      <h3 className="font-semibold text-[#3E2723] mb-1">
+                        {stylist.name}
+                      </h3>
+                      <p className="text-sm text-[#5D4037] mb-1">
+                        {stylist.specialty}
+                      </p>
+                      <p className="text-sm text-[#8B4513]">
+                        Kinh nghiệm: {stylist.experience}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
 
-      case 4:
-        return (
-          <div className="space-y-6">
-            <div className="grid grid-cols-7 gap-2">
-              {dates.map((date, index) => (
-                <button
-                  key={index}
-                  className={`p-2 rounded-lg text-center ${
-                    selectedDateTime?.date === date.toDateString()
-                      ? "bg-[#8B4513] text-white"
-                      : "bg-white hover:bg-[#DEB887]/20"
-                  }`}
-                  onClick={() =>
-                    setSelectedDateTime({
-                      ...selectedDateTime,
-                      date: date.toDateString(),
-                    })
-                  }
-                >
-                  <div className="text-sm font-medium">
-                    {date.toLocaleDateString("vi-VN", { weekday: "short" })}
-                  </div>
-                  <div className="text-lg font-bold">{date.getDate()}</div>
-                </button>
-              ))}
-            </div>
-            <div className="grid grid-cols-4 gap-4">
-              {timeSlots.map((time, index) => (
-                <button
-                  key={index}
-                  className={`p-2 rounded-lg ${
-                    selectedDateTime?.time === time
-                      ? "bg-[#8B4513] text-white"
-                      : "bg-white hover:bg-[#DEB887]/20"
-                  }`}
-                  onClick={() =>
-                    setSelectedDateTime({ ...selectedDateTime, time })
-                  }
-                >
-                  {time}
-                </button>
-              ))}
-            </div>
+            {selectedStylist && (
+              <div className="space-y-6">
+                <div className="text-xl font-semibold mb-4">
+                  Chọn ngày và giờ với {selectedStylist.name}
+                </div>
+                <div className="grid grid-cols-7 gap-2">
+                  {generateStylistSpecificDates(selectedStylist.id).map(
+                    (date, index) => (
+                      <button
+                        key={index}
+                        className={`p-2 rounded-lg text-center ${
+                          selectedDateTime?.date === date.toDateString()
+                            ? "bg-[#8B4513] text-white"
+                            : "bg-white hover:bg-[#DEB887]/20"
+                        }`}
+                        onClick={() =>
+                          setSelectedDateTime({
+                            ...selectedDateTime,
+                            date: date.toDateString(),
+                          })
+                        }
+                      >
+                        <div className="text-sm font-medium">
+                          {date.toLocaleDateString("vi-VN", {
+                            weekday: "short",
+                          })}
+                        </div>
+                        <div className="text-lg font-bold">
+                          {date.getDate()}
+                        </div>
+                      </button>
+                    )
+                  )}
+                </div>
+                <div className="grid grid-cols-4 gap-4">
+                  {getStylistTimeSlots(selectedStylist.id).map(
+                    (time, index) => (
+                      <button
+                        key={index}
+                        className={`p-2 rounded-lg ${
+                          selectedDateTime?.time === time
+                            ? "bg-[#8B4513] text-white"
+                            : "bg-white hover:bg-[#DEB887]/20"
+                        }`}
+                        onClick={() =>
+                          setSelectedDateTime({
+                            ...selectedDateTime,
+                            time,
+                          })
+                        }
+                      >
+                        {time}
+                      </button>
+                    )
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         );
 
@@ -499,12 +595,8 @@ const BookingService = () => {
     }
   };
 
-  const stepTitles = [
-    "Chọn Salon",
-    "Chọn Dịch Vụ",
-    "Chọn Stylist",
-    "Chọn Thời Gian",
-  ];
+  // Step titles
+  const stepTitles = ["Chọn Salon", "Chọn Dịch Vụ", "Chọn Stylist & Thời Gian"];
 
   return (
     <div className="min-h-screen bg-[#FDF5E6] py-8 pt-28">
@@ -571,12 +663,17 @@ const BookingService = () => {
           <button
             onClick={handleNext}
             className={`flex items-center px-6 py-2 rounded-lg ${
-              currentStep === 4
+              currentStep === 3
                 ? "bg-[#8B4513] text-white"
                 : "bg-[#8B4513] text-white hover:bg-[#915C38]"
             }`}
+            disabled={
+              (currentStep === 1 && !selectedSalon) ||
+              (currentStep === 2 && !selectedService) ||
+              (currentStep === 3 && (!selectedStylist || !selectedDateTime))
+            }
           >
-            {currentStep === 4 ? "Hoàn tất đặt lịch" : "Tiếp tục"}
+            {currentStep === 3 ? "Hoàn tất đặt lịch" : "Tiếp tục"}
             <ChevronRight className="w-5 h-5 ml-2" />
           </button>
         </div>
