@@ -2,9 +2,13 @@ import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
 const StylistDetail = () => {
-  const [selectedDateTime, setSelectedDateTime] = useState({});
   const { id } = useParams();
   const navigate = useNavigate();
+  const [hoveredTime, setHoveredTime] = useState(null);
+  const [popup, setPopup] = useState({ visible: false, time: null });
+  const [successMessage, setSuccessMessage] = useState("");
+  const [approvedTimes, setApprovedTimes] = useState([]);
+  const [selectedDateTime, setSelectedDateTime] = useState(null);
 
   const stylist = {
     1: {
@@ -111,27 +115,61 @@ const StylistDetail = () => {
   ];
 
   const handleTimeSelect = (time) => {
-    if (!stylist.bookings.includes(time)) {
-      setSelectedDateTime({ stylistId: stylist.id, time });
+    if (!approvedTimes.includes(time)) {
+      setPopup({ visible: true, time });
     }
   };
 
-  // Hàm quay lại trang trước
+  const handleApprove = () => {
+    setPopup({ ...popup, visible: false });
+    setApprovedTimes([...approvedTimes, popup.time]);
+    setSuccessMessage(
+      `Đặt lịch thành công vào ${popup.time} với stylist ${stylist.name}`
+    );
+
+    setTimeout(() => {
+      setSuccessMessage("");
+    }, 2500);
+  };
+
+  const handleDecline = () => {
+    setPopup({ ...popup, visible: false });
+  };
+
   const handleBackClick = () => {
     navigate("/dashboard");
   };
 
+  const generateDates = () => {
+    const dates = [];
+    const today = new Date();
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() + i);
+      dates.push(date);
+    }
+    return dates;
+  };
+
+  const dates = generateDates();
+
   return (
-    <div className="stylist-detail container mx-auto p-6" style={{ paddingTop: "80px" }}>
+    <div
+      className="stylist-detail container mx-auto p-6"
+      style={{ paddingTop: "80px" }}
+    >
       <button
         onClick={handleBackClick}
         className="bg-[#8B4513] text-white px-4 py-2 rounded-md mt-4"
       >
         Quay lại trang Dashboard
       </button>
-  
-      <div className="bg-white shadow-lg rounded-lg p-6 mt-6 flex items-start">
-        {/* Left side - Stylist Image */}
+
+      <div
+        className="bg-white shadow-lg rounded-lg p-9 mt-6 flex items-start st"
+        style={{ margin: "40px" }}
+      >
+        {/* Left side - stylist Image */}
         <div className="flex-shrink-0 mr-16">
           <img
             src={stylist.imageUrl}
@@ -146,21 +184,52 @@ const StylistDetail = () => {
             }}
           />
           <div className="text-center">
-            <h2 className="font-bold text-3xl text-gray-800 mt-4">{stylist.name}</h2>
-            <p className="font-bold text-lg text-gray-600 mt-2">{stylist.specialty}</p>
-            <p className="font-bold text-lg text-gray-500 mt-2">Kinh nghiệm: {stylist.experience}</p>
+            <h2 className="font-bold text-3xl text-gray-800 mt-4">
+              {stylist.name}
+            </h2>
+            <p className="font-bold text-lg text-gray-600 mt-2">
+              {stylist.specialty}
+            </p>
+            <p className="font-bold text-lg text-gray-500 mt-2">
+              Kinh nghiệm: {stylist.experience}
+            </p>
           </div>
         </div>
-  
+
         {/* Right side - Time slots and selected time */}
         <div className="flex-grow">
-          {/* Time Slots */}
+          <div className="grid grid-cols-7 gap-2 mb-4">
+            {" "}
+            {dates.map((date, index) => (
+              <button
+                key={index}
+                className={`p-2 rounded-lg text-center ${
+                  selectedDateTime?.date === date.toDateString()
+                    ? "bg-[#8B4513] text-white"
+                    : "bg-white hover:bg-[#DEB887]/20"
+                }`}
+                onClick={() =>
+                  setSelectedDateTime({
+                    ...selectedDateTime,
+                    date: date.toDateString(),
+                  })
+                }
+              >
+                <div className="text-sm font-medium">
+                  {date.toLocaleDateString("vi-VN", { weekday: "short" })}
+                </div>
+                <div className="text-lg font-bold">{date.getDate()}</div>
+              </button>
+            ))}
+          </div>
+
+          {/* Phần thời gian */}
           <div
             style={{
               display: "grid",
               gridTemplateColumns: "repeat(4, 1fr)",
               gap: "10px",
-              marginTop: "20px",
+              marginTop: "10px", 
             }}
           >
             {timeSlots.map((time, index) => (
@@ -170,46 +239,138 @@ const StylistDetail = () => {
                   padding: "15px",
                   borderRadius: "5px",
                   textAlign: "center",
-                  backgroundColor: stylist.bookings.includes(time)
-                    ? "#d3d3d3"
-                    : "#ffffff",
-                  color: stylist.bookings.includes(time) ? "#555" : "#000",
-                  cursor: stylist.bookings.includes(time)
-                    ? "not-allowed"
-                    : "pointer",
+                  backgroundColor:
+                    hoveredTime === time
+                      ? "#90EE90"
+                      : approvedTimes.includes(time) // Check if time is approved
+                      ? "#d3d3d3"
+                      : stylist.bookings.includes(time)
+                      ? "#d3d3d3"
+                      : "#ffffff",
+                  color:
+                    approvedTimes.includes(time) ||
+                    stylist.bookings.includes(time)
+                      ? "#555"
+                      : "#000",
+                  cursor:
+                    approvedTimes.includes(time) ||
+                    stylist.bookings.includes(time)
+                      ? "not-allowed"
+                      : "pointer",
                   border: "1px solid #ccc",
-                  transition: "background-color 0.2s",
                 }}
-                disabled={stylist.bookings.includes(time)}
+                disabled={
+                  approvedTimes.includes(time) ||
+                  stylist.bookings.includes(time)
+                } // Disable times that are approved or already booked
+                onMouseEnter={() => setHoveredTime(time)}
+                onMouseLeave={() => setHoveredTime(null)}
                 onClick={() => handleTimeSelect(time)}
-                onMouseEnter={(e) =>
-                  !stylist.bookings.includes(time) &&
-                  (e.target.style.backgroundColor = "#f0f8ff")
-                }
-                onMouseLeave={(e) =>
-                  !stylist.bookings.includes(time) &&
-                  (e.target.style.backgroundColor = "#ffffff")
-                }
               >
                 {time}
               </button>
             ))}
           </div>
-  
-          {/* Selected DateTime */}
-          {selectedDateTime.time && (
-            <div className="mt-4 text-green-500 text-center">
-              <p>
-                Đã chọn: {selectedDateTime.time} - Bạn đang đặt lịch cho stylist{" "}
-                {stylist.name}.
+
+          {successMessage && (
+            <div
+              style={{
+                marginTop: "20px",
+                backgroundColor: "#d4edda",
+                color: "#155724",
+                padding: "15px",
+                borderRadius: "5px",
+                textAlign: "center",
+                fontSize: "16px",
+                fontWeight: "bold",
+              }}
+            >
+              {successMessage}
+            </div>
+          )}
+
+          {popup.visible && (
+            <div
+              style={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                backgroundColor: "white",
+                border: "1px solid #ccc",
+                padding: "30px",
+                borderRadius: "10px",
+                boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+                textAlign: "center",
+                zIndex: 1000,
+              }}
+            >
+              <p
+                style={{
+                  marginBottom: "20px",
+                  fontSize: "18px",
+                  fontWeight: "bold",
+                }}
+              >
+                Bạn có muốn đặt lịch vào{" "}
+                <span style={{ color: "#8B4513" }}>{popup.time}</span> không?
               </p>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  gap: "20px",
+                }}
+              >
+                <button
+                  onClick={handleApprove}
+                  style={{
+                    backgroundColor: "#4CAF50",
+                    color: "white",
+                    border: "none",
+                    padding: "10px 20px",
+                    borderRadius: "5px",
+                    fontSize: "16px",
+                    cursor: "pointer",
+                    transition: "background-color 0.3s",
+                  }}
+                  onMouseEnter={(e) =>
+                    (e.target.style.backgroundColor = "#45a049")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.target.style.backgroundColor = "#4CAF50")
+                  }
+                >
+                  Approve
+                </button>
+                <button
+                  onClick={handleDecline}
+                  style={{
+                    backgroundColor: "#f44336",
+                    color: "white",
+                    border: "none",
+                    padding: "10px 20px",
+                    borderRadius: "5px",
+                    fontSize: "16px",
+                    cursor: "pointer",
+                    transition: "background-color 0.3s",
+                  }}
+                  onMouseEnter={(e) =>
+                    (e.target.style.backgroundColor = "#d32f2f")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.target.style.backgroundColor = "#f44336")
+                  }
+                >
+                  Decline
+                </button>
+              </div>
             </div>
           )}
         </div>
       </div>
     </div>
   );
-  
 };
 
 export default StylistDetail;

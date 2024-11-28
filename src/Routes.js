@@ -12,7 +12,8 @@ import BookingService from "./components/BookingService/BookingService";
 import NotFound from "./components/NotFound/NotFound";
 import DashboardSalonStaff from "./components/Dashboard/DashboardSalonStaff";
 import StylistDetail from "./components/Dashboard/StylistDetail";
-
+import Notifications from "./components/Dashboard/Notifications"; 
+import Statistics from "./components/Dashboard/Statistics";
 const AppRoutes = () => {
   return (
     <Routes>
@@ -27,6 +28,8 @@ const AppRoutes = () => {
       <Route path="/booking-service" element={<BookingService />} />
       <Route path="/dashboard" element={<DashboardSalonStaff />} />
       <Route path="/stylist/:id" element={<StylistDetail />} />
+      <Route path="/notifications" element={<Notifications />} /> 
+      <Route path="/statistics" element={<Statistics />} />
       {/* Catch all unmatched routes */}
       <Route path="*" element={<NotFound />} />
     </Routes>
