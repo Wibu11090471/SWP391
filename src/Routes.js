@@ -10,6 +10,10 @@ import HairDyeingServiceDetail from "./components/ServicePage/HairDyeingService/
 import HairPermServiceDetail from "./components/ServicePage/HairPermService/HairPermServiceDetail/HairPermServiceDetail";
 import BookingService from "./components/BookingService/BookingService";
 import NotFound from "./components/NotFound/NotFound";
+import DashboardSalonStaff from "./components/Dashboard/DashboardSalonStaff";
+import StylistDetail from "./components/Dashboard/StylistDetail";
+import Notifications from "./components/Dashboard/Notifications"; 
+import Statistics from "./components/Dashboard/Statistics";
 import SalonRevenueDashboard from "./components/HairSalonManager/Revenue/Revenue";
 import OverviewDashboard from "./components/HairSalonManager/OverView/OverView";
 import StaffManagement from "./components/HairSalonManager/StaffManagement/StaffManagement";
@@ -26,6 +30,10 @@ const AppRoutes = () => {
       <Route path="/dyeing-service/:id" element={<HairDyeingServiceDetail />} />
       <Route path="/perm-service/:id" element={<HairPermServiceDetail />} />
       <Route path="/booking-service" element={<BookingService />} />
+      <Route path="/hairsalon-staff" element={<DashboardSalonStaff />} />
+      <Route path="/stylist/:id" element={<StylistDetail />} />
+      <Route path="/notifications" element={<Notifications />} /> 
+      <Route path="/statistics" element={<Statistics />} />
       <Route path="/revenue-management" element={<SalonRevenueDashboard />} />
       <Route path="/overview-management" element={<OverviewDashboard />} />
       <Route path="/staff-management" element={<StaffManagement />} />
