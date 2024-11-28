@@ -84,7 +84,7 @@ const DashboardSalonStaff = () => {
 
   return (
     <div className="dashboard-container flex" style={{ paddingTop: "80px" }}>
-      {/* Sidebar */}
+
       <div className="sidebar w-1/4 bg-gray-800 text-white p-6 shadow-lg">
         <h2 className="text-2xl font-bold mb-8 text-center text-yellow-400">
           Stylist Management
