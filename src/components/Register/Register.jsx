@@ -1,13 +1,16 @@
 import React, { useState } from "react";
+import axios from "axios";
 
 const Register = ({ onSwitchToLogin }) => {
   const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
+    username: "",
     password: "",
     confirmPassword: "",
+    phoneNumber: "",
+    fullName: "",
   });
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -17,15 +20,13 @@ const Register = ({ onSwitchToLogin }) => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+    setSuccess("");
 
-    if (
-      !formData.fullName ||
-      !formData.email ||
-      !formData.password ||
-      !formData.confirmPassword
-    ) {
+    // Validate form fields
+    if (!formData.username || !formData.password || !formData.phoneNumber) {
       setError("Vui lòng điền đầy đủ thông tin!");
       return;
     }
@@ -35,8 +36,27 @@ const Register = ({ onSwitchToLogin }) => {
       return;
     }
 
-    setError("");
-    console.log("Đăng ký thành công với:", formData);
+    try {
+      // Send registration request to API
+      const response = await axios.post(
+        "http://localhost:4000/accounts/register",
+        {
+          username: formData.username,
+          password: formData.password,
+          phoneNumber: formData.phoneNumber,
+          fullName: formData.fullName,
+        }
+      );
+
+      // Handle successful registration
+      setSuccess("Đăng ký thành công!");
+      onSwitchToLogin(); // Optionally switch to login page
+    } catch (err) {
+      // Handle registration error
+      setError(
+        err.response?.data?.message || "Đăng ký thất bại. Vui lòng thử lại."
+      );
+    }
   };
 
   return (
@@ -54,6 +74,7 @@ const Register = ({ onSwitchToLogin }) => {
       </div>
 
       {error && <div className="text-red-500 text-sm mb-4">{error}</div>}
+      {success && <div className="text-green-500 text-sm mb-4">{success}</div>}
 
       <div className="flex gap-4 mb-6">
         <button
@@ -71,9 +92,33 @@ const Register = ({ onSwitchToLogin }) => {
         <div className="relative">
           <input
             type="text"
+            name="username"
+            className="w-full p-3 bg-[#FAEBD7] rounded-md pl-10 border border-[#DEB887] focus:outline-none focus:border-[#8B4513]"
+            placeholder="Tên đăng nhập"
+            value={formData.username}
+            onChange={handleChange}
+          />
+          <svg
+            className="w-5 h-5 absolute left-3 top-3.5 text-[#8B4513]"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+            />
+          </svg>
+        </div>
+
+        <div className="relative">
+          <input
+            type="text"
             name="fullName"
             className="w-full p-3 bg-[#FAEBD7] rounded-md pl-10 border border-[#DEB887] focus:outline-none focus:border-[#8B4513]"
-            placeholder="Họ và tên"
+            placeholder="Họ và Tên"
             value={formData.fullName}
             onChange={handleChange}
           />
@@ -94,11 +139,11 @@ const Register = ({ onSwitchToLogin }) => {
 
         <div className="relative">
           <input
-            type="email"
-            name="email"
+            type="tel"
+            name="phoneNumber"
             className="w-full p-3 bg-[#FAEBD7] rounded-md pl-10 border border-[#DEB887] focus:outline-none focus:border-[#8B4513]"
-            placeholder="Email"
-            value={formData.email}
+            placeholder="Số điện thoại"
+            value={formData.phoneNumber}
             onChange={handleChange}
           />
           <svg
@@ -111,7 +156,7 @@ const Register = ({ onSwitchToLogin }) => {
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth={2}
-              d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+              d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
             />
           </svg>
         </div>
