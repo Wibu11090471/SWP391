@@ -137,7 +137,7 @@ const StylistDetail = () => {
   };
 
   const handleBackClick = () => {
-    navigate("/dashboard");
+    navigate("/hairsalon-staff");
   };
 
   const generateDates = () => {

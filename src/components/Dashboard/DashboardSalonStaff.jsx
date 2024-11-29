@@ -92,7 +92,7 @@ const DashboardSalonStaff = () => {
         <ul>
           <li>
             <Link
-              to="/dashboard"
+              to="/hairsalon-staff"
               className="block py-3 text-lg hover:bg-gray-700 px-4 rounded-lg transition-all duration-300 ease-in-out hover:text-yellow-400"
             >
               Lịch hẹn

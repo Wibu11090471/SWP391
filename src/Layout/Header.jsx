@@ -80,13 +80,13 @@ const Header = () => {
             href="#"
             className="text-[#FDF5E6] hover:text-[#DEB887] font-medium"
           >
-            Trang Chủ
+            <Link to="/">Trang Chủ</Link>
           </a>
           <a
             href="#"
             className="text-[#FDF5E6] hover:text-[#DEB887] font-medium"
           >
-            Giới Thiệu
+            <Link to="/">Giới thiệu</Link>
           </a>
           {user ? (
             <div className="relative">
