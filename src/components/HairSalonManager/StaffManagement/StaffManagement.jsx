@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../ui/card";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogDescription,
 } from "../../../ui/dialog";
 import {
@@ -17,7 +17,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "../../../ui/alert-dialog";
 import { Button } from "../../../ui/button";
 import { Input } from "../../../ui/input";
@@ -39,6 +38,7 @@ import theme from "../../../theme";
 import Layout from "../Layout";
 
 const StaffManagement = () => {
+  const navigate = useNavigate();
   const [staff, setStaff] = useState([
     {
       id: 1,
@@ -98,6 +98,11 @@ const StaffManagement = () => {
       ...prevData,
       [name]: value,
     }));
+  };
+
+  // New function to handle staff detail navigation
+  const navigateToStaffDetail = (staffId) => {
+    navigate(`/staff-detail/${staffId}`);
   };
 
   // Add new staff member
@@ -269,7 +274,10 @@ const StaffManagement = () => {
                 >
                   <CardContent className="p-4">
                     <div className="flex items-center space-x-4">
-                      <Avatar className="h-16 w-16">
+                    <Avatar 
+                    className="h-16 w-16 cursor-pointer"
+                    onClick={() => navigateToStaffDetail(member.id)}
+                  >
                         <AvatarImage src={member.avatar} />
                         <AvatarFallback
                           style={{
@@ -282,10 +290,11 @@ const StaffManagement = () => {
                       </Avatar>
                       <div className="flex-grow">
                         <div className="flex justify-between items-center">
-                          <h3
-                            className="text-lg font-semibold"
-                            style={{ color: theme.colors.text.primary }}
-                          >
+                        <h3
+                        className="text-lg font-semibold cursor-pointer"
+                        onClick={() => navigateToStaffDetail(member.id)}
+                        style={{ color: theme.colors.text.primary }}
+                      >
                             {member.name}
                           </h3>
                           <Badge

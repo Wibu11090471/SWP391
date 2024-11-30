@@ -17,6 +17,7 @@ import Statistics from "./components/Dashboard/Statistics";
 import SalonRevenueDashboard from "./components/HairSalonManager/Revenue/Revenue";
 import OverviewDashboard from "./components/HairSalonManager/OverView/OverView";
 import StaffManagement from "./components/HairSalonManager/StaffManagement/StaffManagement";
+import StaffDetailManagement from "./components/HairSalonManager/StaffManagement/StaffDetailManagement/StaffDetailManagement";
 
 const AppRoutes = () => {
   return (
@@ -37,6 +38,7 @@ const AppRoutes = () => {
       <Route path="/revenue-management" element={<SalonRevenueDashboard />} />
       <Route path="/overview-management" element={<OverviewDashboard />} />
       <Route path="/staff-management" element={<StaffManagement />} />
+      <Route path="/staff-detail/:id" element={<StaffDetailManagement />} />
 
       {/* Catch all unmatched routes */}
       <Route path="*" element={<NotFound />} />
