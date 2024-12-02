@@ -5,7 +5,7 @@ import { Card, CardContent } from "../../../../ui/card";
 import { Clock, ChevronRight, CheckCircle2, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const HairPermServiceDetail = () => {
+const MassageRelaxServiceDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [service, setService] = useState(null);
@@ -44,52 +44,45 @@ const HairPermServiceDetail = () => {
             process: [
               {
                 step: 1,
-                title: "Tư vấn và thăm da đầu",
+                title: "Tư vấn và chuẩn bị",
                 description:
-                  "Đánh giá tình trạng tóc, da đầu và tư vấn kiểu uốn phù hợp",
-                duration: "20 phút",
+                  "Phân tích tình trạng sức khỏe và nhu cầu riêng của khách hàng",
+                duration: "10 phút",
               },
               {
                 step: 2,
-                title: "Gội đầu và chăm sóc tóc",
+                title: "Massage vai và cổ",
                 description:
-                  "Gội đầu chuyên sâu, massage thư giãn và phân tích cấu trúc tóc",
-                duration: "25 phút",
+                  "Giảm căng thẳng, thư giãn các nhóm cơ vai và cổ chuyên sâu",
+                duration: "20 phút",
               },
               {
                 step: 3,
-                title: "Phục hồi và nuôi dưỡng tóc trước uốn",
+                title: "Massage lưng toàn diện",
                 description:
-                  "Sử dụng các loại kem dưỡng chuyên biệt để phục hồi và bảo vệ tóc trước khi uốn",
-                duration: "20 phút",
+                  "Sử dụng kỹ thuật massage chuyên nghiệp, giải phóng áp lực và mệt mỏi",
+                duration: "25 phút",
               },
               {
                 step: 4,
-                title: "Kỹ thuật uốn chuyên nghiệp",
+                title: "Massage chân và bàn chân",
                 description:
-                  "Áp dụng kỹ thuật uốn hiện đại, sử dụng máy uốn chuyên dụng và hóa chất cao cấp",
-                duration: "50 phút",
-              },
-              {
-                step: 5,
-                title: "Xả thuốc và chăm sóc tóc sau uốn",
-                description:
-                  "Xả thuốc uốn, dưỡng ẩm và phục hồi độ đàn hồi cho tóc",
+                  "Kích hoạt các điểm huyệt, giảm mỏi, cải thiện tuần hoàn máu",
                 duration: "20 phút",
               },
               {
-                step: 6,
-                title: "Tạo kiểu và hoàn thiện",
+                step: 5,
+                title: "Hồi phục và thư giãn",
                 description:
-                  "Sấy và tạo kiểu tóc, tư vấn chăm sóc và bảo quản tóc sau uốn",
+                  "Cung cấp nước uống và thời gian nghỉ ngơi sau liệu trình",
                 duration: "15 phút",
               },
             ],
             additionalServices: [
-              "Bảo hành kiểu uốn trong 30 ngày",
-              "Tặng gói dưỡng tóc chuyên sâu",
-              "Tư vấn chăm sóc tóc uốn tại nhà miễn phí",
-              "Kiểm tra độ bền và chất lượng uốn sau 1 tuần",
+              "Phục vụ nước thảo dược miễn phí",
+              "Không gian thư giãn riêng tư",
+              "Chọn nhạc nền theo sở thích",
+              "Chế độ chăm sóc sau massage",
             ],
           };
 
@@ -110,7 +103,7 @@ const HairPermServiceDetail = () => {
   const handleBookingClick = (e, serviceId) => {
     e.stopPropagation();
     navigate("/booking-service", {
-      state: { serviceId, serviceType: "hairperm" },
+      state: { serviceId, serviceType: "massage" },
     });
   };
 
@@ -281,4 +274,4 @@ const HairPermServiceDetail = () => {
   );
 };
 
-export default HairPermServiceDetail;
+export default MassageRelaxServiceDetail;
