@@ -1,41 +1,25 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "../../../ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+import { 
+  AlertDialog, 
+  AlertDialogAction, 
+  AlertDialogCancel, 
+  AlertDialogContent, 
+  AlertDialogDescription, 
+  AlertDialogFooter, 
+  AlertDialogHeader, 
+  AlertDialogTitle 
 } from "../../../ui/alert-dialog";
 import { Button } from "../../../ui/button";
 import { Input } from "../../../ui/input";
-import { Label } from "../../../ui/label";
-import {
-  Pencil,
-  Trash2,
-  UserPlus,
-  Search,
-  Users,
-  Calendar,
-  Phone,
-  Mail,
-  X,
-} from "lucide-react";
-import { Badge } from "../../../ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "../../../ui/avatar";
+import { Search, UserPlus, Users } from "lucide-react";
 import theme from "../../../theme";
 import Layout from "../Layout";
+
+// Import the new components
+import StylishCard from "./components/StylishCard";
+import StylishDialog from "./components/StylishDialog";
 
 const StylishManagement = () => {
   const navigate = useNavigate();
@@ -159,7 +143,7 @@ const StylishManagement = () => {
   // Open add dialog
   const openAddDialog = () => {
     resetForm();
-    setSelectedStylish(null); // Reset selected stylish
+    setSelectedStylish(null);
     setIsAddMode(true);
     setIsDialogOpen(true);
   };
@@ -264,283 +248,28 @@ const StylishManagement = () => {
           >
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredStylish.map((member) => (
-                <Card
+                <StylishCard
                   key={member.id}
-                  className="hover:shadow-lg transition-shadow"
-                  style={{
-                    backgroundColor: theme.colors.background.secondary,
-                    borderColor: theme.colors.primary.light,
-                  }}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-center space-x-4">
-                    <Avatar 
-                    className="h-16 w-16 cursor-pointer"
-                    onClick={() => navigateToStylishDetail(member.id)}
-                  >
-                        <AvatarImage src={member.avatar} />
-                        <AvatarFallback
-                          style={{
-                            backgroundColor: theme.colors.primary.light,
-                            color: theme.colors.background.primary,
-                          }}
-                        >
-                          {member.name.charAt(0).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-grow">
-                        <div className="flex justify-between items-center">
-                        <h3
-                        className="text-lg font-semibold cursor-pointer"
-                        onClick={() => navigateToStylishDetail(member.id)}
-                        style={{ color: theme.colors.text.primary }}
-                      >
-                            {member.name}
-                          </h3>
-                          <Badge
-                            style={{
-                              backgroundColor:
-                                member.status === "active"
-                                  ? theme.colors.accent.DEFAULT
-                                  : theme.colors.secondary.dark,
-                              color: theme.colors.background.primary,
-                            }}
-                          >
-                            {member.status === "active"
-                              ? "Đang Làm"
-                              : "Nghỉ Việc"}
-                          </Badge>
-                        </div>
-                        <div
-                          className="text-sm space-y-1"
-                          style={{ color: theme.colors.text.secondary }}
-                        >
-                          <div className="flex items-center">
-                            <Phone
-                              className="h-4 w-4 mr-2"
-                              style={{ color: theme.colors.primary.light }}
-                            />
-                            {member.phone}
-                          </div>
-                          <div className="flex items-center">
-                            <Mail
-                              className="h-4 w-4 mr-2"
-                              style={{ color: theme.colors.primary.light }}
-                            />
-                            {member.email}
-                          </div>
-                          <div className="flex items-center">
-                            <Calendar
-                              className="h-4 w-4 mr-2"
-                              style={{ color: theme.colors.primary.light }}
-                            />
-                            {member.hireDate}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex justify-end space-x-2 mt-4">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => openEditDialog(member)}
-                        style={{
-                          borderColor: theme.colors.primary.light,
-                          color: theme.colors.primary.DEFAULT,
-                        }}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="icon"
-                        onClick={() => openDeleteDialog(member)}
-                        style={{
-                          backgroundColor: theme.colors.secondary.dark,
-                          color: theme.colors.background.primary,
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
+                  member={member}
+                  navigateToStylishDetail={navigateToStylishDetail}
+                  openEditDialog={openEditDialog}
+                  openDeleteDialog={openDeleteDialog}
+                />
               ))}
             </div>
           </CardContent>
         </Card>
 
-        {/* Dialog cho việc thêm/chỉnh sửa Stylish */}
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent
-            className="sm:max-w-[600px]"
-            style={{
-              backgroundColor: theme.colors.background.primary,
-              borderColor: theme.colors.primary.light,
-            }}
-          >
-            <DialogHeader>
-              <DialogTitle
-                style={{
-                  color: theme.colors.text.primary,
-                }}
-              >
-                {isAddMode
-                  ? "Thêm Stylish Mới"
-                  : "Chỉnh Sửa Thông Tin Stylish"}
-              </DialogTitle>
-              <DialogDescription
-                style={{
-                  color: theme.colors.text.secondary,
-                }}
-              >
-                {isAddMode
-                  ? "Nhập thông tin cho Stylish mới"
-                  : "Cập nhật thông tin cho Stylish đã chọn"}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              {/* Name Input */}
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label
-                  htmlFor="name"
-                  className="text-right"
-                  style={{ color: theme.colors.text.primary }}
-                >
-                  Tên Stylish
-                </Label>
-                <Input
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  className="col-span-3"
-                  placeholder="Nhập tên Stylish"
-                  style={{
-                    borderColor: theme.colors.primary.light,
-                    backgroundColor: theme.colors.background.primary,
-                  }}
-                />
-              </div>
-
-              {/* Position Input */}
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label
-                  htmlFor="position"
-                  className="text-right"
-                  style={{ color: theme.colors.text.primary }}
-                >
-                  Chức Vụ
-                </Label>
-                <Input
-                  id="position"
-                  name="position"
-                  value={formData.position}
-                  onChange={handleInputChange}
-                  className="col-span-3"
-                  placeholder="Nhập chức vụ"
-                  style={{
-                    borderColor: theme.colors.primary.light,
-                    backgroundColor: theme.colors.background.primary,
-                  }}
-                />
-              </div>
-
-              {/* Phone Input */}
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label
-                  htmlFor="phone"
-                  className="text-right"
-                  style={{ color: theme.colors.text.primary }}
-                >
-                  Số Điện Thoại
-                </Label>
-                <Input
-                  id="phone"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  className="col-span-3"
-                  placeholder="Nhập số điện thoại"
-                  style={{
-                    borderColor: theme.colors.primary.light,
-                    backgroundColor: theme.colors.background.primary,
-                  }}
-                />
-              </div>
-
-              {/* Email Input */}
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label
-                  htmlFor="hireDate"
-                  className="text-right"
-                  style={{ color: theme.colors.text.primary }}
-                >
-                  Ngày Bắt Đầu
-                </Label>
-                <Input
-                  id="hireDate"
-                  name="hireDate"
-                  type="date"
-                  value={formData.hireDate}
-                  onChange={handleInputChange}
-                  className="col-span-3"
-                  style={{
-                    borderColor: theme.colors.primary.light,
-                    backgroundColor: theme.colors.background.primary,
-                  }}
-                />
-              </div>
-
-              {/* Status Input */}
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label
-                  htmlFor="status"
-                  className="text-right"
-                  style={{ color: theme.colors.text.primary }}
-                >
-                  Trạng Thái
-                </Label>
-                <select
-                  id="status"
-                  name="status"
-                  value={formData.status}
-                  onChange={handleInputChange}
-                  className="col-span-3 p-2 border rounded"
-                  style={{
-                    borderColor: theme.colors.primary.light,
-                    backgroundColor: theme.colors.background.primary,
-                    color: theme.colors.text.primary,
-                  }}
-                >
-                  <option value="active">Đang Làm</option>
-                  <option value="inactive">Nghỉ Việc</option>
-                </select>
-              </div>
-            </div>
-            <div className="flex justify-end space-x-2">
-              <Button
-                variant="outline"
-                onClick={() => setIsDialogOpen(false)}
-                style={{
-                  borderColor: theme.colors.primary.dark,
-                  color: theme.colors.text.primary,
-                }}
-              >
-                <X className="mr-2 h-4 w-4" /> Hủy
-              </Button>
-              <Button
-                onClick={isAddMode ? handleAddStylish : handleUpdateStylish}
-                style={{
-                  backgroundColor: theme.colors.primary.DEFAULT,
-                  color: theme.colors.background.primary,
-                }}
-              >
-                {isAddMode ? "Thêm Stylish" : "Cập Nhật"}
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+        {/* Stylish Dialog Component */}
+        <StylishDialog
+          isDialogOpen={isDialogOpen}
+          setIsDialogOpen={setIsDialogOpen}
+          isAddMode={isAddMode}
+          formData={formData}
+          handleInputChange={handleInputChange}
+          handleAddStylish={handleAddStylish}
+          handleUpdateStylish={handleUpdateStylish}
+        />
 
         {/* AlertDialog cho việc xóa Stylish */}
         <AlertDialog
