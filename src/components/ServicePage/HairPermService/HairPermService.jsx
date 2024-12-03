@@ -1,61 +1,49 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import { Card, CardContent } from "../../../ui/card";
 import { Clock, ChevronRight, Waves } from "lucide-react";
 
 const HairPermService = () => {
   const navigate = useNavigate();
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const services = [
-    {
-      id: "hairperm_1",
-      name: "Uốn Cơ Bản",
-      duration: "120 Phút",
-      features: ["Uốn basic form đơn giản", "Phù hợp mọi độ tuổi"],
-      mainImage: "/assets/image/1.jpg",
-      subImages: ["/assets/image/1.jpg", "/assets/image/1.jpg"],
-    },
-    {
-      id: "hairperm_2",
-      name: "Uốn Phồng",
-      duration: "150 Phút",
-      features: ["Uốn tạo độ phồng", "Setting kỹ thuật cao"],
-      mainImage: "/assets/image/2.jpg",
-      subImages: ["/assets/image/2.jpg", "/assets/image/2.jpg"],
-    },
-    {
-      id: "hairperm_3",
-      name: "Uốn Gợn Sóng",
-      duration: "140 Phút",
-      features: ["Uốn sóng nhẹ nhàng", "Phong cách tự nhiên"],
-      mainImage: "/assets/image/3.jpg",
-      subImages: ["/assets/image/3.jpg", "/assets/image/3.jpg"],
-    },
-    {
-      id: "hairperm_4",
-      name: "Uốn Xoăn",
-      duration: "160 Phút",
-      features: ["Uốn xoăn đa dạng", "Nhiều lựa chọn độ xoăn"],
-      mainImage: "/assets/image/1.jpg",
-      subImages: ["/assets/image/1.jpg", "/assets/image/1.jpg"],
-    },
-    {
-      id: "hairperm_5",
-      name: "Uốn Tạo Kiểu",
-      duration: "180 Phút",
-      features: ["Uốn theo yêu cầu", "Tạo kiểu đa dạng"],
-      mainImage: "/assets/image/1.jpg",
-      subImages: ["/assets/image/1.jpg", "/assets/image/1.jpg"],
-    },
-    {
-      id: "hairperm_6",
-      name: "Uốn Setting",
-      duration: "200 Phút",
-      features: ["Kỹ thuật setting cao cấp", "Độ bền cao"],
-      mainImage: "/assets/image/1.jpg",
-      subImages: ["/assets/image/1.jpg", "/assets/image/1.jpg"],
-    },
-  ];
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const response = await axios.get(
+          "https://localhost:7081/api/Service/getAll"
+        );
+        // Filter for hair perm related services
+        const hairPermServices = response.data.items
+          .filter((item) =>
+            item.serviceEnity.title.toLowerCase().includes("uốn")
+          )
+          .map((item) => ({
+            id: item.serviceEnity.id,
+            name: item.serviceEnity.title,
+            description: item.serviceEnity.description,
+            price: item.serviceEnity.price,
+            duration: `${item.serviceEnity.timeService * 60} Phút`,
+            mainImage: item.images[0]?.url || "/assets/image/default.jpg",
+            subImages: item.images.map((img) => img.url),
+            features: item.serviceEnity.description
+              .split(",")
+              .map((feature) => feature.trim()),
+          }));
+
+        setServices(hairPermServices);
+        setLoading(false);
+      } catch (err) {
+        setError("Không thể tải dịch vụ. Vui lòng thử lại sau.");
+        setLoading(false);
+      }
+    };
+
+    fetchServices();
+  }, []);
 
   const handleServiceClick = (serviceId) => {
     navigate(`/perm-service/${serviceId}`);
@@ -63,10 +51,33 @@ const HairPermService = () => {
 
   const handleBookingClick = (e, serviceId) => {
     e.stopPropagation();
-    navigate("/booking-service", {
-      state: { serviceId, serviceType: "hairperm" },
-    });
+
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      navigate("/login");
+    } else {
+      navigate("/booking-service", {
+        state: { serviceId, serviceType: "hair-perm" },
+      });
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#FDF5E6] flex items-center justify-center">
+        <div className="text-xl">Đang tải dịch vụ...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-[#FDF5E6] flex items-center justify-center">
+        <div className="text-xl text-red-500">{error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#FDF5E6] pt-20">
@@ -114,7 +125,7 @@ const HairPermService = () => {
                   </div>
                 </div>
 
-                {/* Content Section */}
+                {/* Content Section with flex-grow to push button to bottom */}
                 <div className="p-6 flex flex-col flex-grow">
                   <h2 className="text-xl font-semibold text-[#3E2723] mb-3">
                     {service.name}

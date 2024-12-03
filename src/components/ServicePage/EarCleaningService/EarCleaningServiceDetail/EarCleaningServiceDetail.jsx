@@ -5,7 +5,7 @@ import { Card, CardContent } from "../../../../ui/card";
 import { Clock, ChevronRight, CheckCircle2, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const HairPermServiceDetail = () => {
+const EarCleaningServiceDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [service, setService] = useState(null);
@@ -44,52 +44,45 @@ const HairPermServiceDetail = () => {
             process: [
               {
                 step: 1,
-                title: "Tư vấn và thăm da đầu",
+                title: "Tiếp đón và tư vấn ban đầu",
                 description:
-                  "Đánh giá tình trạng tóc, da đầu và tư vấn kiểu uốn phù hợp",
-                duration: "20 phút",
+                  "Khám và đánh giá kỹ tình trạng tai của khách hàng, trao đổi về nhu cầu và mục tiêu dịch vụ",
+                duration: "10 phút",
               },
               {
                 step: 2,
-                title: "Gội đầu và chăm sóc tóc",
+                title: "Làm sạch vành tai và ống tai ngoài",
                 description:
-                  "Gội đầu chuyên sâu, massage thư giãn và phân tích cấu trúc tóc",
-                duration: "25 phút",
+                  "Sử dụng dụng cụ y tế chuyên dụng để làm sạch nhẹ nhàng, loại bỏ bụi bẩn và dầu nhờn trên vành tai",
+                duration: "15 phút",
               },
               {
                 step: 3,
-                title: "Phục hồi và nuôi dưỡng tóc trước uốn",
+                title: "Loại bỏ ráy tai chuyên sâu",
                 description:
-                  "Sử dụng các loại kem dưỡng chuyên biệt để phục hồi và bảo vệ tóc trước khi uốn",
-                duration: "20 phút",
+                  "Sử dụng các kỹ thuật chuyên nghiệp để loại bỏ ráy tai một cách an toàn, không gây đau hay tổn thương. Kiểm tra kỹ từng giai đoạn để đảm bảo không có tổn thương",
+                duration: "25 phút",
               },
               {
                 step: 4,
-                title: "Kỹ thuật uốn chuyên nghiệp",
+                title: "Sát khuẩn, dưỡng ẩm và bảo vệ tai",
                 description:
-                  "Áp dụng kỹ thuật uốn hiện đại, sử dụng máy uốn chuyên dụng và hóa chất cao cấp",
-                duration: "50 phút",
+                  "Sử dụng dung dịch sát khuẩn chuyên dụng, thực hiện các bước dưỡng ẩm và bảo vệ tai sau quá trình vệ sinh. Kiểm tra độ sạch và trạng thái tai",
+                duration: "10 phút",
               },
               {
                 step: 5,
-                title: "Xả thuốc và chăm sóc tóc sau uốn",
+                title: "Tư vấn chăm sóc tai và kết thúc",
                 description:
-                  "Xả thuốc uốn, dưỡng ẩm và phục hồi độ đàn hồi cho tóc",
-                duration: "20 phút",
-              },
-              {
-                step: 6,
-                title: "Tạo kiểu và hoàn thiện",
-                description:
-                  "Sấy và tạo kiểu tóc, tư vấn chăm sóc và bảo quản tóc sau uốn",
-                duration: "15 phút",
+                  "Hướng dẫn chi tiết cách chăm sóc và bảo vệ tai sau dịch vụ. Giải đáp các thắc mắc và chia sẻ lời khuyên chăm sóc tai hiệu quả",
+                duration: "10 phút",
               },
             ],
             additionalServices: [
-              "Bảo hành kiểu uốn trong 30 ngày",
-              "Tặng gói dưỡng tóc chuyên sâu",
-              "Tư vấn chăm sóc tóc uốn tại nhà miễn phí",
-              "Kiểm tra độ bền và chất lượng uốn sau 1 tuần",
+              "Tư vấn miễn phí về chăm sóc tai",
+              "Kiểm tra sức khỏe tai miễn phí",
+              "Hướng dẫn vệ sinh tai tại nhà",
+              "Chế độ chăm sóc sau dịch vụ",
             ],
           };
 
@@ -110,7 +103,7 @@ const HairPermServiceDetail = () => {
   const handleBookingClick = (e, serviceId) => {
     e.stopPropagation();
     navigate("/booking-service", {
-      state: { serviceId, serviceType: "hairperm" },
+      state: { serviceId, serviceType: "ear-cleaning" },
     });
   };
 
@@ -281,4 +274,4 @@ const HairPermServiceDetail = () => {
   );
 };
 
-export default HairPermServiceDetail;
+export default EarCleaningServiceDetail;

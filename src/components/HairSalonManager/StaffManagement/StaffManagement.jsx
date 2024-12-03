@@ -1,44 +1,28 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogDescription,
-} from "../../../ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
+import { 
+  AlertDialog, 
+  AlertDialogAction, 
+  AlertDialogCancel, 
+  AlertDialogContent, 
+  AlertDialogDescription, 
+  AlertDialogFooter, 
+  AlertDialogHeader, 
+  AlertDialogTitle 
 } from "../../../ui/alert-dialog";
 import { Button } from "../../../ui/button";
 import { Input } from "../../../ui/input";
-import { Label } from "../../../ui/label";
-import {
-  Pencil,
-  Trash2,
-  UserPlus,
-  Search,
-  Users,
-  Calendar,
-  Phone,
-  Mail,
-  X,
-} from "lucide-react";
-import { Badge } from "../../../ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "../../../ui/avatar";
+import { Search, UserPlus, Users } from "lucide-react";
 import theme from "../../../theme";
 import Layout from "../Layout";
 
+// Import the new components
+import StaffCard from "./components/StaffCard";
+import StaffDialog from "./components/StaffDialog";
+
 const StaffManagement = () => {
+  const navigate = useNavigate();
   const [staff, setStaff] = useState([
     {
       id: 1,
@@ -100,6 +84,11 @@ const StaffManagement = () => {
     }));
   };
 
+  // New function to handle staff detail navigation
+  const navigateToStaffDetail = (staffId) => {
+    navigate(`/staff-detail/${staffId}`);
+  };
+
   // Add new staff member
   const handleAddStaff = () => {
     const newStaff = {
@@ -154,7 +143,7 @@ const StaffManagement = () => {
   // Open add dialog
   const openAddDialog = () => {
     resetForm();
-    setSelectedStaff(null); // Reset selected staff
+    setSelectedStaff(null);
     setIsAddMode(true);
     setIsDialogOpen(true);
   };
@@ -212,7 +201,7 @@ const StaffManagement = () => {
                     className="text-2xl font-bold"
                     style={{ color: theme.colors.text.primary }}
                   >
-                    Quản Lý Nhân Viên Salon
+                    Quản Lý Staff Salon
                   </CardTitle>
                 </div>
                 <p
@@ -229,7 +218,7 @@ const StaffManagement = () => {
                     style={{ color: theme.colors.primary.dark }}
                   />
                   <Input
-                    placeholder="Tìm kiếm nhân viên..."
+                    placeholder="Tìm kiếm Staff..."
                     className="pl-10 w-64 shadow-sm"
                     style={{
                       borderColor: theme.colors.primary.light,
@@ -246,7 +235,7 @@ const StaffManagement = () => {
                     color: theme.colors.background.primary,
                   }}
                 >
-                  <UserPlus className="mr-2" /> Thêm Nhân Viên
+                  <UserPlus className="mr-2" /> Thêm Staff
                 </Button>
               </div>
             </div>
@@ -259,281 +248,30 @@ const StaffManagement = () => {
           >
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredStaff.map((member) => (
-                <Card
+                <StaffCard
                   key={member.id}
-                  className="hover:shadow-lg transition-shadow"
-                  style={{
-                    backgroundColor: theme.colors.background.secondary,
-                    borderColor: theme.colors.primary.light,
-                  }}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-center space-x-4">
-                      <Avatar className="h-16 w-16">
-                        <AvatarImage src={member.avatar} />
-                        <AvatarFallback
-                          style={{
-                            backgroundColor: theme.colors.primary.light,
-                            color: theme.colors.background.primary,
-                          }}
-                        >
-                          {member.name.charAt(0).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-grow">
-                        <div className="flex justify-between items-center">
-                          <h3
-                            className="text-lg font-semibold"
-                            style={{ color: theme.colors.text.primary }}
-                          >
-                            {member.name}
-                          </h3>
-                          <Badge
-                            style={{
-                              backgroundColor:
-                                member.status === "active"
-                                  ? theme.colors.accent.DEFAULT
-                                  : theme.colors.secondary.dark,
-                              color: theme.colors.background.primary,
-                            }}
-                          >
-                            {member.status === "active"
-                              ? "Đang Làm"
-                              : "Nghỉ Việc"}
-                          </Badge>
-                        </div>
-                        <div
-                          className="text-sm space-y-1"
-                          style={{ color: theme.colors.text.secondary }}
-                        >
-                          <div className="flex items-center">
-                            <Phone
-                              className="h-4 w-4 mr-2"
-                              style={{ color: theme.colors.primary.light }}
-                            />
-                            {member.phone}
-                          </div>
-                          <div className="flex items-center">
-                            <Mail
-                              className="h-4 w-4 mr-2"
-                              style={{ color: theme.colors.primary.light }}
-                            />
-                            {member.email}
-                          </div>
-                          <div className="flex items-center">
-                            <Calendar
-                              className="h-4 w-4 mr-2"
-                              style={{ color: theme.colors.primary.light }}
-                            />
-                            {member.hireDate}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex justify-end space-x-2 mt-4">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => openEditDialog(member)}
-                        style={{
-                          borderColor: theme.colors.primary.light,
-                          color: theme.colors.primary.DEFAULT,
-                        }}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="icon"
-                        onClick={() => openDeleteDialog(member)}
-                        style={{
-                          backgroundColor: theme.colors.secondary.dark,
-                          color: theme.colors.background.primary,
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
+                  member={member}
+                  navigateToStaffDetail={navigateToStaffDetail}
+                  openEditDialog={openEditDialog}
+                  openDeleteDialog={openDeleteDialog}
+                />
               ))}
             </div>
           </CardContent>
         </Card>
 
-        {/* Dialog cho việc thêm/chỉnh sửa nhân viên */}
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent
-            className="sm:max-w-[600px]"
-            style={{
-              backgroundColor: theme.colors.background.primary,
-              borderColor: theme.colors.primary.light,
-            }}
-          >
-            <DialogHeader>
-              <DialogTitle
-                style={{
-                  color: theme.colors.text.primary,
-                }}
-              >
-                {isAddMode
-                  ? "Thêm Nhân Viên Mới"
-                  : "Chỉnh Sửa Thông Tin Nhân Viên"}
-              </DialogTitle>
-              <DialogDescription
-                style={{
-                  color: theme.colors.text.secondary,
-                }}
-              >
-                {isAddMode
-                  ? "Nhập thông tin cho nhân viên mới"
-                  : "Cập nhật thông tin cho nhân viên đã chọn"}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              {/* Name Input */}
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label
-                  htmlFor="name"
-                  className="text-right"
-                  style={{ color: theme.colors.text.primary }}
-                >
-                  Tên Nhân Viên
-                </Label>
-                <Input
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  className="col-span-3"
-                  placeholder="Nhập tên nhân viên"
-                  style={{
-                    borderColor: theme.colors.primary.light,
-                    backgroundColor: theme.colors.background.primary,
-                  }}
-                />
-              </div>
+        {/* Staff Dialog Component */}
+        <StaffDialog
+          isDialogOpen={isDialogOpen}
+          setIsDialogOpen={setIsDialogOpen}
+          isAddMode={isAddMode}
+          formData={formData}
+          handleInputChange={handleInputChange}
+          handleAddStaff={handleAddStaff}
+          handleUpdateStaff={handleUpdateStaff}
+        />
 
-              {/* Position Input */}
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label
-                  htmlFor="position"
-                  className="text-right"
-                  style={{ color: theme.colors.text.primary }}
-                >
-                  Chức Vụ
-                </Label>
-                <Input
-                  id="position"
-                  name="position"
-                  value={formData.position}
-                  onChange={handleInputChange}
-                  className="col-span-3"
-                  placeholder="Nhập chức vụ"
-                  style={{
-                    borderColor: theme.colors.primary.light,
-                    backgroundColor: theme.colors.background.primary,
-                  }}
-                />
-              </div>
-
-              {/* Phone Input */}
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label
-                  htmlFor="phone"
-                  className="text-right"
-                  style={{ color: theme.colors.text.primary }}
-                >
-                  Số Điện Thoại
-                </Label>
-                <Input
-                  id="phone"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  className="col-span-3"
-                  placeholder="Nhập số điện thoại"
-                  style={{
-                    borderColor: theme.colors.primary.light,
-                    backgroundColor: theme.colors.background.primary,
-                  }}
-                />
-              </div>
-
-              {/* Email Input */}
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label
-                  htmlFor="hireDate"
-                  className="text-right"
-                  style={{ color: theme.colors.text.primary }}
-                >
-                  Ngày Bắt Đầu
-                </Label>
-                <Input
-                  id="hireDate"
-                  name="hireDate"
-                  type="date"
-                  value={formData.hireDate}
-                  onChange={handleInputChange}
-                  className="col-span-3"
-                  style={{
-                    borderColor: theme.colors.primary.light,
-                    backgroundColor: theme.colors.background.primary,
-                  }}
-                />
-              </div>
-
-              {/* Status Input */}
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label
-                  htmlFor="status"
-                  className="text-right"
-                  style={{ color: theme.colors.text.primary }}
-                >
-                  Trạng Thái
-                </Label>
-                <select
-                  id="status"
-                  name="status"
-                  value={formData.status}
-                  onChange={handleInputChange}
-                  className="col-span-3 p-2 border rounded"
-                  style={{
-                    borderColor: theme.colors.primary.light,
-                    backgroundColor: theme.colors.background.primary,
-                    color: theme.colors.text.primary,
-                  }}
-                >
-                  <option value="active">Đang Làm</option>
-                  <option value="inactive">Nghỉ Việc</option>
-                </select>
-              </div>
-            </div>
-            <div className="flex justify-end space-x-2">
-              <Button
-                variant="outline"
-                onClick={() => setIsDialogOpen(false)}
-                style={{
-                  borderColor: theme.colors.primary.dark,
-                  color: theme.colors.text.primary,
-                }}
-              >
-                <X className="mr-2 h-4 w-4" /> Hủy
-              </Button>
-              <Button
-                onClick={isAddMode ? handleAddStaff : handleUpdateStaff}
-                style={{
-                  backgroundColor: theme.colors.primary.DEFAULT,
-                  color: theme.colors.background.primary,
-                }}
-              >
-                {isAddMode ? "Thêm Nhân Viên" : "Cập Nhật"}
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        {/* AlertDialog cho việc xóa nhân viên */}
+        {/* AlertDialog cho việc xóa Staff */}
         <AlertDialog
           open={isDeleteDialogOpen}
           onOpenChange={setIsDeleteDialogOpen}
@@ -550,14 +288,14 @@ const StaffManagement = () => {
                   color: theme.colors.text.primary,
                 }}
               >
-                Xác Nhận Xóa Nhân Viên
+                Xác Nhận Xóa Staff
               </AlertDialogTitle>
               <AlertDialogDescription
                 style={{
                   color: theme.colors.text.secondary,
                 }}
               >
-                Bạn có chắc chắn muốn xóa nhân viên{" "}
+                Bạn có chắc chắn muốn xóa Staff{" "}
                 <span style={{ fontWeight: "bold" }}>
                   {selectedStaff?.name}
                 </span>

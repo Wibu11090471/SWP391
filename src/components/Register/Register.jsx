@@ -3,11 +3,14 @@ import axios from "axios";
 
 const Register = ({ onSwitchToLogin }) => {
   const [formData, setFormData] = useState({
-    username: "",
+    fullName: "",
+    userName: "",
     password: "",
     confirmPassword: "",
-    phoneNumber: "",
-    fullName: "",
+    email: "",
+    gender: true,
+    dob: "",
+    address: "",
   });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -16,7 +19,7 @@ const Register = ({ onSwitchToLogin }) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: name === "gender" ? value === "true" : value,
     }));
   };
 
@@ -25,8 +28,14 @@ const Register = ({ onSwitchToLogin }) => {
     setError("");
     setSuccess("");
 
-    if (!formData.username || !formData.password || !formData.phoneNumber) {
-      setError("Vui lòng điền đầy đủ thông tin!");
+    // Validate form fields
+    if (
+      !formData.fullName ||
+      !formData.userName ||
+      !formData.password ||
+      !formData.email
+    ) {
+      setError("Vui lòng điền đầy đủ thông tin bắt buộc!");
       return;
     }
 
@@ -35,19 +44,25 @@ const Register = ({ onSwitchToLogin }) => {
       return;
     }
 
+    // Prepare data for API
+    const apiData = {
+      fullName: formData.fullName,
+      userName: formData.userName,
+      password: formData.password,
+      email: formData.email,
+      gender: formData.gender,
+      dob: formData.dob ? new Date(formData.dob).toISOString() : null,
+      address: formData.address || null,
+    };
+
     try {
       const response = await axios.post(
-        "http://localhost:4000/accounts/register",
-        {
-          username: formData.username,
-          password: formData.password,
-          phoneNumber: formData.phoneNumber,
-          fullName: formData.fullName,
-        }
+        "https://localhost:7081/api/User/create-user",
+        apiData
       );
 
       setSuccess("Đăng ký thành công!");
-      onSwitchToLogin(); 
+      onSwitchToLogin(); // Switch to login page
     } catch (err) {
       setError(
         err.response?.data?.message || "Đăng ký thất bại. Vui lòng thử lại."
@@ -88,30 +103,6 @@ const Register = ({ onSwitchToLogin }) => {
         <div className="relative">
           <input
             type="text"
-            name="username"
-            className="w-full p-3 bg-[#FAEBD7] rounded-md pl-10 border border-[#DEB887] focus:outline-none focus:border-[#8B4513]"
-            placeholder="Tên đăng nhập"
-            value={formData.username}
-            onChange={handleChange}
-          />
-          <svg
-            className="w-5 h-5 absolute left-3 top-3.5 text-[#8B4513]"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-            />
-          </svg>
-        </div>
-
-        <div className="relative">
-          <input
-            type="text"
             name="fullName"
             className="w-full p-3 bg-[#FAEBD7] rounded-md pl-10 border border-[#DEB887] focus:outline-none focus:border-[#8B4513]"
             placeholder="Họ và Tên"
@@ -135,11 +126,11 @@ const Register = ({ onSwitchToLogin }) => {
 
         <div className="relative">
           <input
-            type="tel"
-            name="phoneNumber"
+            type="text"
+            name="userName"
             className="w-full p-3 bg-[#FAEBD7] rounded-md pl-10 border border-[#DEB887] focus:outline-none focus:border-[#8B4513]"
-            placeholder="Số điện thoại"
-            value={formData.phoneNumber}
+            placeholder="Tên đăng nhập"
+            value={formData.userName}
             onChange={handleChange}
           />
           <svg
@@ -152,7 +143,31 @@ const Register = ({ onSwitchToLogin }) => {
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth={2}
-              d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+            />
+          </svg>
+        </div>
+
+        <div className="relative">
+          <input
+            type="email"
+            name="email"
+            className="w-full p-3 bg-[#FAEBD7] rounded-md pl-10 border border-[#DEB887] focus:outline-none focus:border-[#8B4513]"
+            placeholder="Email"
+            value={formData.email}
+            onChange={handleChange}
+          />
+          <svg
+            className="w-5 h-5 absolute left-3 top-3.5 text-[#8B4513]"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
             />
           </svg>
         </div>
@@ -205,6 +220,85 @@ const Register = ({ onSwitchToLogin }) => {
           </svg>
         </div>
 
+        <div className="relative">
+          <input
+            type="date"
+            name="dob"
+            className="w-full p-3 bg-[#FAEBD7] rounded-md pl-10 border border-[#DEB887] focus:outline-none focus:border-[#8B4513]"
+            placeholder="Ngày sinh"
+            value={formData.dob}
+            onChange={handleChange}
+          />
+          <svg
+            className="w-5 h-5 absolute left-3 top-3.5 text-[#8B4513]"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+            />
+          </svg>
+        </div>
+
+        <div className="relative">
+          <input
+            type="text"
+            name="address"
+            className="w-full p-3 bg-[#FAEBD7] rounded-md pl-10 border border-[#DEB887] focus:outline-none focus:border-[#8B4513]"
+            placeholder="Địa chỉ"
+            value={formData.address}
+            onChange={handleChange}
+          />
+          <svg
+            className="w-5 h-5 absolute left-3 top-3.5 text-[#8B4513]"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+            />
+          </svg>
+        </div>
+
+        <div className="flex items-center space-x-4">
+          <label className="flex items-center">
+            <input
+              type="radio"
+              name="gender"
+              value="true"
+              checked={formData.gender === true}
+              onChange={handleChange}
+              className="mr-2 accent-[#8B4513]"
+            />
+            <span className="text-sm text-[#5D4037]">Nam</span>
+          </label>
+          <label className="flex items-center">
+            <input
+              type="radio"
+              name="gender"
+              value="false"
+              checked={formData.gender === false}
+              onChange={handleChange}
+              className="mr-2 accent-[#8B4513]"
+            />
+            <span className="text-sm text-[#5D4037]">Nữ</span>
+          </label>
+        </div>
+
         <button
           type="submit"
           className="w-full bg-[#8B4513] text-white py-3 rounded-md hover:bg-[#915C38] transition duration-200"
@@ -212,10 +306,6 @@ const Register = ({ onSwitchToLogin }) => {
           Đăng ký
         </button>
       </form>
-
-      <div className="mt-6 text-center">
-        <p className="text-sm text-[#5D4037]">Đăng nhập hoặc đăng ký bằng...</p>
-      </div>
     </div>
   );
 };
