@@ -75,7 +75,7 @@ const TransactionDetailModal = ({
           </div>
 
           {/* Approve/Reject Buttons */}
-          <div className="mt-6 flex justify-center space-x-16">
+          <div className="mt-6 flex justify-center space-x-12">
             <button
               onClick={() => onApprove(transaction.id)}
               className="bg-green-500 text-white px-6 py-2 rounded-lg flex items-center hover:bg-green-600 transition"

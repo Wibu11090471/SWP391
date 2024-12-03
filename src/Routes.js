@@ -12,7 +12,7 @@ import HairPermServiceDetail from "./components/ServicePage/HairPermService/Hair
 import BookingService from "./components/BookingService/BookingService";
 import NotFound from "./components/NotFound/NotFound";
 import DashboardSalonStaff from "./components/Dashboard/DashboardSalonStaff";
-import StylistDetail from "./components/Dashboard/StylistDetail";
+import DetailPayment from "./components/Dashboard/DetailPayment";
 import Notifications from "./components/Dashboard/Notifications";
 import DashboardSalonStaff from "./components/Dashboard/DashboardSalonStaff.jsx";
 import DetailPayment from "./components/Dashboard/DetailPayment.jsx";
@@ -45,13 +45,110 @@ const AppRoutes = () => {
       <Route path="/dyeing-service/:id" element={<HairDyeingServiceDetail />} />
       <Route path="/perm-service/:id" element={<HairPermServiceDetail />} />
       <Route path="/booking-service" element={<BookingService />} />
-      <Route path="/hairsalon-staff" element={<DashboardSalonStaff />} />
-      <Route path="/stylist/:id" element={<StylistDetail />} />
-      <Route path="/notifications" element={<Notifications />} /> 
-      <Route path="/statistics" element={<Statistics />} />
-      <Route path="/revenue-management" element={<SalonRevenueDashboard />} />
-      <Route path="/overview-management" element={<OverviewDashboard />} />
-      <Route path="/staff-management" element={<StaffManagement />} />
+      {/* Route yêu cầu đăng nhập */}
+
+      <Route
+        path="/booking-success"
+        element={
+          <ProtectedRoute>
+            <BookingConfirmation />
+          </ProtectedRoute>
+        }
+      />
+      {/* Route dành cho nhân viên salon */}
+      <Route
+        path="/hairsalon-staff"
+        element={
+          <ProtectedRoute requiredRoles={["staff", "admin"]}>
+            <DashboardSalonStaff />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/stylist/:id"
+        element={
+          <ProtectedRoute requiredRoles={["staff", "admin"]}>
+            <DetailPayment />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/notifications"
+        element={
+          <ProtectedRoute requiredRoles={["staff"]}>
+            <Notifications />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Route quản lý dành cho quản lý */}
+      <Route
+        path="/statistics"
+        element={
+          <ProtectedRoute requiredRoles={["staff"]}>
+            <Statistics />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/revenue-management"
+        element={
+          <ProtectedRoute requiredRoles={["admin"]}>
+            <SalonRevenueDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/overview-management"
+        element={
+          <ProtectedRoute requiredRoles={["admin"]}>
+            <OverviewDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/staff-management"
+        element={
+          <ProtectedRoute requiredRoles={["admin"]}>
+            <StaffManagement />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/staff-detail/:id"
+        element={
+          <ProtectedRoute requiredRoles={["admin"]}>
+            <StaffDetailManagement />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/stylish-management"
+        element={
+          <ProtectedRoute requiredRoles={["admin"]}>
+            <StylishManagement />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/stylish-detail/:id"
+        element={
+          <ProtectedRoute requiredRoles={["admin"]}>
+            <StylishDetailManagement />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Trang không được phép truy cập */}
+      <Route path="/404" element={<NotFound />} />
 
       {/* Catch all unmatched routes */}
       <Route path="*" element={<NotFound />} />
