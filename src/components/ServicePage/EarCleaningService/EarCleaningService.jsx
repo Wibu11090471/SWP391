@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Card, CardContent } from "../../../ui/card";
-import { Clock, ChevronRight, Paintbrush } from "lucide-react";
+import { Clock, ChevronRight, Ear } from "lucide-react";
 
-const HairDyeingService = () => {
+const EarCleaningService = () => {
   const navigate = useNavigate();
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -16,10 +16,10 @@ const HairDyeingService = () => {
         const response = await axios.get(
           "https://localhost:7081/api/Service/getAll"
         );
-        // Filter for hair dyeing related services
-        const hairDyeingServices = response.data.items
+        // Filter for ear cleaning related services
+        const earCleaningServices = response.data.items
           .filter((item) =>
-            item.serviceEnity.title.toLowerCase().includes("màu tóc")
+            item.serviceEnity.title.toLowerCase().includes("ráy tai")
           )
           .map((item) => ({
             id: item.serviceEnity.id,
@@ -34,7 +34,7 @@ const HairDyeingService = () => {
               .map((feature) => feature.trim()),
           }));
 
-        setServices(hairDyeingServices);
+        setServices(earCleaningServices);
         setLoading(false);
       } catch (err) {
         setError("Không thể tải dịch vụ. Vui lòng thử lại sau.");
@@ -46,7 +46,7 @@ const HairDyeingService = () => {
   }, []);
 
   const handleServiceClick = (serviceId) => {
-    navigate(`/dyeing-service/${serviceId}`);
+    navigate(`/ear-service/${serviceId}`);
   };
 
   const handleBookingClick = (e, serviceId) => {
@@ -58,7 +58,7 @@ const HairDyeingService = () => {
       navigate("/login");
     } else {
       navigate("/booking-service", {
-        state: { serviceId, serviceType: "hair-dye" },
+        state: { serviceId, serviceType: "ear-cleaning" },
       });
     }
   };
@@ -85,15 +85,15 @@ const HairDyeingService = () => {
         {/* Header Section with decorative elements */}
         <div className="text-center mb-12 relative">
           <div className="absolute left-1/2 -translate-x-1/2 -top-6">
-            <Paintbrush className="w-12 h-12 text-[#8B4513] opacity-20" />
+            <Ear className="w-12 h-12 text-[#8B4513] opacity-20" />
           </div>
           <h1 className="text-4xl font-bold text-[#3E2723] mb-4 relative">
-            Dịch Vụ Nhuộm Tóc
+            Dịch Vụ Vệ Sinh Tai
           </h1>
           <div className="w-24 h-1 bg-[#8B4513] mx-auto mb-4"></div>
           <p className="text-[#5D4037] text-lg max-w-2xl mx-auto">
-            Thay đổi diện mạo với màu tóc ấn tượng, công nghệ nhuộm an toàn cho
-            mái tóc của bạn
+            Trải nghiệm dịch vụ vệ sinh tai chuyên nghiệp, an toàn và hiệu quả,
+            giúp loại bỏ ráy tai một cách nhẹ nhàng
           </p>
         </div>
 
@@ -160,4 +160,4 @@ const HairDyeingService = () => {
   );
 };
 
-export default HairDyeingService;
+export default EarCleaningService;

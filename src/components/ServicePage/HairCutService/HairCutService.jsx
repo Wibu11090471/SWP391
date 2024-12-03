@@ -1,61 +1,49 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios"; // Ensure you have axios installed
 import { Card, CardContent } from "../../../ui/card";
 import { Clock, ChevronRight, Scissors } from "lucide-react";
 
 const HairCutService = () => {
   const navigate = useNavigate();
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const services = [
-    {
-      id: "haircut_1",
-      name: "Cắt gội khoang thương gia",
-      duration: "50 Phút",
-      features: ["Combo cắt kỳ", "Combo gội massage"],
-      mainImage: "/assets/image/1.jpg",
-      subImages: ["/assets/image/1.jpg", "/assets/image/1.jpg"],
-    },
-    {
-      id: "haircut_2",
-      name: "Cắt gội Combo 1",
-      duration: "45 Phút",
-      features: ["Combo cắt kỳ", "Combo gội massage"],
-      mainImage: "/assets/image/2.jpg",
-      subImages: ["/assets/image/2.jpg", "/assets/image/2.jpg"],
-    },
-    {
-      id: "haircut_3",
-      name: "Cắt gội Combo 2",
-      duration: "55 Phút",
-      features: ["Combo cắt kỳ", "Combo gội massage cổ vai gáy"],
-      mainImage: "/assets/image/3.jpg",
-      subImages: ["/assets/image/3.jpg", "/assets/image/3.jpg"],
-    },
-    {
-      id: "haircut_4",
-      name: "Cắt gội Combo 3",
-      duration: "65 Phút",
-      features: ["Combo cắt kỳ", "Combo gội massage chăm sóc da"],
-      mainImage: "/assets/image/1.jpg",
-      subImages: ["/assets/image/1.jpg", "/assets/image/1.jpg"],
-    },
-    {
-      id: "haircut_5",
-      name: "Cắt gội Combo 4",
-      duration: "75 Phút",
-      features: ["Combo cắt kỳ", "Combo gội massage bằng đá nóng"],
-      mainImage: "/assets/image/1.jpg",
-      subImages: ["/assets/image/1.jpg", "/assets/image/1.jpg"],
-    },
-    {
-      id: "haircut_6",
-      name: "Cắt gội Combo 5",
-      duration: "75 Phút",
-      features: ["Combo cắt kỳ", "Combo gội massage lấy nhân mụn chuyên sâu"],
-      mainImage: "/assets/image/1.jpg",
-      subImages: ["/assets/image/1.jpg", "/assets/image/1.jpg"],
-    },
-  ];
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const response = await axios.get(
+          "https://localhost:7081/api/Service/getAll"
+        );
+        // Filter for hair cut related services
+        const hairCutServices = response.data.items
+          .filter((item) =>
+            item.serviceEnity.title.toLowerCase().includes("cắt tóc")
+          )
+          .map((item) => ({
+            id: item.serviceEnity.id,
+            name: item.serviceEnity.title,
+            description: item.serviceEnity.description,
+            price: item.serviceEnity.price,
+            duration: `${item.serviceEnity.timeService * 60} Phút`,
+            mainImage: item.images[0]?.url || "/assets/image/default.jpg",
+            subImages: item.images.map((img) => img.url),
+            features: item.serviceEnity.description
+              .split(",")
+              .map((feature) => feature.trim()),
+          }));
+
+        setServices(hairCutServices);
+        setLoading(false);
+      } catch (err) {
+        setError("Không thể tải dịch vụ. Vui lòng thử lại sau.");
+        setLoading(false);
+      }
+    };
+
+    fetchServices();
+  }, []);
 
   const handleServiceClick = (serviceId) => {
     navigate(`/service/${serviceId}`);
@@ -63,10 +51,33 @@ const HairCutService = () => {
 
   const handleBookingClick = (e, serviceId) => {
     e.stopPropagation();
-    navigate("/booking-service", {
-      state: { serviceId, serviceType: "haircut" },
-    });
+
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      navigate("/login");
+    } else {
+      navigate("/booking-service", {
+        state: { serviceId, serviceType: "hair-cut" },
+      });
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#FDF5E6] flex items-center justify-center">
+        <div className="text-xl">Đang tải dịch vụ...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-[#FDF5E6] flex items-center justify-center">
+        <div className="text-xl text-red-500">{error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#FDF5E6] pt-20">

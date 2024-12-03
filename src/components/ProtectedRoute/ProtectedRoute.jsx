@@ -12,12 +12,12 @@ const ProtectedRoute = ({ children, requiredRoles }) => {
 
   if (!isAuthenticated) {
     // Chưa đăng nhập, chuyển về trang login
-    return <Navigate to="/unauthorized" state={{ from: location }} replace />;
+    return <Navigate to="/404" state={{ from: location }} replace />;
   }
 
   if (requiredRoles && !hasRequiredRole) {
     // Không có quyền truy cập
-    return <Navigate to="/unauthorized" replace />;
+    return <Navigate to="/404" replace />;
   }
 
   return children;

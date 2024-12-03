@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import axios from "axios";
 import { Card, CardContent } from "../../../../ui/card";
 import { Clock, ChevronRight, CheckCircle2, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -7,67 +8,97 @@ import { useNavigate } from "react-router-dom";
 const HairCutServiceDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [service, setService] = useState(null);
   const [activeImage, setActiveImage] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Data mẫu - trong thực tế nên được lấy từ API hoặc store
-  const serviceDetails = {
-    haircut_1: {
-      name: "Cắt gội khoang thương gia",
-      duration: "50 Phút",
-      description:
-        "Trải nghiệm dịch vụ cắt gội cao cấp với không gian riêng tư, thoải mái cùng các dịch vụ chăm sóc đẳng cấp.",
-      price: "300.000đ",
-      features: ["Combo cắt kỳ", "Combo gội massage"],
-      mainImage: "/assets/image/1.jpg",
-      subImages: [
-        "/assets/image/1.jpg",
-        "/assets/image/1.jpg",
-        "/assets/image/1.jpg",
-      ],
-      process: [
-        {
-          step: 1,
-          title: "Tư vấn kiểu tóc",
-          description:
-            "Stylist sẽ tư vấn kiểu tóc phù hợp với khuôn mặt và phong cách của khách hàng",
-          duration: "5 phút",
-        },
-        {
-          step: 2,
-          title: "Gội đầu thư giãn",
-          description: "Gội đầu với sản phẩm cao cấp kết hợp massage da đầu",
-          duration: "15 phút",
-        },
-        {
-          step: 3,
-          title: "Cắt tạo kiểu",
-          description:
-            "Cắt và tạo kiểu theo yêu cầu với kỹ thuật chuyên nghiệp",
-          duration: "20 phút",
-        },
-        {
-          step: 4,
-          title: "Massage vai cổ gáy",
-          description: "Massage thư giãn vùng vai cổ gáy giảm căng thẳng",
-          duration: "5 phút",
-        },
-        {
-          step: 5,
-          title: "Hoàn thiện",
-          description: "Tạo kiểu hoàn thiện và tư vấn chăm sóc tóc tại nhà",
-          duration: "5 phút",
-        },
-      ],
-      additionalServices: [
-        "Phục vụ nước uống miễn phí",
-        "Tư vấn chăm sóc tóc tại nhà",
-        "Bảo hành tạo kiểu trong 24h",
-      ],
-    },
-    // Thêm chi tiết cho các service khác tương tự
-  };
+  useEffect(() => {
+    const fetchServiceDetails = async () => {
+      try {
+        const response = await axios.get(
+          "https://localhost:7081/api/Service/getAll"
+        );
 
-  const service = serviceDetails[id];
+        // Find the service by ID
+        const foundService = response.data.items.find(
+          (item) => item.serviceEnity.id === parseInt(id)
+        );
+
+        if (foundService) {
+          // Transform service data
+          const transformedService = {
+            id: foundService.serviceEnity.id,
+            name: foundService.serviceEnity.title,
+            description: foundService.serviceEnity.description,
+            price: `${foundService.serviceEnity.price.toLocaleString()}đ`,
+            duration: `${Math.round(
+              foundService.serviceEnity.timeService * 60
+            )} Phút`,
+            mainImage:
+              foundService.images[0]?.url || "/assets/image/default.jpg",
+            subImages: foundService.images.map((img) => img.url),
+            features: foundService.serviceEnity.description
+              .split(",")
+              .map((feature) => feature.trim()),
+            process: [
+              {
+                step: 1,
+                title: "Khai huyệt & Rửa mặt chuyên sâu",
+                description:
+                  "Phân tích da mặt, làm sạch và chuẩn bị da cho các bước tiếp theo",
+                duration: "15 phút",
+              },
+              {
+                step: 2,
+                title: "Massage thư giãn và chăm sóc da",
+                description:
+                  "Massage mặt chuyên sâu giúp giảm căng thẳng, kích thích tuần hoàn máu và làm mềm da",
+                duration: "20 phút",
+              },
+              {
+                step: 3,
+                title: "Hút mụn & Làm sạch da chuyên nghiệp",
+                description:
+                  "Loại bỏ mụn đầu đen, mụn ẩn bằng công nghệ hiện đại, an toàn và không gây đau",
+                duration: "15 phút",
+              },
+              {
+                step: 4,
+                title: "Phun Hoa Hồng - Điều trị và phục hồi da",
+                description:
+                  "Sử dụng kỹ thuật phun huyết tương giàu tiểu cầu (PRP) để nuôi dưỡng và phục hồi da",
+                duration: "20 phút",
+              },
+              {
+                step: 5,
+                title: "Cắt tóc chuyên nghiệp",
+                description:
+                  "Tư vấn và cắt tóc theo phong cách riêng, sử dụng kỹ thuật chuyên nghiệp",
+                duration: "20 phút",
+              },
+            ],
+            additionalServices: [
+              "Phục vụ nước uống miễn phí",
+              "Tư vấn chăm sóc da và tóc tại nhà",
+              "Kiểm tra da miễn phí",
+              "Chế độ chăm sóc sau điều trị",
+            ],
+          };
+
+          setService(transformedService);
+        } else {
+          setError("Không tìm thấy dịch vụ");
+        }
+        setLoading(false);
+      } catch (err) {
+        setError("Không thể tải chi tiết dịch vụ. Vui lòng thử lại sau.");
+        setLoading(false);
+      }
+    };
+
+    fetchServiceDetails();
+  }, [id]);
 
   const handleBookingClick = (e, serviceId) => {
     e.stopPropagation();
@@ -75,6 +106,22 @@ const HairCutServiceDetail = () => {
       state: { serviceId, serviceType: "haircut" },
     });
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-xl text-gray-600">Đang tải dịch vụ...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-xl text-red-500">{error}</p>
+      </div>
+    );
+  }
 
   if (!service) {
     return (

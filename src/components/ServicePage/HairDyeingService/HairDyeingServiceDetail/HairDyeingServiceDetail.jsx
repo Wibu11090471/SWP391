@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Card, CardContent } from "./../../../../ui/card";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { Card, CardContent } from "../../../../ui/card";
 import {
   Clock,
   ChevronRight,
@@ -8,86 +10,120 @@ import {
   ArrowLeft,
   AlertCircle,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 
 const HairDyeingServiceDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [service, setService] = useState(null);
   const [activeImage, setActiveImage] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Data mẫu - trong thực tế nên được lấy từ API hoặc store
-  const serviceDetails = {
-    hairdye_1: {
-      name: "Nhuộm Màu Cơ Bản",
-      duration: "90 Phút",
-      description:
-        "Dịch vụ nhuộm tóc cơ bản với thuốc nhuộm cao cấp, phù hợp với mọi đối tượng khách hàng. Màu nhuộm tự nhiên, an toàn cho tóc.",
-      price: "450.000đ",
-      features: [
-        "Tư vấn màu phù hợp",
-        "Thuốc nhuộm cao cấp",
-        "Dưỡng chất bảo vệ tóc",
-        "Công nghệ nhuộm hiện đại",
-      ],
-      mainImage: "/assets/image/1.jpg",
-      subImages: [
-        "/assets/image/1.jpg",
-        "/assets/image/1.jpg",
-        "/assets/image/1.jpg",
-      ],
-      process: [
-        {
-          step: 1,
-          title: "Tư vấn màu nhuộm",
-          description:
-            "Stylist tư vấn màu nhuộm phù hợp với màu da và phong cách",
-          duration: "10 phút",
-        },
-        {
-          step: 2,
-          title: "Chuẩn bị tóc",
-          description: "Gội sạch và chuẩn bị tóc để đảm bảo màu lên đều",
-          duration: "15 phút",
-        },
-        {
-          step: 3,
-          title: "Pha màu và thi công",
-          description: "Pha màu theo công thức và tiến hành nhuộm từng phần",
-          duration: "30 phút",
-        },
-        {
-          step: 4,
-          title: "Ủ màu",
-          description: "Ủ tóc để màu thấm đều và bền màu",
-          duration: "20 phút",
-        },
-        {
-          step: 5,
-          title: "Gội xả và dưỡng",
-          description: "Gội sạch thuốc nhuộm và ủ dưỡng chất bảo vệ màu",
-          duration: "15 phút",
-        },
-      ],
-      additionalServices: [
-        "Tặng gói phục hồi tóc sau nhuộm",
-        "Tư vấn chăm sóc tóc nhuộm tại nhà",
-        "Bảo hành màu trong 2 tuần",
-      ],
-      notes: [
-        "Nên thử phản ứng thuốc nhuộm trước khi thực hiện",
-        "Kết quả có thể khác nhau tùy thuộc vào chất tóc",
-        "Tránh gội đầu trong 24h đầu sau khi nhuộm",
-      ],
-      suitableFor: [
-        "Khách hàng muốn thay đổi màu tóc nhẹ nhàng",
-        "Tóc chưa qua xử lý hóa chất",
-        "Lần đầu nhuộm tóc",
-      ],
-    },
-    // Thêm chi tiết cho các service khác tương tự
-  };
+  useEffect(() => {
+    const fetchServiceDetails = async () => {
+      try {
+        const response = await axios.get(
+          "https://localhost:7081/api/Service/getAll"
+        );
 
-  const service = serviceDetails[id];
+        // Find the service by ID
+        const foundService = response.data.items.find(
+          (item) => item.serviceEnity.id === parseInt(id)
+        );
+
+        if (foundService) {
+          // Transform service data
+          const transformedService = {
+            id: foundService.serviceEnity.id,
+            name: foundService.serviceEnity.title,
+            description: foundService.serviceEnity.description,
+            price: `${foundService.serviceEnity.price.toLocaleString()}đ`,
+            duration: `${Math.round(
+              foundService.serviceEnity.timeService * 60
+            )} Phút`,
+            mainImage:
+              foundService.images[0]?.url || "/assets/image/default.jpg",
+            subImages: foundService.images.map((img) => img.url),
+            features: foundService.serviceEnity.description
+              .split(",")
+              .map((feature) => feature.trim()),
+            process: [
+              {
+                step: 1,
+                title: "Tư vấn và phân tích tóc",
+                description:
+                  "Đánh giá tình trạng tóc hiện tại, màu tóc cũ, độ hư tổn để lựa chọn phương pháp nhuộm phù hợp",
+                duration: "15 phút",
+              },
+              {
+                step: 2,
+                title: "Làm sạch và chuẩn bị tóc",
+                description:
+                  "Gội đầu sạch sẽ, kiểm tra độ đàn hồi và độ ẩm của tóc trước khi nhuộm",
+                duration: "20 phút",
+              },
+              {
+                step: 3,
+                title: "Bảo vệ và chuẩn bị da đầu",
+                description:
+                  "Thoa kem bảo vệ da đầu để tránh kích ứng và tác động của hóa chất",
+                duration: "10 phút",
+              },
+              {
+                step: 4,
+                title: "Pha và thi công màu",
+                description:
+                  "Pha màu theo công thức chuyên nghiệp, áp dụng kỹ thuật nhuộm đồng đều từng phần tóc",
+                duration: "30 phút",
+              },
+              {
+                step: 5,
+                title: "Ủ và kích hoạt màu",
+                description:
+                  "Ủ tóc để màu thấm sâu và phát triển, sử dụng nhiệt và kỹ thuật chuyên nghiệp",
+                duration: "20 phút",
+              },
+              {
+                step: 6,
+                title: "Gội rửa và chăm sóc sau nhuộm",
+                description:
+                  "Gội sạch, sử dụng dầu xả chuyên biệt và dưỡng chất phục hồi màu tóc",
+                duration: "15 phút",
+              },
+            ],
+            additionalServices: [
+              "Tặng gói dưỡng phục hồi tóc",
+              "Tư vấn chăm sóc tóc nhuộm tại nhà",
+              "Kiểm tra độ bền màu miễn phí",
+              "Chế độ chăm sóc sau nhuộm",
+            ],
+            notes: [
+              "Không gội đầu trong 48h đầu sau khi nhuộm",
+              "Sử dụng dầu gội và dầu xả chuyên dụng cho tóc nhuộm",
+              "Tránh tiếp xúc trực tiếp với ánh nắng mặt trời trong tuần đầu",
+              "Hạn chế sử dụng máy sấy ở nhiệt độ cao",
+            ],
+            suitableFor: [
+              "Khách hàng muốn thay đổi màu tóc hoàn toàn",
+              "Che phủ bạc hiệu quả",
+              "Tóc chưa qua xử lý nhiều hóa chất",
+              "Muốn nâng tone màu tóc tự nhiên",
+            ],
+          };
+
+          setService(transformedService);
+        } else {
+          setError("Không tìm thấy dịch vụ");
+        }
+        setLoading(false);
+      } catch (err) {
+        setError("Không thể tải chi tiết dịch vụ. Vui lòng thử lại sau.");
+        setLoading(false);
+      }
+    };
+
+    fetchServiceDetails();
+  }, [id]);
 
   const handleBookingClick = (e, serviceId) => {
     e.stopPropagation();
@@ -95,6 +131,22 @@ const HairDyeingServiceDetail = () => {
       state: { serviceId, serviceType: "hairdye" },
     });
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-xl text-gray-600">Đang tải dịch vụ...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-xl text-red-500">{error}</p>
+      </div>
+    );
+  }
 
   if (!service) {
     return (
