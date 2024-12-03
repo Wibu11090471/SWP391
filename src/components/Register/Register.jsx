@@ -56,17 +56,14 @@ const Register = ({ onSwitchToLogin }) => {
     };
 
     try {
-      // Send registration request to API
       const response = await axios.post(
         "https://localhost:7081/api/User/create-user",
         apiData
       );
 
-      // Handle successful registration
       setSuccess("Đăng ký thành công!");
       onSwitchToLogin(); // Switch to login page
     } catch (err) {
-      // Handle registration error
       setError(
         err.response?.data?.message || "Đăng ký thất bại. Vui lòng thử lại."
       );
