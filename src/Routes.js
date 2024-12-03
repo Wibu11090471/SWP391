@@ -12,7 +12,7 @@ import HairPermServiceDetail from "./components/ServicePage/HairPermService/Hair
 import BookingService from "./components/BookingService/BookingService";
 import NotFound from "./components/NotFound/NotFound";
 import DashboardSalonStaff from "./components/Dashboard/DashboardSalonStaff";
-import StylistDetail from "./components/Dashboard/StylistDetail";
+import DetailPayment from "./components/Dashboard/DetailPayment";
 import Notifications from "./components/Dashboard/Notifications";
 import Statistics from "./components/Dashboard/Statistics";
 import SalonRevenueDashboard from "./components/HairSalonManager/Revenue/Revenue";
@@ -66,7 +66,7 @@ const AppRoutes = () => {
         path="/stylist/:id"
         element={
           <ProtectedRoute requiredRoles={["staff", "admin"]}>
-            <StylistDetail />
+            <DetailPayment />
           </ProtectedRoute>
         }
       />
@@ -74,7 +74,7 @@ const AppRoutes = () => {
       <Route
         path="/notifications"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute requiredRoles={["staff"]}>
             <Notifications />
           </ProtectedRoute>
         }
@@ -84,7 +84,7 @@ const AppRoutes = () => {
       <Route
         path="/statistics"
         element={
-          <ProtectedRoute requiredRoles={["admin"]}>
+          <ProtectedRoute requiredRoles={["staff"]}>
             <Statistics />
           </ProtectedRoute>
         }
