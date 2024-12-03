@@ -42,7 +42,7 @@ const Statistics = () => {
     <div className="bg-white shadow-lg rounded-lg p-9 mt-6 w-full min-h-screen">
       <div
         className="stylish-detail container mx-auto p-6"
-        style={{ paddingTop: "50px" }}
+        // style={{ paddingTop: "50px" }}
       >
         <Link to="/hairsalon-staff">
           <button className="bg-[#8B4513] text-white px-8 py-2 rounded-md mt-4">
@@ -51,12 +51,12 @@ const Statistics = () => {
         </Link>
       </div>
 
-      <div className="container mx-auto mt-10">
+      <div className="container mx-auto mt-10" style={{paddingBottom:"10px"}}>
         <h1 className="text-3xl font-bold mb-6 text-center">Thống Kê Stylist</h1>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Highest Revenue */}
-          <div className="bg-green-100 p-6 rounded-lg shadow-md">
+          <div className="bg-green-100 p-6 rounded-lg shadow-md text-center">
             <h2 className="text-xl font-bold mb-2">Stylist Doanh Thu Cao Nhất</h2>
             <p className="text-lg">
               <strong>{highestStylist.name}</strong>:{" "}
@@ -67,7 +67,7 @@ const Statistics = () => {
           </div>
 
           {/* Lowest Revenue */}
-          <div className="bg-red-100 p-6 rounded-lg shadow-md">
+          <div className="bg-red-100 p-6 rounded-lg shadow-md text-center">
             <h2 className="text-xl font-bold mb-2">Stylist Doanh Thu Thấp Nhất</h2>
             <p className="text-lg">
               <strong>{lowestStylist.name}</strong>:{" "}

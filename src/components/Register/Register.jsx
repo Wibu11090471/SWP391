@@ -25,7 +25,6 @@ const Register = ({ onSwitchToLogin }) => {
     setError("");
     setSuccess("");
 
-    // Validate form fields
     if (!formData.username || !formData.password || !formData.phoneNumber) {
       setError("Vui lòng điền đầy đủ thông tin!");
       return;
@@ -37,7 +36,6 @@ const Register = ({ onSwitchToLogin }) => {
     }
 
     try {
-      // Send registration request to API
       const response = await axios.post(
         "http://localhost:4000/accounts/register",
         {
@@ -48,11 +46,9 @@ const Register = ({ onSwitchToLogin }) => {
         }
       );
 
-      // Handle successful registration
       setSuccess("Đăng ký thành công!");
-      onSwitchToLogin(); // Optionally switch to login page
+      onSwitchToLogin(); 
     } catch (err) {
-      // Handle registration error
       setError(
         err.response?.data?.message || "Đăng ký thất bại. Vui lòng thử lại."
       );
