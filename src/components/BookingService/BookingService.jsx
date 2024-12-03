@@ -2,8 +2,16 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "../../ui/card";
-import { MapPin, Clock, ChevronRight, ChevronLeft, Check } from "lucide-react";
+import {
+  MapPin,
+  Clock,
+  ChevronRight,
+  ChevronLeft,
+  Check,
+  X,
+} from "lucide-react";
 import { format } from "date-fns";
+import { Alert, AlertDescription } from "../../ui/alert";
 
 const createApiInstance = () => {
   const token = localStorage.getItem("token");
@@ -26,6 +34,16 @@ const BookingService = () => {
   const [availableTimes, setAvailableTimes] = useState([]);
   const [availableDates, setAvailableDates] = useState([]);
   const [user, setUser] = useState(null);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
 
   const generateAvailableDates = () => {
     const dates = [];
@@ -38,11 +56,26 @@ const BookingService = () => {
     return dates;
   };
 
-  const generateAvailableTimes = () => {
+  const generateAvailableTimes = (selectedDate) => {
     const times = [];
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+
     for (let hour = 8; hour <= 20; hour++) {
       ["00", "30"].forEach((minute) => {
-        times.push(`${hour.toString().padStart(2, "0")}:${minute}`);
+        const timeToCheck = new Date();
+        timeToCheck.setHours(hour, parseInt(minute), 0, 0);
+
+        const isPastTime =
+          format(now, "yyyy-MM-dd") === selectedDate &&
+          (hour < currentHour ||
+            (hour === currentHour && parseInt(minute) <= currentMinute));
+
+        times.push({
+          time: `${hour.toString().padStart(2, "0")}:${minute}`,
+          disabled: isPastTime,
+        });
       });
     }
     return times;
@@ -55,7 +88,7 @@ const BookingService = () => {
         const response = await api.get("/api/Service/getAll");
         setServices(response.data.items);
       } catch (error) {
-        console.error("Error fetching services:", error);
+        setError("Lỗi khi tải dịch vụ");
       }
     };
 
@@ -73,13 +106,17 @@ const BookingService = () => {
 
     fetchServices();
     setAvailableDates(generateAvailableDates());
-    setAvailableTimes(generateAvailableTimes());
   }, [navigate]);
+
+  useEffect(() => {
+    if (selectedDateTime?.date) {
+      setAvailableTimes(generateAvailableTimes(selectedDateTime.date));
+    }
+  }, [selectedDateTime?.date]);
 
   const handleBookingSubmit = async () => {
     try {
       const api = createApiInstance();
-
       const bookingData = {
         startTime: new Date(
           `${selectedDateTime.date} ${selectedDateTime.time}`
@@ -93,11 +130,28 @@ const BookingService = () => {
         bookingData
       );
 
-      alert("Đặt lịch thành công!");
-      navigate("/booking-success");
+      localStorage.setItem(
+        "lastBooking",
+        JSON.stringify({
+          serviceName: selectedService.serviceEnity.title,
+          servicePicture: selectedService.images?.[0]?.url || null,
+          bookingDate: selectedDateTime.date,
+          bookingTime: selectedDateTime.time,
+          servicePrice: selectedService.serviceEnity.price,
+        })
+      );
+
+      navigate("/booking-success", {
+        state: {
+          serviceName: selectedService.serviceEnity.title,
+          bookingDate: selectedDateTime.date,
+          bookingTime: selectedDateTime.time,
+          servicePrice: selectedService.serviceEnity.price,
+          serviceImage: selectedService.images?.[0]?.url || null,
+        },
+      });
     } catch (error) {
-      console.error("Booking Error:", error);
-      alert(error.response?.data?.message || "Đặt lịch thất bại");
+      setError(error.response?.data?.message || "Đặt lịch thất bại");
     }
   };
 
@@ -175,10 +229,11 @@ const BookingService = () => {
                     }`}
                     onClick={() =>
                       setSelectedDateTime((prev) => ({
-                        ...prev,
                         date: date,
+                        time: null,
                       }))
                     }
+                    disabled={new Date(date) < new Date().setHours(0, 0, 0, 0)}
                   >
                     <div className="font-semibold">
                       {format(new Date(date), "EEE")}
@@ -196,22 +251,26 @@ const BookingService = () => {
                   Chọn giờ
                 </label>
                 <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
-                  {availableTimes.map((time) => (
+                  {availableTimes.map((timeObj) => (
                     <button
-                      key={time}
+                      key={timeObj.time}
                       className={`py-2 px-3 border rounded-md ${
-                        selectedDateTime?.time === time
+                        selectedDateTime?.time === timeObj.time
                           ? "bg-[#8B4513] text-white"
+                          : timeObj.disabled
+                          ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                           : "bg-white text-[#8B4513] hover:bg-[#DEB887]/20"
                       }`}
                       onClick={() =>
+                        !timeObj.disabled &&
                         setSelectedDateTime((prev) => ({
                           ...prev,
-                          time,
+                          time: timeObj.time,
                         }))
                       }
+                      disabled={timeObj.disabled}
                     >
-                      {time}
+                      {timeObj.time}
                     </button>
                   ))}
                 </div>
@@ -286,6 +345,20 @@ const BookingService = () => {
 
   return (
     <div className="min-h-screen bg-[#FDF5E6] py-8 pt-28">
+      {error && (
+        <div className="fixed bottom-4 right-4 z-50">
+          <Alert variant="destructive" className="w-72 bg-red-700">
+            <AlertDescription className="flex items-center justify-between">
+              <span>{error}</span>
+              <X
+                className="h-4 w-4 cursor-pointer opacity-70"
+                onClick={() => setError(null)}
+              />
+            </AlertDescription>
+          </Alert>
+        </div>
+      )}
+
       <div className="max-w-7xl mx-auto px-4">
         <div className="mb-8 flex justify-between items-center">
           {["Chọn Dịch Vụ", "Chọn Ngày & Giờ", "Xác Nhận"].map(
@@ -325,7 +398,7 @@ const BookingService = () => {
           </button>
           <button
             onClick={handleNext}
-            className="bg-[#8B4513] text-white px-6 py-2 rounded-lg"
+            className="bg-[#8B4513] text-white px-6 py-2 rounded-lg flex items-center"
             disabled={
               (currentStep === 1 && !selectedService) ||
               (currentStep === 2 &&
