@@ -1,103 +1,188 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 import {
-  BarChart,
-  Bar,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  Legend,
 } from "recharts";
 
-// Mock data (with increased revenue range)
-const stylistsData = [
-  { name: "Minh Tuấn", revenue: 500 },
-  { name: "Lan Phương", revenue: 3500 },
-  { name: "Việt Anh", revenue: 2500 },
-  { name: "Hương Giang", revenue: 7000 },
-  { name: "Quang Minh", revenue: 200 },
-  { name: "Mai Ly", revenue: 4500 },
-  { name: "Đức Trọng", revenue: 6000 },
-  { name: "Thảo Linh", revenue: 350 },
-  { name: "Minh Khang", revenue: 8000 },
-  { name: "Phương Anh", revenue: 1500 },
-];
-
-// Find highest and lowest earning stylists
-const highestStylist = stylistsData.reduce((prev, current) =>
-  current.revenue > prev.revenue ? current : prev
-);
-const lowestStylist = stylistsData.reduce((prev, current) =>
-  current.revenue < prev.revenue ? current : prev
-);
-
-const totalRevenue = stylistsData.reduce(
-  (sum, stylist) => sum + stylist.revenue,
-  0
-);
+const api = axios.create({
+  baseURL: "https://localhost:7081",
+  withCredentials: true,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
 const Statistics = () => {
+  const [bookings, setBookings] = useState([]);
+  const [monthlyRevenue, setMonthlyRevenue] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchBookings = async () => {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        navigate("/login");
+        return;
+      }
+
+      try {
+        const response = await api.get("/api/Booking/listAll", {
+          params: { status: "paid" },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        setBookings(response.data.items);
+
+        // Process monthly revenue
+        const revenueByMonth = processMonthlyRevenue(response.data.items);
+        setMonthlyRevenue(revenueByMonth);
+
+        setLoading(false);
+      } catch (err) {
+        if (err.response && err.response.status === 401) {
+          // Unauthorized - clear token and redirect to login
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          navigate("/login");
+        } else {
+          // Handle other errors
+          setError(err.message || "Có lỗi xảy ra khi tải dữ liệu");
+        }
+        setLoading(false);
+      }
+    };
+
+    fetchBookings();
+  }, [navigate]);
+
+  const getAllMonths = () => {
+    const months = [];
+    for (let i = 0; i < 12; i++) {
+      const date = new Date(2024, i); // Sử dụng năm bất kỳ
+      months.push(
+        date.toLocaleString("default", { month: "short", year: "numeric" })
+      );
+    }
+    return months;
+  };
+
+  const processMonthlyRevenue = (items) => {
+    const monthlyRevenueMap = {};
+
+    items.forEach((booking) => {
+      const month = new Date(booking.startTime).toLocaleString("default", {
+        month: "short",
+        year: "numeric",
+      });
+      const servicePrice = booking.service.price;
+
+      if (monthlyRevenueMap[month]) {
+        monthlyRevenueMap[month] += servicePrice;
+      } else {
+        monthlyRevenueMap[month] = servicePrice;
+      }
+    });
+
+    // Tạo danh sách tất cả các tháng với doanh thu mặc định là 0
+    const allMonths = getAllMonths();
+    const revenueByMonth = allMonths.map((month) => ({
+      name: month,
+      revenue: monthlyRevenueMap[month] || 0,
+    }));
+
+    return revenueByMonth;
+  };
+
+  const totalRevenue = monthlyRevenue.reduce(
+    (sum, item) => sum + item.revenue,
+    0
+  );
+
+  if (loading)
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-[#8B4513]"></div>
+      </div>
+    );
+
+  if (error)
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-red-50">
+        <div className="text-center">
+          <p className="text-red-600 text-xl mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-[#8B4513] text-white px-6 py-2 rounded-md"
+          >
+            Thử lại
+          </button>
+        </div>
+      </div>
+    );
+
   return (
     <div className="bg-white shadow-lg rounded-lg p-9 mt-6 w-full min-h-screen">
-      <div
-        className="stylish-detail container mx-auto p-6"
-        // style={{ paddingTop: "50px" }}
-      >
-        <Link to="/hairsalon-staff">
+      <div className="stylish-detail container mx-auto p-6">
+        <Link to="/selectedField">
           <button className="bg-[#8B4513] text-white px-8 py-2 rounded-md mt-4">
             Quay về Dashboard
           </button>
         </Link>
       </div>
 
-      <div className="container mx-auto mt-10" style={{paddingBottom:"10px"}}>
-        <h1 className="text-3xl font-bold mb-6 text-center">Thống Kê Stylist</h1>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Highest Revenue */}
-          <div className="bg-green-100 p-6 rounded-lg shadow-md text-center">
-            <h2 className="text-xl font-bold mb-2">Stylist Doanh Thu Cao Nhất</h2>
-            <p className="text-lg">
-              <strong>{highestStylist.name}</strong>:{" "}
-              <span className="text-green-600">
-                ${highestStylist.revenue.toLocaleString()}
-              </span>
-            </p>
-          </div>
-
-          {/* Lowest Revenue */}
-          <div className="bg-red-100 p-6 rounded-lg shadow-md text-center">
-            <h2 className="text-xl font-bold mb-2">Stylist Doanh Thu Thấp Nhất</h2>
-            <p className="text-lg">
-              <strong>{lowestStylist.name}</strong>:{" "}
-              <span className="text-red-600">
-                ${lowestStylist.revenue.toLocaleString()}
-              </span>
-            </p>
-          </div>
-        </div>
+      <div className="container mx-auto mt-10">
+        <h1 className="text-3xl font-bold mb-6 text-center">
+          Thống Kê Doanh Thu Theo Tháng
+        </h1>
 
         {/* Total Revenue */}
         <div className="bg-blue-100 p-6 rounded-lg shadow-md mt-6 text-center">
-          <h2 className="text-xl font-bold mb-2">Tổng Doanh Thu Tháng Này</h2>
+          <h2 className="text-xl font-bold mb-2">Tổng Doanh Thu</h2>
           <p className="text-2xl text-blue-600 font-semibold">
             ${totalRevenue.toLocaleString()}
           </p>
         </div>
 
-        {/* Revenue Bar Chart */}
+        {/* Revenue Line Chart */}
         <div className="mt-10">
-          <h2 className="text-xl font-bold mb-4 text-center">Biểu Đồ Doanh Thu</h2>
+          <h2 className="text-xl font-bold mb-4 text-center">
+            Biểu Đồ Doanh Thu Theo Tháng
+          </h2>
           <div className="bg-gray-100 p-6 rounded-lg shadow-md">
             <ResponsiveContainer width="100%" height={500}>
-              <BarChart data={stylistsData}>
+              <LineChart data={monthlyRevenue}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis />
-                <Tooltip />
-                <Bar dataKey="revenue" fill="#8B4513" barSize={40} />
-              </BarChart>
+                <Tooltip
+                  formatter={(value) => [
+                    `$${value.toLocaleString()}`,
+                    "Doanh Thu",
+                  ]}
+                />
+                <Legend />
+                <Line
+                  type="monotone"
+                  dataKey="revenue"
+                  name="Doanh Thu"
+                  stroke="#8B4513"
+                  strokeWidth={3}
+                  dot={{ r: 6 }}
+                />
+              </LineChart>
             </ResponsiveContainer>
           </div>
         </div>
