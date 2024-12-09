@@ -35,6 +35,38 @@ const BookingService = () => {
   const [availableDates, setAvailableDates] = useState([]);
   const [user, setUser] = useState(null);
   const [error, setError] = useState(null);
+  const [unavailableTimeIndexes, setUnavailableTimeIndexes] = useState(
+    new Set()
+  );
+
+  // Time slots configuration
+  const TIME_SLOTS = [
+    { time: "08:00", timeIndex: 0 },
+    { time: "08:30", timeIndex: 1 },
+    { time: "09:00", timeIndex: 2 },
+    { time: "09:30", timeIndex: 3 },
+    { time: "10:00", timeIndex: 4 },
+    { time: "10:30", timeIndex: 5 },
+    { time: "11:00", timeIndex: 6 },
+    { time: "11:30", timeIndex: 7 },
+    { time: "12:00", timeIndex: 8 },
+    { time: "12:30", timeIndex: 9 },
+    { time: "13:00", timeIndex: 10 },
+    { time: "13:30", timeIndex: 11 },
+    { time: "14:00", timeIndex: 12 },
+    { time: "14:30", timeIndex: 13 },
+    { time: "15:00", timeIndex: 14 },
+    { time: "15:30", timeIndex: 15 },
+    { time: "16:00", timeIndex: 16 },
+    { time: "16:30", timeIndex: 17 },
+    { time: "17:00", timeIndex: 18 },
+    { time: "17:30", timeIndex: 19 },
+    { time: "18:00", timeIndex: 20 },
+    { time: "18:30", timeIndex: 21 },
+    { time: "19:00", timeIndex: 22 },
+    { time: "19:30", timeIndex: 23 },
+    { time: "20:00", timeIndex: 24 },
+  ];
 
   useEffect(() => {
     if (error) {
@@ -56,29 +88,60 @@ const BookingService = () => {
     return dates;
   };
 
+  const fetchAvailableTimeIndexes = async (selectedDate) => {
+    try {
+      const listTime = TIME_SLOTS.map((slot) => {
+        const startMinutes = parseInt(slot.time.split(":")[1]);
+        const endMinutes = startMinutes + 30;
+        const startTime = slot.time.split(":")[0];
+
+        const endTime =
+          endMinutes === 60
+            ? `${parseInt(startTime) + 1}:00`
+            : `${startTime}:${endMinutes < 10 ? "0" + endMinutes : endMinutes}`;
+
+        return `${slot.time}-${endTime}`;
+      });
+
+      const payload = {
+        listTime: listTime,
+        date: new Date(selectedDate).toISOString(),
+      };
+
+      const api = createApiInstance();
+      const response = await api.post(
+        "/api/PaymentTransaction/availableTimeIndexes",
+        payload
+      );
+
+      // Cập nhật unavailableTimeIndexes với dữ liệu trả về từ API
+      setUnavailableTimeIndexes(new Set(response.data));
+    } catch (error) {
+      console.error("Error fetching available time indexes:", error.message); // Log error
+    }
+  };
+
   const generateAvailableTimes = (selectedDate) => {
-    const times = [];
     const now = new Date();
     const currentHour = now.getHours();
     const currentMinute = now.getMinutes();
 
-    for (let hour = 8; hour <= 20; hour++) {
-      ["00", "30"].forEach((minute) => {
-        const timeToCheck = new Date();
-        timeToCheck.setHours(hour, parseInt(minute), 0, 0);
+    return TIME_SLOTS.map((slot) => {
+      const isPastTime =
+        format(now, "yyyy-MM-dd") === selectedDate &&
+        (parseInt(slot.time.split(":")[0]) < currentHour ||
+          (parseInt(slot.time.split(":")[0]) === currentHour &&
+            parseInt(slot.time.split(":")[1]) <= currentMinute));
 
-        const isPastTime =
-          format(now, "yyyy-MM-dd") === selectedDate &&
-          (hour < currentHour ||
-            (hour === currentHour && parseInt(minute) <= currentMinute));
+      const isUnavailable =
+        unavailableTimeIndexes.has(slot.timeIndex) || isPastTime;
 
-        times.push({
-          time: `${hour.toString().padStart(2, "0")}:${minute}`,
-          disabled: isPastTime,
-        });
-      });
-    }
-    return times;
+      return {
+        time: slot.time,
+        disabled: isUnavailable,
+        timeIndex: slot.timeIndex,
+      };
+    });
   };
 
   useEffect(() => {
@@ -110,9 +173,15 @@ const BookingService = () => {
 
   useEffect(() => {
     if (selectedDateTime?.date) {
-      setAvailableTimes(generateAvailableTimes(selectedDateTime.date));
+      fetchAvailableTimeIndexes(selectedDateTime.date);
     }
   }, [selectedDateTime?.date]);
+
+  useEffect(() => {
+    if (selectedDateTime?.date) {
+      setAvailableTimes(generateAvailableTimes(selectedDateTime.date));
+    }
+  }, [selectedDateTime?.date, unavailableTimeIndexes]);
 
   const handleBookingSubmit = async () => {
     try {
@@ -197,7 +266,7 @@ const BookingService = () => {
                       <h3 className="text-lg font-semibold">{service.title}</h3>
                       <div className="flex items-center">
                         <Clock className="w-4 h-4 mr-2" />
-                        <span>{service.timeService} giờ</span>
+                        <span>{service.timeService * 60} phút</span>
                       </div>
                       <p className="text-sm mt-2">{service.description}</p>
                       <div className="mt-2 text-[#8B4513] font-bold">
@@ -256,10 +325,10 @@ const BookingService = () => {
                       key={timeObj.time}
                       className={`py-2 px-3 border rounded-md ${
                         selectedDateTime?.time === timeObj.time
-                          ? "bg-[#8B4513] text-white"
+                          ? "bg-[#8B4513] text-white" // Được chọn
                           : timeObj.disabled
-                          ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                          : "bg-white text-[#8B4513] hover:bg-[#DEB887]/20"
+                          ? "bg-gray-200 text-gray-400 cursor-not-allowed opacity-50 line-through" // Không khả dụng
+                          : "bg-white text-[#8B4513] hover:bg-[#DEB887]/20" // Bình thường
                       }`}
                       onClick={() =>
                         !timeObj.disabled &&
