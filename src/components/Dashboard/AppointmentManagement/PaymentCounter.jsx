@@ -3,7 +3,7 @@ import axios from "axios";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { Button } from "../../../ui/button";
-import { useNavigate } from "react-router-dom"; // Sử dụng useNavigate để điều hướng
+import { useNavigate } from "react-router-dom"; 
 
 const api = axios.create({
   baseURL: "https://localhost:7081",
@@ -17,8 +17,8 @@ const PaymentCounter = () => {
   const [bookings, setBookings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [paymentSuccess, setPaymentSuccess] = useState(false); // Thêm trạng thái để quản lý thông báo
-  const navigate = useNavigate(); // Khởi tạo navigate
+  const [paymentSuccess, setPaymentSuccess] = useState(false); 
+  const navigate = useNavigate(); 
 
   useEffect(() => {
     fetchBookings();
@@ -100,8 +100,7 @@ const PaymentCounter = () => {
 
       setTimeout(() => {
         setPaymentSuccess(false); 
-        navigate("/"); 
-      }, 5000);
+      }, 3000);
     } catch (error) {
       console.error("Lỗi khi thanh toán:", error);
       alert("Không thể thanh toán. Vui lòng thử lại.");
