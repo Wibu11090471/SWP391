@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import {
   LineChart,
@@ -134,16 +134,50 @@ const Statistics = () => {
     );
 
   return (
-    <div className="bg-white shadow-lg rounded-lg p-9 mt-6 w-full min-h-screen">
-      <div className="stylish-detail container mx-auto p-6">
-        <Link to="/selectedField">
-          <button className="bg-[#8B4513] text-white px-8 py-2 rounded-md mt-4">
-            Quay về Dashboard
-          </button>
-        </Link>
+    <div className="flex min-h-screen bg-[#FDF5E6] pt-20">
+      {/* Sidebar */}
+      <div className="sidebar w-1/4 bg-gray-800 text-white p-6 shadow-lg">
+        <h2 className="text-2xl font-bold mb-8 pl-3 text-yellow-400">
+          Dashboard
+        </h2>
+        <ul>
+          <li>
+            <a
+              href="/selectedField"
+              className="block py-3 text-lg hover:bg-gray-700 px-4 rounded-lg transition-all duration-300 ease-in-out hover:text-yellow-400"
+            >
+              Lịch hẹn
+            </a>
+          </li>
+          <li>
+            <a
+              href="/addserviceimage"
+              className="block py-3 text-lg hover:bg-gray-700 px-4 rounded-lg transition-all duration-300 ease-in-out hover:text-yellow-400"
+            >
+              Thêm Dịch Vụ
+            </a>
+          </li>
+          <li>
+            <a
+              href="/notifications"
+              className="block py-3 text-lg hover:bg-gray-700 px-4 rounded-lg transition-all duration-300 ease-in-out hover:text-yellow-400"
+            >
+              Thông Báo
+            </a>
+          </li>
+          <li>
+            <a
+              href="/statistics"
+              className="block py-3 text-lg bg-gray-700 px-4 rounded-lg transition-all duration-300 ease-in-out text-yellow-400"
+            >
+              Thống Kê
+            </a>
+          </li>
+        </ul>
       </div>
 
-      <div className="container mx-auto mt-10">
+      {/* Main Container */}
+      <div className="main-container flex-1 p-8">
         <h1 className="text-3xl font-bold mb-6 text-center">
           Thống Kê Doanh Thu Theo Tháng
         </h1>

@@ -3,8 +3,8 @@ import axios from "axios";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { Button } from "../../../ui/button";
+import { useNavigate } from "react-router-dom"; 
 
-// Cấu hình axios
 const api = axios.create({
   baseURL: "https://localhost:7081",
   withCredentials: true,
@@ -17,6 +17,8 @@ const PaymentCounter = () => {
   const [bookings, setBookings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [paymentSuccess, setPaymentSuccess] = useState(false); 
+  const navigate = useNavigate(); 
 
   useEffect(() => {
     fetchBookings();
@@ -80,7 +82,6 @@ const PaymentCounter = () => {
         {
           status: "paid",
           note: "Đã thanh toán",
-          // Keeping other details same as original booking
           serviceId: bookings.find((b) => b.id === bookingId).service.id,
           startTime: bookings.find((b) => b.id === bookingId).startTime,
         },
@@ -91,8 +92,15 @@ const PaymentCounter = () => {
         }
       );
 
+      // Set payment success to show the notification
+      setPaymentSuccess(true);
+
       // Refetch bookings to update the list
       await fetchBookings();
+
+      setTimeout(() => {
+        setPaymentSuccess(false); 
+      }, 3000);
     } catch (error) {
       console.error("Lỗi khi thanh toán:", error);
       alert("Không thể thanh toán. Vui lòng thử lại.");
@@ -105,6 +113,13 @@ const PaymentCounter = () => {
         <h1 className="text-3xl font-bold text-[#5D4037] mb-6">
           Thanh Toán Dịch Vụ
         </h1>
+
+        {/* Hiển thị thông báo thanh toán thành công */}
+        {paymentSuccess && (
+          <div className="bg-green-500 text-white p-3 rounded-md mb-4 text-center">
+            Thanh toán thành công!
+          </div>
+        )}
 
         <div className="bg-white shadow-md rounded-lg overflow-hidden">
           <table className="w-full">

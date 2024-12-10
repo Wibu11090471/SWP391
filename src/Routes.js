@@ -12,7 +12,9 @@ import HairDyeingServiceDetail from "./components/ServicePage/HairDyeingService/
 import HairPermServiceDetail from "./components/ServicePage/HairPermService/HairPermServiceDetail/HairPermServiceDetail";
 import BookingService from "./components/BookingService/BookingService";
 import NotFound from "./components/NotFound/NotFound";
-import CreateService from "./components/Dashboard/CreateService";
+import CreateService from "./components/Dashboard/ServiceImageContainer/CreateService";;
+import CreateImage from "./components/Dashboard/ServiceImageContainer/CreateImage";
+import ServiceImageContainer from "./components/Dashboard/ServiceImageContainer";
 import Notifications from "./components/Dashboard/Notifications";
 import Statistics from "./components/Dashboard/Statistics";
 import SalonRevenueDashboard from "./components/HairSalonManager/Revenue/Revenue";
@@ -79,12 +81,27 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
-
       <Route
         path="/create-service"
         element={
           <ProtectedRoute requiredRoles={["staff"]}>
             <CreateService />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/create-image"
+        element={
+          <ProtectedRoute requiredRoles={["staff"]}>
+            <CreateImage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/addserviceimage"
+        element={
+          <ProtectedRoute requiredRoles={["staff"]}>
+            <ServiceImageContainer />
           </ProtectedRoute>
         }
       />
