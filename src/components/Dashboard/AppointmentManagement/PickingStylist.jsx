@@ -175,7 +175,7 @@ const DashboardSalonStaff = () => {
 
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white p-6 rounded-lg shadow-xl w-96">
+        <div className="bg-white p-6 rounded-lg shadow-xl w-96 h-3/5">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-bold text-[#5D4037]">Chọn Stylist</h2>
             <button
@@ -197,25 +197,29 @@ const DashboardSalonStaff = () => {
             </div>
 
             <div className="mb-4">
-              <p className="font-semibold text-[#5D4037] mb-2">Chọn Stylist:</p>
-              <Select
-                value={selectedStylist}
-                onValueChange={setSelectedStylist}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Chọn stylist" />
-                </SelectTrigger>
-                <SelectContent>
-                  {stylists.map((stylist) => (
+            <p className="font-semibold text-[#5D4037] mb-2">Chọn Stylist:</p>
+            <Select
+              value={selectedStylist}
+              onValueChange={setSelectedStylist}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Chọn stylist" />
+              </SelectTrigger>
+              <SelectContent>
+                {stylists.length > 0 ? (
+                  stylists.map((stylist) => (
                     <SelectItem key={stylist.id} value={stylist.id}>
                       {stylist.fullName}
                     </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+                  ))
+                ) : (
+                  <SelectItem disabled>Không có stylist nào</SelectItem>
+                )}
+              </SelectContent>
+            </Select>
+          </div>
 
-            <div className="flex justify-end mt-4">
+            <div className="flex justify-end mt-4 pt-28">
               <Button
                 onClick={onSubmit}
                 className="bg-[#8B4513] hover:bg-[#915C38] text-white"

@@ -3,7 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import Login from "./components/Login/Login";
 import Home from "./components/HomePage/HairSalonHome";
-import AllService from "./components/ServicePage/AllService/AllService"
+import AllService from "./components/ServicePage/AllService/AllService";
 import HairCutService from "./components/ServicePage/HairCutService/HairCutService";
 import HairDyeingService from "./components/ServicePage/HairDyeingService/HairDyeingService";
 import HairPermService from "./components/ServicePage/HairPermService/HairPermService";
@@ -12,7 +12,9 @@ import HairDyeingServiceDetail from "./components/ServicePage/HairDyeingService/
 import HairPermServiceDetail from "./components/ServicePage/HairPermService/HairPermServiceDetail/HairPermServiceDetail";
 import BookingService from "./components/BookingService/BookingService";
 import NotFound from "./components/NotFound/NotFound";
-import CreateService from "./components/Dashboard/CreateService"
+import CreateService from "./components/Dashboard/ServiceImageContainer/CreateService";
+import CreateImage from "./components/Dashboard/ServiceImageContainer/CreateImage";
+import ServiceImageContainer from "./components/Dashboard/ServiceImageContainer";
 import Notifications from "./components/Dashboard/Notifications";
 import Statistics from "./components/Dashboard/Statistics";
 import SalonRevenueDashboard from "./components/HairSalonManager/Revenue/Revenue";
@@ -24,9 +26,9 @@ import StylishDetailManagement from "./components/HairSalonManager/StylishManage
 import MassageRelaxService from "./components/ServicePage/MassageRelaxService/MassageRelaxService";
 import EarCleaningService from "./components/ServicePage/EarCleaningService/EarCleaningService";
 import BookingConfirmation from "./components/BookingService/BookingSuccess";
-import PickingStylish from "./components/Dashboard/AppointmentManagement/PickingStylist"
-import PaymentCounter from "./components/Dashboard/AppointmentManagement/PaymentCounter"
-import DashboardSalonStaff from "./components/Dashboard/AppointmentManagement/DashboardSalonStaff"
+import PickingStylish from "./components/Dashboard/AppointmentManagement/PickingStylist";
+import PaymentCounter from "./components/Dashboard/AppointmentManagement/PaymentCounter";
+import DashboardSalonStaff from "./components/Dashboard/AppointmentManagement/DashboardSalonStaff";
 import SalonStaffDashboard from "./components/Dashboard/SalonStaffDashboard";
 const AppRoutes = () => {
   return (
@@ -76,12 +78,27 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
-
       <Route
         path="/create-service"
         element={
           <ProtectedRoute requiredRoles={["staff"]}>
             <CreateService />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/create-image"
+        element={
+          <ProtectedRoute requiredRoles={["staff"]}>
+            <CreateImage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/addserviceimage"
+        element={
+          <ProtectedRoute requiredRoles={["staff"]}>
+            <ServiceImageContainer />
           </ProtectedRoute>
         }
       />

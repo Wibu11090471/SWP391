@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import axios from "axios"; 
 
-const CreateService = () => {
-  const navigate = useNavigate();
-
+const CreateService = ({ 
+  onServiceCreated, 
+  redirectToImageDisabled = false 
+}) => {
   const createApiInstance = () => {
     const token = localStorage.getItem("token");
     return axios.create({
@@ -16,8 +16,6 @@ const CreateService = () => {
       },
     });
   };
-
-  const api = createApiInstance();
 
   const [serviceData, setServiceData] = useState({
     title: "",
@@ -45,6 +43,7 @@ const CreateService = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const api = createApiInstance();
 
     setSubmitStatus({ success: false, error: null });
 
@@ -57,17 +56,21 @@ const CreateService = () => {
           error: null,
         });
 
-        // Reset form
-        setServiceData({
-          title: "",
-          description: "",
-          price: 0,
-          discount: 0,
-          timeService: 0,
-        });
+        // Gọi callback nếu được truyền
+        if (onServiceCreated) {
+          onServiceCreated(response.data.id);
+        }
 
-        // Điều hướng về danh sách dịch vụ
-        navigate("/");
+        // Reset form nếu không được điều hướng
+        if (redirectToImageDisabled) {
+          setServiceData({
+            title: "",
+            description: "",
+            price: 0,
+            discount: 0,
+            timeService: 0,
+          });
+        }
       } else {
         throw new Error("Failed to create service");
       }
@@ -82,7 +85,7 @@ const CreateService = () => {
   };
 
   return (
-    <div className="bg-[#FDF5E6] min-h-screen flex items-center justify-center mt-10">
+    <div className="bg-[#FDF5E6]  flex items-center justify-center pb-20">
       <div className="w-full max-w-md bg-white shadow-lg rounded-xl p-8">
         <h2 className="text-2xl font-bold mb-6 text-center text-[#3E2723]">
           Tạo Dịch Vụ Mới
@@ -166,6 +169,7 @@ const CreateService = () => {
               placeholder="0"
               min="0"
               step="0.5"
+              max="5"
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#CD853F]"
             />

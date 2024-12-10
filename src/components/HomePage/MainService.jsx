@@ -18,45 +18,15 @@ const MainService = () => {
   const navigate = useNavigate();
   const [activeIndex, setActiveIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
-  const [apiServices, setApiServices] = useState([]); 
+  const [apiServices, setApiServices] = useState([]);
 
   const systemServices = [
-    {
-      id: 1,
-      name: "Cắt Tóc",
-      image: "assets/image/1.jpg",
-      path: "/haircutservice",
-    },
-    {
-      id: 2,
-      name: "Uốn Tóc",
-      image: "assets/image/2.jpg",
-      path: "/hairpermservice",
-    },
-    {
-      id: 3,
-      name: "Nhuộm Tóc",
-      image: "assets/image/3.jpg",
-      path: "/hairdyeingservice",
-    },
-    {
-      id: 4,
-      name: "Gội Massage",
-      image: "assets/image/3.jpg",
-      path: "/massageservice",
-    },
-    {
-      id: 5,
-      name: "Lấy Ráy Tai",
-      image: "assets/image/3.jpg",
-      path: "/earcleaningservice",
-    },
-    {
-      id: 6,
-      name: "Tất cả dịch vụ",
-      image: "assets/image/3.jpg",
-      path: "/all-service",
-    },
+    { id: 1, name: "Cắt Tóc", image: "assets/image/1.jpg", path: "/haircutservice" },
+    { id: 2, name: "Uốn Tóc", image: "assets/image/2.jpg", path: "/hairpermservice" },
+    { id: 3, name: "Nhuộm Tóc", image: "assets/image/3.jpg", path: "/hairdyeingservice" },
+    { id: 4, name: "Gội Massage", image: "assets/image/3.jpg", path: "/massageservice" },
+    { id: 5, name: "Lấy Ráy Tai", image: "assets/image/3.jpg", path: "/earcleaningservice" },
+    { id: 6, name: "Tất cả dịch vụ", image: "assets/image/3.jpg", path: "/all-service" },
   ];
 
   useEffect(() => {
@@ -64,16 +34,25 @@ const MainService = () => {
       const api = createApiInstance();
       try {
         const response = await api.get("/api/Service/getAll");
-        setApiServices(Array.isArray(response.data) ? response.data : []);
+        const filteredServices = Array.isArray(response.data)
+          ? response.data.filter((service) => service.serviceEnity.status === true)
+          : [];
+        setApiServices(
+          filteredServices.map((service) => ({
+            ...service.serviceEnity,
+            name: service.serviceEnity.title,
+            image: service.image,
+          }))
+        );
       } catch (error) {
         console.error("Failed to fetch services:", error.message);
-        setApiServices([]); 
+        setApiServices([]);
       }
     };
     fetchServices();
   }, []);
 
-  const allServices = [...systemServices, ...apiServices]; 
+  const allServices = [...systemServices, ...apiServices];
 
   const moveToIndex = (newIndex) => {
     if (isAnimating) return;
@@ -95,7 +74,7 @@ const MainService = () => {
   };
 
   const getVisibleCards = () => {
-    if (allServices.length === 0) return []; 
+    if (allServices.length === 0) return [];
     const cards = [];
     for (let i = -2; i <= 2; i++) {
       let index = activeIndex + i;
@@ -107,17 +86,10 @@ const MainService = () => {
   };
 
   const getCardStyle = (position) => {
-    const baseScale =
-      position === 0 ? 1.2 : position === -1 || position === 1 ? 0.9 : 0.7;
-    const baseOpacity =
-      position === 0 ? 1 : position === -1 || position === 1 ? 0.8 : 0.4;
-    const baseZIndex =
-      position === 0 ? 3 : position === -1 || position === 1 ? 2 : 1;
-    return {
-      scale: baseScale,
-      opacity: baseOpacity,
-      zIndex: baseZIndex,
-    };
+    const baseScale = position === 0 ? 1.2 : position === -1 || position === 1 ? 0.9 : 0.7;
+    const baseOpacity = position === 0 ? 1 : position === -1 || position === 1 ? 0.8 : 0.4;
+    const baseZIndex = position === 0 ? 3 : position === -1 || position === 1 ? 2 : 1;
+    return { scale: baseScale, opacity: baseOpacity, zIndex: baseZIndex };
   };
 
   return (

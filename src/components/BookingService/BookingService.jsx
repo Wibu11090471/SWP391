@@ -197,7 +197,7 @@ const BookingService = () => {
                       <h3 className="text-lg font-semibold">{service.title}</h3>
                       <div className="flex items-center">
                         <Clock className="w-4 h-4 mr-2" />
-                        <span>{service.timeService} giờ</span>
+                        <span>{service.timeService * 60} phút</span>
                       </div>
                       <p className="text-sm mt-2">{service.description}</p>
                       <div className="mt-2 text-[#8B4513] font-bold">

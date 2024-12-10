@@ -1,21 +1,38 @@
 import React, { useState } from "react";
-import DashboardSalonStaff from "./AppointmentManagement/DashboardSalonStaff";
-import PickingStylist from "./AppointmentManagement/PickingStylist";
-import PaymentCounter from "./AppointmentManagement/PaymentCounter";
+import CreateService from "./ServiceImageContainer/CreateService";
+import CreateImage from "./ServiceImageContainer/CreateImage";
 
-const SalonStaffDashboard = () => {
-  const [activeView, setActiveView] = useState("booking");
+const ServiceImageContainer = () => {
+  const [activeView, setActiveView] = useState("service");
+  const [serviceId, setServiceId] = useState(null);
+
+  const handleServiceCreated = (id) => {
+    setServiceId(id);
+    setActiveView("image");
+  };
+
+  const handleBackToService = () => {
+    setActiveView("service");
+  };
 
   const renderView = () => {
     switch (activeView) {
-      case "booking":
-        return <DashboardSalonStaff />;
-      case "stylist":
-        return <PickingStylist />;
-      case "payment":
-        return <PaymentCounter />;
+      case "service":
+        return (
+          <CreateService
+            onServiceCreated={handleServiceCreated}
+            redirectToImageDisabled={true}
+          />
+        );
+      case "image":
+        return (
+          <CreateImage
+            initialServiceId={serviceId}
+            onBackToService={handleBackToService}
+          />
+        );
       default:
-        return <DashboardSalonStaff />;
+        return null;
     }
   };
 
@@ -68,36 +85,26 @@ const SalonStaffDashboard = () => {
         <div className="sticky top-0 z-10 bg-white shadow-md">
           <div className="container mx-auto flex justify-center space-x-4 py-4">
             <button
-              onClick={() => setActiveView("booking")}
+              onClick={() => setActiveView("service")}
               className={`px-6 py-2 rounded-lg transition-all duration-300 ${
-                activeView === "booking"
+                activeView === "service"
                   ? "bg-[#8B4513] text-white"
                   : "bg-[#FFF0E1] text-[#5D4037] hover:bg-[#E6D2C1]"
               }`}
             >
-              Duyệt Đơn
+              Tạo Dịch Vụ
             </button>
 
             <button
-              onClick={() => setActiveView("stylist")}
+              onClick={() => setActiveView("image")}
               className={`px-6 py-2 rounded-lg transition-all duration-300 ${
-                activeView === "stylist"
+                activeView === "image"
                   ? "bg-[#8B4513] text-white"
                   : "bg-[#FFF0E1] text-[#5D4037] hover:bg-[#E6D2C1]"
               }`}
+              disabled={!serviceId}
             >
-              Chọn Stylist
-            </button>
-
-            <button
-              onClick={() => setActiveView("payment")}
-              className={`px-6 py-2 rounded-lg transition-all duration-300 ${
-                activeView === "payment"
-                  ? "bg-[#8B4513] text-white"
-                  : "bg-[#FFF0E1] text-[#5D4037] hover:bg-[#E6D2C1]"
-              }`}
-            >
-              Thanh Toán
+              Thêm Ảnh
             </button>
           </div>
         </div>
@@ -109,4 +116,4 @@ const SalonStaffDashboard = () => {
   );
 };
 
-export default SalonStaffDashboard;
+export default ServiceImageContainer;
