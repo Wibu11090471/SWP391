@@ -76,18 +76,18 @@ const Header = () => {
           />
         </div>
         <nav className="flex items-center space-x-6">
-          <a
-            href="#"
+          <Link
+            to="/"
             className="text-[#FDF5E6] hover:text-[#DEB887] font-medium"
           >
-            <Link to="/">Trang Chủ</Link>
-          </a>
-          <a
-            href="#"
+            Trang Chủ
+          </Link>
+          <Link
+            to="/introduction"
             className="text-[#FDF5E6] hover:text-[#DEB887] font-medium"
           >
-            <Link to="/">Giới thiệu</Link>
-          </a>
+            Giới thiệu
+          </Link>
           {user ? (
             <div className="relative">
               <button
@@ -105,7 +105,7 @@ const Header = () => {
                   <button
                     onClick={() => {
                       setIsDropdownOpen(false);
-                      navigate("/overview-management");
+                      navigate("/profile");
                     }}
                     className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   >

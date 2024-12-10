@@ -12,7 +12,7 @@ import HairDyeingServiceDetail from "./components/ServicePage/HairDyeingService/
 import HairPermServiceDetail from "./components/ServicePage/HairPermService/HairPermServiceDetail/HairPermServiceDetail";
 import BookingService from "./components/BookingService/BookingService";
 import NotFound from "./components/NotFound/NotFound";
-import CreateService from "./components/Dashboard/ServiceImageContainer/CreateService";
+import CreateService from "./components/Dashboard/ServiceImageContainer/CreateService";;
 import CreateImage from "./components/Dashboard/ServiceImageContainer/CreateImage";
 import ServiceImageContainer from "./components/Dashboard/ServiceImageContainer";
 import Notifications from "./components/Dashboard/Notifications";
@@ -30,6 +30,8 @@ import PickingStylish from "./components/Dashboard/AppointmentManagement/Picking
 import PaymentCounter from "./components/Dashboard/AppointmentManagement/PaymentCounter";
 import DashboardSalonStaff from "./components/Dashboard/AppointmentManagement/DashboardSalonStaff";
 import SalonStaffDashboard from "./components/Dashboard/SalonStaffDashboard";
+import AccountProfile from "./components/Profile/AccountProfile";
+
 const AppRoutes = () => {
   return (
     <Routes>
@@ -48,6 +50,7 @@ const AppRoutes = () => {
       <Route path="/perm-service/:id" element={<HairPermServiceDetail />} />
       <Route path="/booking-service" element={<BookingService />} />
       <Route path="/all-service" element={<AllService />} />
+      <Route path="/profile" element={<AccountProfile />} />
       <Route path="/pickingstylist" element={<PickingStylish />} />
       <Route path="/paymentcounter" element={<PaymentCounter />} />
       <Route path="/SelectedField" element={<SalonStaffDashboard />} />
