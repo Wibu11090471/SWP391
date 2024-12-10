@@ -1,171 +1,70 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../ui/card";
-import { 
-  AlertDialog, 
-  AlertDialogAction, 
-  AlertDialogCancel, 
-  AlertDialogContent, 
-  AlertDialogDescription, 
-  AlertDialogFooter, 
-  AlertDialogHeader, 
-  AlertDialogTitle 
-} from "../../../ui/alert-dialog";
 import { Button } from "../../../ui/button";
 import { Input } from "../../../ui/input";
 import { Search, UserPlus, Users } from "lucide-react";
 import theme from "../../../theme";
 import Layout from "../Layout";
 
-// Import the new components
-import StylishCard from "./components/StylishCard";
-import StylishDialog from "./components/StylishDialog";
+// Import the components
+import StylistCard from "./components/StylishCard";
+import StylistDialog from "./components/StylishDialog";
 
-const StylishManagement = () => {
+// Axios configuration
+const api = axios.create({
+  baseURL: "https://localhost:7081",
+  withCredentials: true,
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${localStorage.getItem("token")}`,
+  },
+});
+
+const StylistManagement = () => {
   const navigate = useNavigate();
-  const [stylish, setStylish] = useState([
-    {
-      id: 1,
-      name: "Nguyễn Văn A",
-      position: "Quản Lý",
-      phone: "0987654321",
-      email: "nguyenvana@example.com",
-      hireDate: "2023-01-15",
-      status: "active",
-      avatar: "",
-    },
-    {
-      id: 2,
-      name: "Trần Thị B",
-      position: "Quản Lý",
-      phone: "0123456789",
-      email: "tranthib@example.com",
-      hireDate: "2022-06-20",
-      status: "active",
-      avatar: "",
-    },
-  ]);
-
-  const [filteredStylish, setFilteredStylish] = useState(stylish);
+  const [stylist, setStylist] = useState([]);
+  const [filteredStylist, setFilteredStylist] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedStylish, setSelectedStylish] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isAddMode, setIsAddMode] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    position: "",
-    phone: "",
-    email: "",
-    hireDate: "",
-    status: "active",
-    avatar: "",
-  });
 
-  // Reset form to initial state
-  const resetForm = () => {
-    setFormData({
-      name: "",
-      position: "",
-      phone: "",
-      email: "",
-      hireDate: "",
-      status: "active",
-      avatar: "",
-    });
+  // Fetch stylist data from API
+  const fetchStylist = async () => {
+    try {
+      const response = await api.get("/api/User/getAllUsers");
+      const stylistData = response.data.filter(
+        (user) => user.role === "stylist"
+      );
+      setStylist(stylistData);
+      setFilteredStylist(stylistData);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error fetching stylist:", error);
+      setIsLoading(false);
+    }
   };
 
-  // Handle input changes in form
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
-
-  // New function to handle stylish detail navigation
-  const navigateToStylishDetail = (stylishId) => {
-    navigate(`/stylish-detail/${stylishId}`);
-  };
-
-  // Add new stylish member
-  const handleAddStylish = () => {
-    const newStylish = {
-      ...formData,
-      id: stylish.length > 0 ? Math.max(...stylish.map((s) => s.id)) + 1 : 1,
-    };
-    setStylish((prevStylish) => [...prevStylish, newStylish]);
-    setFilteredStylish((prevFiltered) => [...prevFiltered, newStylish]);
-    setIsDialogOpen(false);
-    resetForm();
-  };
-
-  // Update existing stylish member
-  const handleUpdateStylish = () => {
-    if (!selectedStylish) return;
-
-    setStylish((prevStylish) =>
-      prevStylish.map((member) =>
-        member.id === selectedStylish.id
-          ? { ...formData, id: selectedStylish.id }
-          : member
-      )
-    );
-    setFilteredStylish((prevFiltered) =>
-      prevFiltered.map((member) =>
-        member.id === selectedStylish.id
-          ? { ...formData, id: selectedStylish.id }
-          : member
-      )
-    );
-    setIsDialogOpen(false);
-    resetForm();
-  };
-
-  // Delete stylish member
-  const handleDeleteStylish = () => {
-    setStylish((prevStylish) =>
-      prevStylish.filter((member) => member.id !== selectedStylish.id)
-    );
-    setFilteredStylish((prevFiltered) =>
-      prevFiltered.filter((member) => member.id !== selectedStylish.id)
-    );
-    setIsDeleteDialogOpen(false);
-  };
-
-  // Open delete confirmation dialog
-  const openDeleteDialog = (stylishMember) => {
-    setSelectedStylish(stylishMember);
-    setIsDeleteDialogOpen(true);
-  };
-
-  // Open add dialog
-  const openAddDialog = () => {
-    resetForm();
-    setSelectedStylish(null);
-    setIsAddMode(true);
-    setIsDialogOpen(true);
-  };
-
-  // Open edit dialog
-  const openEditDialog = (stylishMember) => {
-    setSelectedStylish(stylishMember);
-    setFormData(stylishMember);
-    setIsAddMode(false);
-    setIsDialogOpen(true);
-  };
-
-  // Search/Filter stylish
   useEffect(() => {
-    const filtered = stylish.filter(
+    fetchStylist();
+  }, []);
+
+  // New function to handle stylist detail navigation
+  const navigateToStylistDetail = (stylistId) => {
+    navigate(`/stylist-detail/${stylistId}`);
+  };
+
+  // Search/Filter stylist
+  useEffect(() => {
+    const filtered = stylist.filter(
       (member) =>
-        member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        member.position.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        member.email.toLowerCase().includes(searchTerm.toLowerCase())
+        member.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        member.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        member.role.toLowerCase().includes(searchTerm.toLowerCase())
     );
-    setFilteredStylish(filtered);
-  }, [searchTerm, stylish]);
+    setFilteredStylist(filtered);
+  }, [searchTerm, stylist]);
 
   return (
     <Layout>
@@ -201,7 +100,7 @@ const StylishManagement = () => {
                     className="text-2xl font-bold"
                     style={{ color: theme.colors.text.primary }}
                   >
-                    Quản Lý Stylish Salon
+                    Quản Lý Stylist Salon
                   </CardTitle>
                 </div>
                 <p
@@ -218,7 +117,7 @@ const StylishManagement = () => {
                     style={{ color: theme.colors.primary.dark }}
                   />
                   <Input
-                    placeholder="Tìm kiếm Stylish..."
+                    placeholder="Tìm kiếm Stylist..."
                     className="pl-10 w-64 shadow-sm"
                     style={{
                       borderColor: theme.colors.primary.light,
@@ -229,103 +128,57 @@ const StylishManagement = () => {
                   />
                 </div>
                 <Button
-                  onClick={openAddDialog}
+                  onClick={() => setIsDialogOpen(true)}
                   style={{
                     backgroundColor: theme.colors.primary.DEFAULT,
                     color: theme.colors.background.primary,
                   }}
                 >
-                  <UserPlus className="mr-2" /> Thêm Stylish
+                  <UserPlus className="mr-2" /> Thêm Stylist
                 </Button>
               </div>
             </div>
           </CardHeader>
 
-          {/* Stylish List Section */}
+          {/* Stylist List Section */}
           <CardContent
             className="p-6"
             style={{ backgroundColor: theme.colors.background.primary }}
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredStylish.map((member) => (
-                <StylishCard
-                  key={member.id}
-                  member={member}
-                  navigateToStylishDetail={navigateToStylishDetail}
-                  openEditDialog={openEditDialog}
-                  openDeleteDialog={openDeleteDialog}
-                />
-              ))}
-            </div>
+            {isLoading ? (
+              <div className="text-center">Đang tải...</div>
+            ) : filteredStylist.length === 0 ? (
+              <div className="text-center">Không có nhân viên nào</div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredStylist.map((member) => (
+                  <StylistCard
+                    key={member.id || crypto.randomUUID()}
+                    member={{
+                      id: member.id,
+                      userName: member.userName || "Chưa cập nhật",
+                      fullName: member.fullName || "Không rõ",
+                      role: member.role || "Stylist",
+                      status: member.status || false,
+                      avatar: "",
+                    }}
+                    navigateToStylistDetail={navigateToStylistDetail}
+                  />
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
 
-        {/* Stylish Dialog Component */}
-        <StylishDialog
+        {/* Stylist Dialog */}
+        <StylistDialog
           isDialogOpen={isDialogOpen}
           setIsDialogOpen={setIsDialogOpen}
-          isAddMode={isAddMode}
-          formData={formData}
-          handleInputChange={handleInputChange}
-          handleAddStylish={handleAddStylish}
-          handleUpdateStylish={handleUpdateStylish}
+          onAddSuccess={fetchStylist}
         />
-
-        {/* AlertDialog cho việc xóa Stylish */}
-        <AlertDialog
-          open={isDeleteDialogOpen}
-          onOpenChange={setIsDeleteDialogOpen}
-        >
-          <AlertDialogContent
-            style={{
-              backgroundColor: theme.colors.background.primary,
-              borderColor: theme.colors.primary.light,
-            }}
-          >
-            <AlertDialogHeader>
-              <AlertDialogTitle
-                style={{
-                  color: theme.colors.text.primary,
-                }}
-              >
-                Xác Nhận Xóa Stylish
-              </AlertDialogTitle>
-              <AlertDialogDescription
-                style={{
-                  color: theme.colors.text.secondary,
-                }}
-              >
-                Bạn có chắc chắn muốn xóa Stylish{" "}
-                <span style={{ fontWeight: "bold" }}>
-                  {selectedStylish?.name}
-                </span>
-                ? Thao tác này không thể hoàn tác.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel
-                style={{
-                  borderColor: theme.colors.primary.light,
-                  color: theme.colors.text.primary,
-                }}
-              >
-                Hủy
-              </AlertDialogCancel>
-              <AlertDialogAction
-                style={{
-                  backgroundColor: theme.colors.secondary.dark,
-                  color: theme.colors.background.primary,
-                }}
-                onClick={handleDeleteStylish}
-              >
-                Xóa
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
       </div>
     </Layout>
   );
 };
 
-export default StylishManagement;
+export default StylistManagement;

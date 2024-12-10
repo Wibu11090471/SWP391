@@ -1,168 +1,65 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../ui/card";
-import { 
-  AlertDialog, 
-  AlertDialogAction, 
-  AlertDialogCancel, 
-  AlertDialogContent, 
-  AlertDialogDescription, 
-  AlertDialogFooter, 
-  AlertDialogHeader, 
-  AlertDialogTitle 
-} from "../../../ui/alert-dialog";
 import { Button } from "../../../ui/button";
 import { Input } from "../../../ui/input";
 import { Search, UserPlus, Users } from "lucide-react";
 import theme from "../../../theme";
 import Layout from "../Layout";
 
-// Import the new components
+// Import the components
 import StaffCard from "./components/StaffCard";
 import StaffDialog from "./components/StaffDialog";
 
+// Axios configuration
+const api = axios.create({
+  baseURL: "https://localhost:7081",
+  withCredentials: true,
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${localStorage.getItem("token")}`,
+  },
+});
+
 const StaffManagement = () => {
   const navigate = useNavigate();
-  const [staff, setStaff] = useState([
-    {
-      id: 1,
-      name: "Nguyễn Văn A",
-      position: "Quản Lý",
-      phone: "0987654321",
-      email: "nguyenvana@example.com",
-      hireDate: "2023-01-15",
-      status: "active",
-      avatar: "",
-    },
-    {
-      id: 2,
-      name: "Trần Thị B",
-      position: "Quản Lý",
-      phone: "0123456789",
-      email: "tranthib@example.com",
-      hireDate: "2022-06-20",
-      status: "active",
-      avatar: "",
-    },
-  ]);
-
-  const [filteredStaff, setFilteredStaff] = useState(staff);
+  const [staff, setStaff] = useState([]);
+  const [filteredStaff, setFilteredStaff] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedStaff, setSelectedStaff] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isAddMode, setIsAddMode] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    position: "",
-    phone: "",
-    email: "",
-    hireDate: "",
-    status: "active",
-    avatar: "",
-  });
 
-  // Reset form to initial state
-  const resetForm = () => {
-    setFormData({
-      name: "",
-      position: "",
-      phone: "",
-      email: "",
-      hireDate: "",
-      status: "active",
-      avatar: "",
-    });
+  // Fetch staff data from API
+  const fetchStaff = async () => {
+    try {
+      const response = await api.get("/api/User/getAllUsers");
+      const staffData = response.data.filter((user) => user.role === "staff");
+      setStaff(staffData);
+      setFilteredStaff(staffData);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error fetching staff:", error);
+      setIsLoading(false);
+    }
   };
 
-  // Handle input changes in form
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
+  useEffect(() => {
+    fetchStaff();
+  }, []);
 
   // New function to handle staff detail navigation
   const navigateToStaffDetail = (staffId) => {
     navigate(`/staff-detail/${staffId}`);
   };
 
-  // Add new staff member
-  const handleAddStaff = () => {
-    const newStaff = {
-      ...formData,
-      id: staff.length > 0 ? Math.max(...staff.map((s) => s.id)) + 1 : 1,
-    };
-    setStaff((prevStaff) => [...prevStaff, newStaff]);
-    setFilteredStaff((prevFiltered) => [...prevFiltered, newStaff]);
-    setIsDialogOpen(false);
-    resetForm();
-  };
-
-  // Update existing staff member
-  const handleUpdateStaff = () => {
-    if (!selectedStaff) return;
-
-    setStaff((prevStaff) =>
-      prevStaff.map((member) =>
-        member.id === selectedStaff.id
-          ? { ...formData, id: selectedStaff.id }
-          : member
-      )
-    );
-    setFilteredStaff((prevFiltered) =>
-      prevFiltered.map((member) =>
-        member.id === selectedStaff.id
-          ? { ...formData, id: selectedStaff.id }
-          : member
-      )
-    );
-    setIsDialogOpen(false);
-    resetForm();
-  };
-
-  // Delete staff member
-  const handleDeleteStaff = () => {
-    setStaff((prevStaff) =>
-      prevStaff.filter((member) => member.id !== selectedStaff.id)
-    );
-    setFilteredStaff((prevFiltered) =>
-      prevFiltered.filter((member) => member.id !== selectedStaff.id)
-    );
-    setIsDeleteDialogOpen(false);
-  };
-
-  // Open delete confirmation dialog
-  const openDeleteDialog = (staffMember) => {
-    setSelectedStaff(staffMember);
-    setIsDeleteDialogOpen(true);
-  };
-
-  // Open add dialog
-  const openAddDialog = () => {
-    resetForm();
-    setSelectedStaff(null);
-    setIsAddMode(true);
-    setIsDialogOpen(true);
-  };
-
-  // Open edit dialog
-  const openEditDialog = (staffMember) => {
-    setSelectedStaff(staffMember);
-    setFormData(staffMember);
-    setIsAddMode(false);
-    setIsDialogOpen(true);
-  };
-
   // Search/Filter staff
   useEffect(() => {
     const filtered = staff.filter(
       (member) =>
-        member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        member.position.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        member.email.toLowerCase().includes(searchTerm.toLowerCase())
+        member.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        member.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        member.role.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredStaff(filtered);
   }, [searchTerm, staff]);
@@ -229,7 +126,7 @@ const StaffManagement = () => {
                   />
                 </div>
                 <Button
-                  onClick={openAddDialog}
+                  onClick={() => setIsDialogOpen(true)}
                   style={{
                     backgroundColor: theme.colors.primary.DEFAULT,
                     color: theme.colors.background.primary,
@@ -246,83 +143,37 @@ const StaffManagement = () => {
             className="p-6"
             style={{ backgroundColor: theme.colors.background.primary }}
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredStaff.map((member) => (
-                <StaffCard
-                  key={member.id}
-                  member={member}
-                  navigateToStaffDetail={navigateToStaffDetail}
-                  openEditDialog={openEditDialog}
-                  openDeleteDialog={openDeleteDialog}
-                />
-              ))}
-            </div>
+            {isLoading ? (
+              <div className="text-center">Đang tải...</div>
+            ) : filteredStaff.length === 0 ? (
+              <div className="text-center">Không có nhân viên nào</div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredStaff.map((member) => (
+                  <StaffCard
+                    key={member.id || crypto.randomUUID()}
+                    member={{
+                      id: member.id,
+                      userName: member.userName || "Chưa cập nhật",
+                      fullName: member.fullName || "Không rõ",
+                      role: member.role || "Staff",
+                      status: member.status || false,
+                      avatar: "",
+                    }}
+                    navigateToStaffDetail={navigateToStaffDetail}
+                  />
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
 
-        {/* Staff Dialog Component */}
+        {/* Staff Dialog */}
         <StaffDialog
           isDialogOpen={isDialogOpen}
           setIsDialogOpen={setIsDialogOpen}
-          isAddMode={isAddMode}
-          formData={formData}
-          handleInputChange={handleInputChange}
-          handleAddStaff={handleAddStaff}
-          handleUpdateStaff={handleUpdateStaff}
+          onAddSuccess={fetchStaff}
         />
-
-        {/* AlertDialog cho việc xóa Staff */}
-        <AlertDialog
-          open={isDeleteDialogOpen}
-          onOpenChange={setIsDeleteDialogOpen}
-        >
-          <AlertDialogContent
-            style={{
-              backgroundColor: theme.colors.background.primary,
-              borderColor: theme.colors.primary.light,
-            }}
-          >
-            <AlertDialogHeader>
-              <AlertDialogTitle
-                style={{
-                  color: theme.colors.text.primary,
-                }}
-              >
-                Xác Nhận Xóa Staff
-              </AlertDialogTitle>
-              <AlertDialogDescription
-                style={{
-                  color: theme.colors.text.secondary,
-                }}
-              >
-                Bạn có chắc chắn muốn xóa Staff{" "}
-                <span style={{ fontWeight: "bold" }}>
-                  {selectedStaff?.name}
-                </span>
-                ? Thao tác này không thể hoàn tác.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel
-                style={{
-                  borderColor: theme.colors.primary.light,
-                  color: theme.colors.text.primary,
-                }}
-              >
-                Hủy
-              </AlertDialogCancel>
-              <AlertDialogAction
-                style={{
-                  backgroundColor: theme.colors.secondary.dark,
-                  color: theme.colors.background.primary,
-                }}
-                onClick={handleDeleteStaff}
-              >
-                Xóa
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
       </div>
     </Layout>
   );

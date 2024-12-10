@@ -1,357 +1,210 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Layout from "../../Layout";
 import { Card, CardContent, CardHeader } from "../../../../ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "../../../../ui/avatar";
-import { 
-  UserCircle2, 
-  Smartphone, 
-  AtSign, 
-  CalendarCheck, 
-  UserCheck, 
-  BookUser, 
-  Briefcase, 
-  CreditCard, 
-  Percent, 
-  Banknote, 
-  StarHalf, 
-  PieChart, 
-  Scissors, 
-  Paintbrush, 
-  TrendingUp 
+import {
+  UserCircle2,
+  Smartphone,
+  AtSign,
+  CalendarCheck,
+  UserCheck,
+  MapPin,
+  Gift,
+  UserIcon,
 } from "lucide-react";
 import { useParams } from "react-router-dom";
 import theme from "../../../../theme";
 import { Button } from "../../../../ui/button";
+import axios from "axios";
 
-const StylishDetailManagement = () => {
+const StylistDetailManagement = () => {
   const { id } = useParams();
   const [activeTab, setActiveTab] = useState("profile");
-  
-  const stylishData = {
-    1: {
-      id: 1,
-      name: "Nguyễn Văn A",
-      position: "Quản Lý",
-      phone: "0987654321",
-      email: "nguyenvana@example.com",
-      hireDate: "2023-01-15",
-      status: "active",
-      avatar: "",
-      bio: "Nhân viên quản lý với 3 năm kinh nghiệm tại salon",
-      specialization: "Cắt tóc nam, chăm sóc khách hàng",
-      salary: {
-        base: 15000000, // VND
-        commission: 0.1, // 10% commission
-        totalCommission: 5000000, // VND
-        workDays: 25,
-        performanceBonus: 2000000,
-      },
-      performance: {
-        totalCustomers: 150,
-        servicesSold: {
-          haircut: 80,
-          dyeing: 40,
-          perm: 30
-        },
-        customerSatisfaction: 4.8,
-        monthlyRevenue: 75000000 // VND
-      },
-      scheduleShift: {
-        morning: "7:00 - 12:00",
-        afternoon: "13:00 - 18:00"
-      }
+  const [stylist, setStylist] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Axios configuration
+  const api = axios.create({
+    baseURL: "https://localhost:7081",
+    withCredentials: true,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
-    2: {
-      id: 2,
-      name: "Trần Thị B",
-      position: "Nhân Viên Salon",
-      phone: "0123456789",
-      email: "tranthib@example.com",
-      hireDate: "2022-06-20",
-      status: "active",
-      avatar: "",
-      bio: "Chuyên viên tạo mẫu tóc với kỹ năng nhuộm và uốn cao cấp",
-      specialization: "Nhuộm tóc, uốn tóc chuyên nghiệp",
-      salary: {
-        base: 12000000, // VND
-        commission: 0.12, // 12% commission
-        totalCommission: 4500000, // VND
-        workDays: 22,
-        performanceBonus: 1800000,
-      },
-      performance: {
-        totalCustomers: 120,
-        servicesSold: {
-          haircut: 50,
-          dyeing: 60,
-          perm: 50
-        },
-        customerSatisfaction: 4.7,
-        monthlyRevenue: 65000000 // VND
-      },
-      scheduleShift: {
-        morning: "8:00 - 13:00",
-        afternoon: "14:00 - 19:00"
+  });
+
+  // Fetch stylist details
+  useEffect(() => {
+    const fetchStylistDetails = async () => {
+      try {
+        const response = await api.get("/api/User/getAllUsers");
+        const stylistMember = response.data.find(
+          (user) => user.id === parseInt(id) && user.role === "stylist"
+        );
+
+        if (stylistMember) {
+          setStylist(stylistMember);
+        } else {
+          setError(new Error("Nhân viên không tồn tại"));
+        }
+        setIsLoading(false);
+      } catch (err) {
+        console.error("Error fetching stylist details:", err);
+        setError(err);
+        setIsLoading(false);
       }
-    }
-  };
+    };
 
-  const stylish = stylishData[id];
+    fetchStylistDetails();
+  }, [id]);
 
-  if (!stylish) {
-    return <div>Nhân viên không tồn tại</div>;
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="flex justify-center items-center min-h-screen">
+          Đang tải...
+        </div>
+      </Layout>
+    );
+  }
+
+  if (error || !stylist) {
+    return (
+      <Layout>
+        <div className="flex justify-center items-center min-h-screen">
+          Không tìm thấy thông tin nhân viên
+        </div>
+      </Layout>
+    );
   }
 
   const renderProfileTab = () => (
     <div className="space-y-4">
       <div className="flex items-center">
-        <Smartphone 
-          className="mr-4" 
+        <AtSign
+          className="mr-4"
           style={{ color: theme.colors.primary.light }}
         />
-        <span>{stylish.phone}</span>
+        <span>Email: {stylist.email || "Chưa cập nhật"}</span>
       </div>
       <div className="flex items-center">
-        <AtSign 
-          className="mr-4" 
+        <MapPin
+          className="mr-4"
           style={{ color: theme.colors.primary.light }}
         />
-        <span>{stylish.email}</span>
+        <span>Địa chỉ: {stylist.address || "Chưa cập nhật"}</span>
       </div>
       <div className="flex items-center">
-        <CalendarCheck 
-          className="mr-4" 
-          style={{ color: theme.colors.primary.light }}
-        />
-        <span>Ngày bắt đầu: {stylish.hireDate}</span>
+        <Gift className="mr-4" style={{ color: theme.colors.primary.light }} />
+        <span>
+          Ngày sinh:{" "}
+          {stylist.dob
+            ? new Date(stylist.dob).toLocaleDateString("vi-VN")
+            : "Chưa cập nhật"}
+        </span>
       </div>
       <div className="flex items-center">
-        <UserCheck 
-          className="mr-4" 
+        <CalendarCheck
+          className="mr-4"
           style={{ color: theme.colors.primary.light }}
         />
         <span>
-          Trạng thái: {stylish.status === 'active' ? 'Đang làm' : 'Nghỉ việc'}
+          Ngày bắt đầu:{" "}
+          {stylist.createdOn
+            ? new Date(stylist.createdOn).toLocaleDateString("vi-VN")
+            : "Chưa cập nhật"}
         </span>
       </div>
-      
-      {stylish.bio && (
-        <div className="mt-4">
-          <h3 
-            className="font-semibold mb-2"
-            style={{ color: theme.colors.text.primary }}
-          >
-            <BookUser 
-              className="inline-block mr-2" 
-              style={{ color: theme.colors.primary.light }}
-            />
-            Giới thiệu
-          </h3>
-          <p>{stylish.bio}</p>
-        </div>
-      )}
-      
-      {stylish.specialization && (
-        <div className="mt-4">
-          <h3 
-            className="font-semibold mb-2"
-            style={{ color: theme.colors.text.primary }}
-          >
-            <Briefcase 
-              className="inline-block mr-2" 
-              style={{ color: theme.colors.primary.light }}
-            />
-            Chuyên môn
-          </h3>
-          <p>{stylish.specialization}</p>
-        </div>
-      )}
-    </div>
-  );
-
-  const renderSalaryTab = () => (
-    <div className="space-y-4">
       <div className="flex items-center">
-        <CreditCard 
-          className="mr-4" 
+        <UserCheck
+          className="mr-4"
           style={{ color: theme.colors.primary.light }}
         />
-        <span>Lương cơ bản: {stylish.salary.base.toLocaleString()} VND</span>
+        <span>
+          Trạng thái: {stylist.status ? "Đang làm việc" : "Nghỉ việc"}
+        </span>
       </div>
       <div className="flex items-center">
-        <Percent 
-          className="mr-4" 
+        <UserIcon
+          className="mr-4"
           style={{ color: theme.colors.primary.light }}
         />
-        <span>Hoa hồng: {stylish.salary.commission * 100}%</span>
-      </div>
-      <div className="flex items-center">
-        <CalendarCheck 
-          className="mr-4" 
-          style={{ color: theme.colors.primary.light }}
-        />
-        <span>Số ngày làm việc: {stylish.salary.workDays} ngày</span>
-      </div>
-      <div className="flex items-center">
-        <TrendingUp 
-          className="mr-4" 
-          style={{ color: theme.colors.primary.light }}
-        />
-        <span>Tổng hoa hồng: {stylish.salary.totalCommission.toLocaleString()} VND</span>
-      </div>
-      <div className="flex items-center">
-        <Banknote 
-          className="mr-4" 
-          style={{ color: theme.colors.primary.light }}
-        />
-        <span>Thưởng hiệu suất: {stylish.salary.performanceBonus.toLocaleString()} VND</span>
-      </div>
-    </div>
-  );
-
-  const renderPerformanceTab = () => (
-    <div className="space-y-4">
-      <div className="flex items-center">
-        <UserCircle2 
-          className="mr-4" 
-          style={{ color: theme.colors.primary.light }}
-        />
-        <span>Tổng số khách hàng: {stylish.performance.totalCustomers}</span>
-      </div>
-      <div className="flex items-center">
-        <PieChart 
-          className="mr-4" 
-          style={{ color: theme.colors.primary.light }}
-        />
-        <span>Doanh thu tháng: {stylish.performance.monthlyRevenue.toLocaleString()} VND</span>
-      </div>
-      <div>
-        <h3 
-          className="font-semibold mb-2"
-          style={{ color: theme.colors.text.primary }}
-        >
-          Dịch vụ đã bán
-        </h3>
-        <div className="grid grid-cols-3 gap-2">
-          <div className="flex items-center">
-            <Scissors 
-              className="mr-2" 
-              size={16} 
-              style={{ color: theme.colors.primary.light }}
-            />
-            Cắt tóc: {stylish.performance.servicesSold.haircut}
-          </div>
-          <div className="flex items-center">
-            <Paintbrush 
-              className="mr-2" 
-              size={16} 
-              style={{ color: theme.colors.primary.light }}
-            />
-            Nhuộm tóc: {stylish.performance.servicesSold.dyeing}
-          </div>
-          <div className="flex items-center">
-            <Paintbrush 
-              className="mr-2" 
-              size={16} 
-              style={{ color: theme.colors.primary.light }}
-            />
-            Uốn tóc: {stylish.performance.servicesSold.perm}
-          </div>
-        </div>
-      </div>
-      <div className="flex items-center">
-        <StarHalf 
-          className="mr-4" 
-          style={{ color: theme.colors.primary.light }}
-        />
-        <span>Đánh giá khách hàng: {stylish.performance.customerSatisfaction}/5</span>
+        <span>Tên đăng nhập: {stylist.userName || "Chưa cập nhật"}</span>
       </div>
     </div>
   );
 
   return (
     <Layout>
-      <div 
+      <div
         className="min-h-screen pt-24 pl-5 pr-5"
         style={{
           backgroundColor: theme.colors.background.primary,
-          color: theme.colors.text.primary
+          color: theme.colors.text.primary,
         }}
       >
-        <Card 
+        <Card
           className="max-w-3xl mx-auto shadow-xl"
           style={{
             backgroundColor: theme.colors.background.secondary,
-            borderColor: theme.colors.primary.DEFAULT
+            borderColor: theme.colors.primary.DEFAULT,
           }}
         >
-          <CardHeader 
+          <CardHeader
             className="border-b flex items-center space-x-4 p-6"
             style={{
               backgroundColor: theme.colors.secondary.light,
-              borderBottomColor: theme.colors.primary.dark
+              borderBottomColor: theme.colors.primary.dark,
             }}
           >
             <Avatar className="h-24 w-24">
-              <AvatarImage src={stylish.avatar} />
+              <AvatarImage src="" />
               <AvatarFallback
                 style={{
                   backgroundColor: theme.colors.primary.light,
                   color: theme.colors.background.primary,
                 }}
               >
-                {stylish.name.charAt(0).toUpperCase()}
+                {stylist.fullName.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div>
-              <h2 
+              <h2
                 className="text-2xl font-bold"
                 style={{ color: theme.colors.text.primary }}
               >
-                {stylish.name}
+                {stylist.fullName}
               </h2>
-              <p 
-                className="text-sm"
+              <p
+                className="text-sm flex items-center"
                 style={{ color: theme.colors.text.secondary }}
               >
-                {stylish.position}
+                <UserIcon
+                  className="mr-2"
+                  size={16}
+                  style={{ color: theme.colors.primary.light }}
+                />
+                {stylist.role || "Chưa xác định"}
               </p>
             </div>
           </CardHeader>
-          
+
           <div className="flex border-b">
-            <Button 
+            <Button
               variant={activeTab === "profile" ? "default" : "ghost"}
               onClick={() => setActiveTab("profile")}
               className="w-full"
             >
-              Thông Tin
-            </Button>
-            <Button 
-              variant={activeTab === "salary" ? "default" : "ghost"}
-              onClick={() => setActiveTab("salary")}
-              className="w-full"
-            >
-              Lương
-            </Button>
-            <Button 
-              variant={activeTab === "performance" ? "default" : "ghost"}
-              onClick={() => setActiveTab("performance")}
-              className="w-full"
-            >
-              Hiệu Suất
+              Thông Tin Cá Nhân
             </Button>
           </div>
-          
-          <CardContent className="p-6">
-            {activeTab === "profile" && renderProfileTab()}
-            {activeTab === "salary" && renderSalaryTab()}
-            {activeTab === "performance" && renderPerformanceTab()}
-          </CardContent>
+
+          <CardContent className="p-6">{renderProfileTab()}</CardContent>
         </Card>
       </div>
     </Layout>
   );
 };
 
-export default StylishDetailManagement;
+export default StylistDetailManagement;
