@@ -46,7 +46,6 @@ const OverviewDashboard = () => {
       const filteredUsers = response.data.filter(
         (user) => user.role === "user"
       );
-      console.log("Filtered Users:", filteredUsers);
       setUserData({
         staff: response.data.filter((user) => user.role === "staff"),
         stylist: response.data.filter((user) => user.role === "stylist"),
