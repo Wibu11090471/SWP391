@@ -4,22 +4,19 @@ import axios from "axios";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../ui/card";
 import { Button } from "../../../ui/button";
 import { Input } from "../../../ui/input";
-import { Search, UserPlus, Users, RefreshCw } from "lucide-react";
+import { Search, Users, RefreshCw } from "lucide-react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogTrigger,
-  DialogClose, // Adding DialogClose as an alternative
 } from "../../../ui/dialog";
 import theme from "../../../theme";
 import Layout from "../Layout";
 
 // Import the components
-import StaffCard from "./components/StaffCard";
-import StaffDialog from "./components/StaffDialog";
+import StylistCard from "./components/StylistCard";
 
 // Axios configuration
 const api = axios.create({
@@ -31,68 +28,68 @@ const api = axios.create({
   },
 });
 
-const StaffManagement = () => {
+const StylistManagement = () => {
   const navigate = useNavigate();
-  const [staff, setStaff] = useState([]);
-  const [filteredStaff, setFilteredStaff] = useState([]);
+  const [stylist, setStylist] = useState([]);
+  const [filteredStylist, setFilteredStylist] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   // New state for role update confirmation
-  const [selectedStaffForRoleUpdate, setSelectedStaffForRoleUpdate] =
+  const [selectedStylistForRoleUpdate, setSelectedStylistForRoleUpdate] =
     useState(null);
   const [isRoleUpdateDialogOpen, setIsRoleUpdateDialogOpen] = useState(false);
 
-  // Fetch staff data from API
-  const fetchStaff = async () => {
+  // Fetch stylist data from API
+  const fetchStylist = async () => {
     try {
       const response = await api.get("/api/User/getAllUsers");
-      const staffData = response.data.filter((user) => user.role === "staff");
-      setStaff(staffData);
-      setFilteredStaff(staffData);
+      const stylistData = response.data.filter(
+        (user) => user.role === "stylist"
+      );
+      setStylist(stylistData);
+      setFilteredStylist(stylistData);
       setIsLoading(false);
     } catch (error) {
-      console.error("Error fetching staff:", error);
+      console.error("Error fetching stylist:", error);
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchStaff();
+    fetchStylist();
   }, []);
 
-  // New function to handle staff role update
-  const handleUpdateStaffRole = async () => {
-    if (!selectedStaffForRoleUpdate) return;
+  // New function to handle stylist role update
+  const handleUpdateStylistRole = async () => {
+    if (!selectedStylistForRoleUpdate) return;
 
     try {
-      // Update user role to stylist (roleId: 2)
+      // Update user role to staff (roleId: 1)
       await api.put("/api/User/updateUserRole", {
-        userId: selectedStaffForRoleUpdate.id,
-        roleId: 2, // Stylist role
+        userId: selectedStylistForRoleUpdate.id,
+        roleId: 3, // Staff role
       });
 
-      // Refresh staff list
-      await fetchStaff();
+      // Refresh stylist list
+      await fetchStylist();
 
       // Close dialog and reset selection
       setIsRoleUpdateDialogOpen(false);
-      setSelectedStaffForRoleUpdate(null);
+      setSelectedStylistForRoleUpdate(null);
     } catch (error) {
-      console.error("Error updating staff role:", error);
+      console.error("Error updating stylist role:", error);
       // Optionally, add error handling toast or notification
       alert("Không thể thay đổi vai trò. Vui lòng thử lại.");
     }
   };
 
-  // New function to handle staff detail navigation
-  const navigateToStaffDetail = (staffId) => {
-    navigate(`/staff-detail/${staffId}`);
+  // New function to handle stylist detail navigation
+  const navigateToStylistDetail = (stylistId) => {
+    navigate(`/stylist-detail/${stylistId}`);
   };
 
-  // Search/Filter staff
-  // Search/Filter staff
+  // Search/Filter stylist
   const removeAccents = (str) =>
     str
       .normalize("NFD") // Chuyển đổi sang dạng Unicode tổ hợp
@@ -101,15 +98,15 @@ const StaffManagement = () => {
 
   // Search/Filter staff
   useEffect(() => {
-    const filtered = staff.filter((member) =>
+    const filtered = stylist.filter((member) =>
       removeAccents(member.fullName).includes(removeAccents(searchTerm))
     );
-    setFilteredStaff(filtered);
-  }, [searchTerm, staff]);
+    setFilteredStylist(filtered);
+  }, [searchTerm, stylist]);
 
   // Function to open role update confirmation dialog
   const openRoleUpdateConfirmation = (member) => {
-    setSelectedStaffForRoleUpdate(member);
+    setSelectedStylistForRoleUpdate(member);
     setIsRoleUpdateDialogOpen(true);
   };
 
@@ -147,14 +144,14 @@ const StaffManagement = () => {
                     className="text-2xl font-bold"
                     style={{ color: theme.colors.text.primary }}
                   >
-                    Quản Lý Staff Salon
+                    Quản Lý Stylist Salon
                   </CardTitle>
                 </div>
                 <p
                   className="text-sm ml-12"
                   style={{ color: theme.colors.text.secondary }}
                 >
-                  Quản lý thông tin và nhân sự của salon
+                  Quản lý thông tin nhân sự của salon
                 </p>
               </div>
               <div className="flex items-center space-x-4">
@@ -164,7 +161,7 @@ const StaffManagement = () => {
                     style={{ color: theme.colors.primary.dark }}
                   />
                   <Input
-                    placeholder="Tìm kiếm Staff..."
+                    placeholder="Tìm kiếm Stylist..."
                     className="pl-10 w-64 shadow-sm"
                     style={{
                       borderColor: theme.colors.primary.light,
@@ -174,45 +171,36 @@ const StaffManagement = () => {
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
-                <Button
-                  onClick={() => setIsDialogOpen(true)}
-                  style={{
-                    backgroundColor: theme.colors.primary.DEFAULT,
-                    color: theme.colors.background.primary,
-                  }}
-                >
-                  <UserPlus className="mr-2" /> Thêm Staff
-                </Button>
               </div>
             </div>
           </CardHeader>
 
-          {/* Staff List Section */}
+          {/* Stylist List Section */}
           <CardContent
             className="p-6"
             style={{ backgroundColor: theme.colors.background.primary }}
           >
             {isLoading ? (
               <div className="text-center">Đang tải...</div>
-            ) : filteredStaff.length === 0 ? (
+            ) : filteredStylist.length === 0 ? (
               <div className="text-center">Không có nhân viên nào</div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredStaff.map((member) => (
+                {filteredStylist.map((member) => (
                   <div
                     key={member.id || crypto.randomUUID()}
                     className="relative"
                   >
-                    <StaffCard
+                    <StylistCard
                       member={{
                         id: member.id,
                         userName: member.email || "Chưa cập nhật",
                         fullName: member.fullName || "Không rõ",
-                        role: member.role || "Staff",
+                        role: member.role || "Stylist",
                         status: member.status || false,
                         avatar: "",
                       }}
-                      navigateToStaffDetail={navigateToStaffDetail}
+                      navigateToStylistDetail={navigateToStylistDetail}
                     />
                     <Button
                       variant="outline"
@@ -229,13 +217,6 @@ const StaffManagement = () => {
           </CardContent>
         </Card>
 
-        {/* Staff Dialog */}
-        <StaffDialog
-          isDialogOpen={isDialogOpen}
-          setIsDialogOpen={setIsDialogOpen}
-          onAddSuccess={fetchStaff}
-        />
-
         {/* Role Update Confirmation Dialog */}
         <Dialog
           open={isRoleUpdateDialogOpen}
@@ -246,8 +227,8 @@ const StaffManagement = () => {
               <DialogTitle>Xác Nhận Chuyển Vai Trò</DialogTitle>
               <DialogDescription>
                 Bạn có chắc chắn muốn chuyển vai trò của nhân viên{" "}
-                <strong>{selectedStaffForRoleUpdate?.fullName}</strong> từ Staff
-                sang Stylist không?
+                <strong>{selectedStylistForRoleUpdate?.fullName}</strong> từ
+                Stylist sang Staff không?
               </DialogDescription>
             </DialogHeader>
             <div className="flex justify-end space-x-2 mt-4">
@@ -258,7 +239,7 @@ const StaffManagement = () => {
                 Hủy
               </Button>
               <Button
-                onClick={handleUpdateStaffRole}
+                onClick={handleUpdateStylistRole}
                 style={{
                   backgroundColor: theme.colors.primary.DEFAULT,
                   color: theme.colors.background.primary,
@@ -274,4 +255,4 @@ const StaffManagement = () => {
   );
 };
 
-export default StaffManagement;
+export default StylistManagement;

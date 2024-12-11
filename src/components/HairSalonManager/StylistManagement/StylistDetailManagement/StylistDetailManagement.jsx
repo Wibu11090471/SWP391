@@ -17,10 +17,10 @@ import theme from "../../../../theme";
 import { Button } from "../../../../ui/button";
 import axios from "axios";
 
-const StaffDetailManagement = () => {
+const StylistDetailManagement = () => {
   const { id } = useParams();
   const [activeTab, setActiveTab] = useState("profile");
-  const [staff, setStaff] = useState(null);
+  const [stylist, setStylist] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -34,29 +34,29 @@ const StaffDetailManagement = () => {
     },
   });
 
-  // Fetch staff details
+  // Fetch stylist details
   useEffect(() => {
-    const fetchStaffDetails = async () => {
+    const fetchStylistDetails = async () => {
       try {
         const response = await api.get("/api/User/getAllUsers");
-        const staffMember = response.data.find(
-          (user) => user.id === parseInt(id) && user.role === "staff"
+        const stylistMember = response.data.find(
+          (user) => user.id === parseInt(id) && user.role === "stylist"
         );
 
-        if (staffMember) {
-          setStaff(staffMember);
+        if (stylistMember) {
+          setStylist(stylistMember);
         } else {
           setError(new Error("Nhân viên không tồn tại"));
         }
         setIsLoading(false);
       } catch (err) {
-        console.error("Error fetching staff details:", err);
+        console.error("Error fetching stylist details:", err);
         setError(err);
         setIsLoading(false);
       }
     };
 
-    fetchStaffDetails();
+    fetchStylistDetails();
   }, [id]);
 
   if (isLoading) {
@@ -69,7 +69,7 @@ const StaffDetailManagement = () => {
     );
   }
 
-  if (error || !staff) {
+  if (error || !stylist) {
     return (
       <Layout>
         <div className="flex justify-center items-center min-h-screen">
@@ -87,7 +87,7 @@ const StaffDetailManagement = () => {
           style={{ color: theme.colors.primary.light }}
         />
         <span className="font-medium">Email:</span>
-        <span className="ml-2">{staff.email || "Chưa cập nhật"}</span>
+        <span className="ml-2">{stylist.email || "Chưa cập nhật"}</span>
       </div>
       <div className="flex items-center">
         <MapPin
@@ -95,7 +95,7 @@ const StaffDetailManagement = () => {
           style={{ color: theme.colors.primary.light }}
         />
         <span className="font-medium">Địa chỉ:</span>
-        <span className="ml-2">{staff.address || "Chưa cập nhật"}</span>
+        <span className="ml-2">{stylist.address || "Chưa cập nhật"}</span>
       </div>
       <div className="flex items-center">
         <Gift
@@ -104,8 +104,8 @@ const StaffDetailManagement = () => {
         />
         <span className="font-medium">Ngày sinh:</span>
         <span className="ml-2">
-          {staff.dob
-            ? new Date(staff.dob).toLocaleDateString("vi-VN")
+          {stylist.dob
+            ? new Date(stylist.dob).toLocaleDateString("vi-VN")
             : "Chưa cập nhật"}
         </span>
       </div>
@@ -116,8 +116,8 @@ const StaffDetailManagement = () => {
         />
         <span className="font-medium">Ngày bắt đầu:</span>
         <span className="ml-2">
-          {staff.createdOn
-            ? new Date(staff.createdOn).toLocaleDateString("vi-VN")
+          {stylist.createdOn
+            ? new Date(stylist.createdOn).toLocaleDateString("vi-VN")
             : "Chưa cập nhật"}
         </span>
       </div>
@@ -128,7 +128,7 @@ const StaffDetailManagement = () => {
         />
         <span className="font-medium">Trạng thái:</span>
         <span className="ml-2">
-          {staff.status ? "Đang hoạt động" : "Ngưng hoạt động"}
+          {stylist.status ? "Đang hoạt động" : "Ngưng hoạt động"}
         </span>
       </div>
       <div className="flex items-center">
@@ -137,7 +137,7 @@ const StaffDetailManagement = () => {
           style={{ color: theme.colors.primary.light }}
         />
         <span className="font-medium">Tên đăng nhập:</span>
-        <span className="ml-2">{staff.userName || "Chưa cập nhật"}</span>
+        <span className="ml-2">{stylist.userName || "Chưa cập nhật"}</span>
       </div>
     </div>
   );
@@ -173,7 +173,7 @@ const StaffDetailManagement = () => {
                   color: theme.colors.background.primary,
                 }}
               >
-                {staff.fullName.charAt(0).toUpperCase()}
+                {stylist.fullName.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div className="ml-6">
@@ -181,7 +181,7 @@ const StaffDetailManagement = () => {
                 className="text-2xl font-bold"
                 style={{ color: theme.colors.text.primary }}
               >
-                {staff.fullName}
+                {stylist.fullName}
               </h2>
               <p
                 className="text-sm mt-2 flex items-center"
@@ -192,7 +192,7 @@ const StaffDetailManagement = () => {
                   size={16}
                   style={{ color: theme.colors.primary.light }}
                 />
-                {staff.role || "Chưa xác định"}
+                {stylist.role || "Chưa xác định"}
               </p>
             </div>
           </CardHeader>
@@ -219,4 +219,4 @@ const StaffDetailManagement = () => {
   );
 };
 
-export default StaffDetailManagement;
+export default StylistDetailManagement;

@@ -5,17 +5,17 @@ import { Avatar, AvatarImage, AvatarFallback } from "../../../../ui/avatar";
 import { CircleUserRound, AtSign, CheckCircle, XCircle } from "lucide-react";
 import theme from "../../../../theme";
 
-const StaffCard = ({ member = {}, navigateToStaffDetail }) => {
+const StylistCard = ({ member = {}, navigateToStylistDetail }) => {
   const {
     id = "",
     fullName = "Không rõ",
     userName = "",
-    role = "Staff",
+    role = "Stylist",
     status = false,
     avatar = "",
   } = member;
 
-  const handleCardClick = () => navigateToStaffDetail(id);
+  const handleCardClick = () => navigateToStylistDetail(id);
 
   return (
     <Card
@@ -111,4 +111,4 @@ const StaffCard = ({ member = {}, navigateToStaffDetail }) => {
   );
 };
 
-export default StaffCard;
+export default StylistCard;
