@@ -25,6 +25,9 @@ const StaffDialog = ({ isDialogOpen, setIsDialogOpen, onAddSuccess }) => {
     address: "",
   });
 
+  // State to track errors
+  const [errors, setErrors] = useState({});
+
   // Axios configuration
   const api = axios.create({
     baseURL: "https://localhost:7081",
@@ -44,31 +47,48 @@ const StaffDialog = ({ isDialogOpen, setIsDialogOpen, onAddSuccess }) => {
     }));
   };
 
+  // Validate form fields
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.fullName) {
+      newErrors.fullName = "Tên đầy đủ là bắt buộc.";
+    } else if (!/^[\p{L}\s]+$/u.test(formData.fullName)) {
+      newErrors.fullName = "Tên không hợp lệ.";
+    }
+    if (!formData.userName) {
+      newErrors.userName = "Tên đăng nhập là bắt buộc.";
+    } else if (formData.userName.includes(" ")) {
+      newErrors.userName = "Tên đăng nhập không được chứa khoảng trắng.";
+    }
+    if (!formData.password) {
+      newErrors.password = "Mật khẩu là bắt buộc.";
+    } else if (formData.password.length < 6) {
+      newErrors.password = "Mật khẩu phải có ít nhất 6 ký tự.";
+    }
+    if (!formData.email) {
+      newErrors.email = "Email là bắt buộc.";
+    } else if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(formData.email)) {
+      newErrors.email = "Email không hợp lệ.";
+    }
+    if (!formData.dob) newErrors.dob = "Ngày sinh là bắt buộc.";
+    if (!formData.address) newErrors.address = "Địa chỉ là bắt buộc.";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0; // Return true if no errors
+  };
+
   // Handle staff creation
   const handleAddStaff = async () => {
-    try {
-      // Validate required fields
-      if (
-        !formData.fullName ||
-        !formData.userName ||
-        !formData.password ||
-        !formData.email
-      ) {
-        alert("Vui lòng điền đầy đủ thông tin.");
-        return;
-      }
+    if (!validateForm()) return; // Stop if validation fails
 
-      // Prepare data for API
+    try {
       const data = {
         ...formData,
         dob: formData.dob ? new Date(formData.dob).toISOString() : null,
       };
-
-      // Call API to create new staff
       await api.post("/api/User/register-staff", data);
       alert("Thêm mới nhân viên thành công!");
-
-      // Close dialog and refresh list
       setIsDialogOpen(false);
       onAddSuccess();
     } catch (error) {
@@ -87,18 +107,10 @@ const StaffDialog = ({ isDialogOpen, setIsDialogOpen, onAddSuccess }) => {
         }}
       >
         <DialogHeader>
-          <DialogTitle
-            style={{
-              color: theme.colors.text.primary,
-            }}
-          >
+          <DialogTitle style={{ color: theme.colors.text.primary }}>
             Thêm Nhân Viên Mới
           </DialogTitle>
-          <DialogDescription
-            style={{
-              color: theme.colors.text.secondary,
-            }}
-          >
+          <DialogDescription style={{ color: theme.colors.text.secondary }}>
             Nhập thông tin cho nhân viên mới
           </DialogDescription>
         </DialogHeader>
@@ -112,18 +124,22 @@ const StaffDialog = ({ isDialogOpen, setIsDialogOpen, onAddSuccess }) => {
             >
               Tên Đầy Đủ
             </Label>
-            <Input
-              id="fullName"
-              name="fullName"
-              value={formData.fullName}
-              onChange={handleInputChange}
-              className="col-span-3"
-              placeholder="Nhập tên đầy đủ"
-              style={{
-                borderColor: theme.colors.primary.light,
-                backgroundColor: theme.colors.background.primary,
-              }}
-            />
+            <div className="col-span-3">
+              <Input
+                id="fullName"
+                name="fullName"
+                value={formData.fullName}
+                onChange={handleInputChange}
+                placeholder="Nhập tên đầy đủ"
+                style={{
+                  borderColor: theme.colors.primary.light,
+                  backgroundColor: theme.colors.background.primary,
+                }}
+              />
+              {errors.fullName && (
+                <p className="text-red-500 text-sm mt-1">{errors.fullName}</p>
+              )}
+            </div>
           </div>
 
           {/* Username Input */}
@@ -135,18 +151,22 @@ const StaffDialog = ({ isDialogOpen, setIsDialogOpen, onAddSuccess }) => {
             >
               Tên Đăng Nhập
             </Label>
-            <Input
-              id="userName"
-              name="userName"
-              value={formData.userName}
-              onChange={handleInputChange}
-              className="col-span-3"
-              placeholder="Nhập tên đăng nhập"
-              style={{
-                borderColor: theme.colors.primary.light,
-                backgroundColor: theme.colors.background.primary,
-              }}
-            />
+            <div className="col-span-3">
+              <Input
+                id="userName"
+                name="userName"
+                value={formData.userName}
+                onChange={handleInputChange}
+                placeholder="Nhập tên đăng nhập"
+                style={{
+                  borderColor: theme.colors.primary.light,
+                  backgroundColor: theme.colors.background.primary,
+                }}
+              />
+              {errors.userName && (
+                <p className="text-red-500 text-sm mt-1">{errors.userName}</p>
+              )}
+            </div>
           </div>
 
           {/* Password Input */}
@@ -158,19 +178,23 @@ const StaffDialog = ({ isDialogOpen, setIsDialogOpen, onAddSuccess }) => {
             >
               Mật Khẩu
             </Label>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={handleInputChange}
-              className="col-span-3"
-              placeholder="Nhập mật khẩu"
-              style={{
-                borderColor: theme.colors.primary.light,
-                backgroundColor: theme.colors.background.primary,
-              }}
-            />
+            <div className="col-span-3">
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                value={formData.password}
+                onChange={handleInputChange}
+                placeholder="Nhập mật khẩu"
+                style={{
+                  borderColor: theme.colors.primary.light,
+                  backgroundColor: theme.colors.background.primary,
+                }}
+              />
+              {errors.password && (
+                <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+              )}
+            </div>
           </div>
 
           {/* Email Input */}
@@ -182,19 +206,23 @@ const StaffDialog = ({ isDialogOpen, setIsDialogOpen, onAddSuccess }) => {
             >
               Email
             </Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              className="col-span-3"
-              placeholder="Nhập email"
-              style={{
-                borderColor: theme.colors.primary.light,
-                backgroundColor: theme.colors.background.primary,
-              }}
-            />
+            <div className="col-span-3">
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                placeholder="Nhập email"
+                style={{
+                  borderColor: theme.colors.primary.light,
+                  backgroundColor: theme.colors.background.primary,
+                }}
+              />
+              {errors.email && (
+                <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+              )}
+            </div>
           </div>
 
           {/* Gender Input */}
@@ -232,18 +260,22 @@ const StaffDialog = ({ isDialogOpen, setIsDialogOpen, onAddSuccess }) => {
             >
               Ngày Sinh
             </Label>
-            <Input
-              id="dob"
-              name="dob"
-              type="date"
-              value={formData.dob}
-              onChange={handleInputChange}
-              className="col-span-3"
-              style={{
-                borderColor: theme.colors.primary.light,
-                backgroundColor: theme.colors.background.primary,
-              }}
-            />
+            <div className="col-span-3">
+              <Input
+                id="dob"
+                name="dob"
+                type="date"
+                value={formData.dob}
+                onChange={handleInputChange}
+                style={{
+                  borderColor: theme.colors.primary.light,
+                  backgroundColor: theme.colors.background.primary,
+                }}
+              />
+              {errors.dob && (
+                <p className="text-red-500 text-sm mt-1">{errors.dob}</p>
+              )}
+            </div>
           </div>
 
           {/* Address Input */}
@@ -255,18 +287,22 @@ const StaffDialog = ({ isDialogOpen, setIsDialogOpen, onAddSuccess }) => {
             >
               Địa Chỉ
             </Label>
-            <Input
-              id="address"
-              name="address"
-              value={formData.address}
-              onChange={handleInputChange}
-              className="col-span-3"
-              placeholder="Nhập địa chỉ"
-              style={{
-                borderColor: theme.colors.primary.light,
-                backgroundColor: theme.colors.background.primary,
-              }}
-            />
+            <div className="col-span-3">
+              <Input
+                id="address"
+                name="address"
+                value={formData.address}
+                onChange={handleInputChange}
+                placeholder="Nhập địa chỉ"
+                style={{
+                  borderColor: theme.colors.primary.light,
+                  backgroundColor: theme.colors.background.primary,
+                }}
+              />
+              {errors.address && (
+                <p className="text-red-500 text-sm mt-1">{errors.address}</p>
+              )}
+            </div>
           </div>
         </div>
         <div className="flex justify-end space-x-2">
