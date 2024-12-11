@@ -16,10 +16,10 @@ const Sidebar = ({ topOffset = 80, bottomOffset = 0, className = "" }) => {
       route: "/overview-management",
     },
     {
-      id: "revenue",
-      label: "Revenue",
+      id: "service",
+      label: "Service",
       icon: DollarSign,
-      route: "/revenue-management",
+      route: "/service-management",
     },
     {
       id: "staff-management",
@@ -28,10 +28,10 @@ const Sidebar = ({ topOffset = 80, bottomOffset = 0, className = "" }) => {
       route: "/staff-management",
     },
     {
-      id: "stylish-management",
-      label: "Stylish Management",
+      id: "stylist-management",
+      label: "Stylist Management",
       icon: Shirt,
-      route: "/stylish-management",
+      route: "/stylist-management",
     },
   ];
 

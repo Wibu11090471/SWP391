@@ -83,22 +83,27 @@ const StylistDetailManagement = () => {
     <div className="space-y-4">
       <div className="flex items-center">
         <AtSign
-          className="mr-4"
+          className="mr-4 text-lg"
           style={{ color: theme.colors.primary.light }}
         />
-        <span>Email: {stylist.email || "Chưa cập nhật"}</span>
+        <span className="font-medium">Email:</span>
+        <span className="ml-2">{stylist.email || "Chưa cập nhật"}</span>
       </div>
       <div className="flex items-center">
         <MapPin
-          className="mr-4"
+          className="mr-4 text-lg"
           style={{ color: theme.colors.primary.light }}
         />
-        <span>Địa chỉ: {stylist.address || "Chưa cập nhật"}</span>
+        <span className="font-medium">Địa chỉ:</span>
+        <span className="ml-2">{stylist.address || "Chưa cập nhật"}</span>
       </div>
       <div className="flex items-center">
-        <Gift className="mr-4" style={{ color: theme.colors.primary.light }} />
-        <span>
-          Ngày sinh:{" "}
+        <Gift
+          className="mr-4 text-lg"
+          style={{ color: theme.colors.primary.light }}
+        />
+        <span className="font-medium">Ngày sinh:</span>
+        <span className="ml-2">
           {stylist.dob
             ? new Date(stylist.dob).toLocaleDateString("vi-VN")
             : "Chưa cập nhật"}
@@ -106,11 +111,11 @@ const StylistDetailManagement = () => {
       </div>
       <div className="flex items-center">
         <CalendarCheck
-          className="mr-4"
+          className="mr-4 text-lg"
           style={{ color: theme.colors.primary.light }}
         />
-        <span>
-          Ngày bắt đầu:{" "}
+        <span className="font-medium">Ngày bắt đầu:</span>
+        <span className="ml-2">
           {stylist.createdOn
             ? new Date(stylist.createdOn).toLocaleDateString("vi-VN")
             : "Chưa cập nhật"}
@@ -118,19 +123,21 @@ const StylistDetailManagement = () => {
       </div>
       <div className="flex items-center">
         <UserCheck
-          className="mr-4"
+          className="mr-4 text-lg"
           style={{ color: theme.colors.primary.light }}
         />
-        <span>
-          Trạng thái: {stylist.status ? "Đang làm việc" : "Nghỉ việc"}
+        <span className="font-medium">Trạng thái:</span>
+        <span className="ml-2">
+          {stylist.status ? "Đang hoạt động" : "Ngưng hoạt động"}
         </span>
       </div>
       <div className="flex items-center">
         <UserIcon
-          className="mr-4"
+          className="mr-4 text-lg"
           style={{ color: theme.colors.primary.light }}
         />
-        <span>Tên đăng nhập: {stylist.userName || "Chưa cập nhật"}</span>
+        <span className="font-medium">Tên đăng nhập:</span>
+        <span className="ml-2">{stylist.userName || "Chưa cập nhật"}</span>
       </div>
     </div>
   );
@@ -138,27 +145,27 @@ const StylistDetailManagement = () => {
   return (
     <Layout>
       <div
-        className="min-h-screen pt-24 pl-5 pr-5"
+        className="min-h-screen pt-24 px-4 sm:px-8"
         style={{
           backgroundColor: theme.colors.background.primary,
           color: theme.colors.text.primary,
         }}
       >
         <Card
-          className="max-w-3xl mx-auto shadow-xl"
+          className="max-w-4xl mx-auto shadow-lg rounded-lg overflow-hidden"
           style={{
             backgroundColor: theme.colors.background.secondary,
             borderColor: theme.colors.primary.DEFAULT,
           }}
         >
           <CardHeader
-            className="border-b flex items-center space-x-4 p-6"
+            className="border-b flex items-center p-6"
             style={{
               backgroundColor: theme.colors.secondary.light,
               borderBottomColor: theme.colors.primary.dark,
             }}
           >
-            <Avatar className="h-24 w-24">
+            <Avatar className="h-28 w-28 shadow-md">
               <AvatarImage src="" />
               <AvatarFallback
                 style={{
@@ -169,7 +176,7 @@ const StylistDetailManagement = () => {
                 {stylist.fullName.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
-            <div>
+            <div className="ml-6">
               <h2
                 className="text-2xl font-bold"
                 style={{ color: theme.colors.text.primary }}
@@ -177,7 +184,7 @@ const StylistDetailManagement = () => {
                 {stylist.fullName}
               </h2>
               <p
-                className="text-sm flex items-center"
+                className="text-sm mt-2 flex items-center"
                 style={{ color: theme.colors.text.secondary }}
               >
                 <UserIcon
@@ -191,13 +198,18 @@ const StylistDetailManagement = () => {
           </CardHeader>
 
           <div className="flex border-b">
-            <Button
+            <div
               variant={activeTab === "profile" ? "default" : "ghost"}
-              onClick={() => setActiveTab("profile")}
-              className="w-full"
+              className="w-full text-center"
+              style={{
+                borderBottom:
+                  activeTab === "profile"
+                    ? `2px solid ${theme.colors.primary.DEFAULT}`
+                    : "none",
+              }}
             >
               Thông Tin Cá Nhân
-            </Button>
+            </div>
           </div>
 
           <CardContent className="p-6">{renderProfileTab()}</CardContent>

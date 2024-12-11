@@ -4,7 +4,16 @@ import axios from "axios";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../ui/card";
 import { Button } from "../../../ui/button";
 import { Input } from "../../../ui/input";
-import { Search, UserPlus, Users } from "lucide-react";
+import { Search, UserPlus, Users, RefreshCw } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogTrigger,
+  DialogClose, // Adding DialogClose as an alternative
+} from "../../../ui/dialog";
 import theme from "../../../theme";
 import Layout from "../Layout";
 
@@ -30,6 +39,11 @@ const StaffManagement = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
+  // New state for role update confirmation
+  const [selectedStaffForRoleUpdate, setSelectedStaffForRoleUpdate] =
+    useState(null);
+  const [isRoleUpdateDialogOpen, setIsRoleUpdateDialogOpen] = useState(false);
+
   // Fetch staff data from API
   const fetchStaff = async () => {
     try {
@@ -48,21 +62,56 @@ const StaffManagement = () => {
     fetchStaff();
   }, []);
 
+  // New function to handle staff role update
+  const handleUpdateStaffRole = async () => {
+    if (!selectedStaffForRoleUpdate) return;
+
+    try {
+      // Update user role to stylist (roleId: 2)
+      await api.put("/api/User/updateUserRole", {
+        userId: selectedStaffForRoleUpdate.id,
+        roleId: 2, // Stylist role
+      });
+
+      // Refresh staff list
+      await fetchStaff();
+
+      // Close dialog and reset selection
+      setIsRoleUpdateDialogOpen(false);
+      setSelectedStaffForRoleUpdate(null);
+    } catch (error) {
+      console.error("Error updating staff role:", error);
+      // Optionally, add error handling toast or notification
+      alert("Không thể thay đổi vai trò. Vui lòng thử lại.");
+    }
+  };
+
   // New function to handle staff detail navigation
   const navigateToStaffDetail = (staffId) => {
     navigate(`/staff-detail/${staffId}`);
   };
 
   // Search/Filter staff
+  // Search/Filter staff
+  const removeAccents = (str) =>
+    str
+      .normalize("NFD") // Chuyển đổi sang dạng Unicode tổ hợp
+      .replace(/[\u0300-\u036f]/g, "") // Loại bỏ dấu
+      .toLowerCase(); // Chuyển về chữ thường
+
+  // Search/Filter staff
   useEffect(() => {
-    const filtered = staff.filter(
-      (member) =>
-        member.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        member.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        member.role.toLowerCase().includes(searchTerm.toLowerCase())
+    const filtered = staff.filter((member) =>
+      removeAccents(member.fullName).includes(removeAccents(searchTerm))
     );
     setFilteredStaff(filtered);
   }, [searchTerm, staff]);
+
+  // Function to open role update confirmation dialog
+  const openRoleUpdateConfirmation = (member) => {
+    setSelectedStaffForRoleUpdate(member);
+    setIsRoleUpdateDialogOpen(true);
+  };
 
   return (
     <Layout>
@@ -150,18 +199,30 @@ const StaffManagement = () => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredStaff.map((member) => (
-                  <StaffCard
+                  <div
                     key={member.id || crypto.randomUUID()}
-                    member={{
-                      id: member.id,
-                      userName: member.userName || "Chưa cập nhật",
-                      fullName: member.fullName || "Không rõ",
-                      role: member.role || "Staff",
-                      status: member.status || false,
-                      avatar: "",
-                    }}
-                    navigateToStaffDetail={navigateToStaffDetail}
-                  />
+                    className="relative"
+                  >
+                    <StaffCard
+                      member={{
+                        id: member.id,
+                        userName: member.email || "Chưa cập nhật",
+                        fullName: member.fullName || "Không rõ",
+                        role: member.role || "Staff",
+                        status: member.status || false,
+                        avatar: "",
+                      }}
+                      navigateToStaffDetail={navigateToStaffDetail}
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="absolute top-2 right-2"
+                      onClick={() => openRoleUpdateConfirmation(member)}
+                    >
+                      <RefreshCw className="h-4 w-4 mr-2" /> Chuyển Vai Trò
+                    </Button>
+                  </div>
                 ))}
               </div>
             )}
@@ -174,6 +235,40 @@ const StaffManagement = () => {
           setIsDialogOpen={setIsDialogOpen}
           onAddSuccess={fetchStaff}
         />
+
+        {/* Role Update Confirmation Dialog */}
+        <Dialog
+          open={isRoleUpdateDialogOpen}
+          onOpenChange={setIsRoleUpdateDialogOpen}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Xác Nhận Chuyển Vai Trò</DialogTitle>
+              <DialogDescription>
+                Bạn có chắc chắn muốn chuyển vai trò của nhân viên{" "}
+                <strong>{selectedStaffForRoleUpdate?.fullName}</strong> từ Staff
+                sang Stylist không?
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex justify-end space-x-2 mt-4">
+              <Button
+                variant="outline"
+                onClick={() => setIsRoleUpdateDialogOpen(false)}
+              >
+                Hủy
+              </Button>
+              <Button
+                onClick={handleUpdateStaffRole}
+                style={{
+                  backgroundColor: theme.colors.primary.DEFAULT,
+                  color: theme.colors.background.primary,
+                }}
+              >
+                Xác Nhận
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </Layout>
   );

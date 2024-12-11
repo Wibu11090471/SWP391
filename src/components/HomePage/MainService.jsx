@@ -1,59 +1,68 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
-const services = [
-  {
-    id: 1,
-    name: "Cắt Tóc",
-    image: "assets/image/1.jpg",
-    path: "/haircutservice",
-  },
-  {
-    id: 2,
-    name: "Uốn Tóc",
-    image: "assets/image/2.jpg",
-    path: "/hairpermservice",
-  },
-  {
-    id: 3,
-    name: "Nhuộm Tóc",
-    image: "assets/image/3.jpg",
-    path: "/hairdyeingservice",
-  },
-  {
-    id: 4,
-    name: "Gội Massage",
-    image: "assets/image/3.jpg",
-    path: "/massageservice",
-  },
-  {
-    id: 5,
-    name: "Lấy Ráy Tai",
-    image: "assets/image/3.jpg",
-    path: "/earcleaningservice",
-  },
-  { id: 6, name: "Coming soon 3", image: "assets/image/3.jpg" },
-  { id: 7, name: "Coming soon 4", image: "assets/image/1.jpg" },
-  { id: 8, name: "Coming soon 5", image: "assets/image/2.jpg" },
-  { id: 9, name: "Coming soon 6", image: "assets/image/3.jpg" },
-];
+const createApiInstance = () => {
+  const token = localStorage.getItem("token");
+  return axios.create({
+    baseURL: "https://localhost:7081",
+    withCredentials: true,
+    headers: {
+      "Content-Type": "application/json",
+      ...(token && { Authorization: `Bearer ${token}` }),
+    },
+  });
+};
 
 const MainService = () => {
   const navigate = useNavigate();
   const [activeIndex, setActiveIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [apiServices, setApiServices] = useState([]);
+
+  const systemServices = [
+    { id: 1, name: "Cắt Tóc", image: "assets/image/1.jpg", path: "/haircutservice" },
+    { id: 2, name: "Uốn Tóc", image: "assets/image/2.jpg", path: "/hairpermservice" },
+    { id: 3, name: "Nhuộm Tóc", image: "assets/image/3.jpg", path: "/hairdyeingservice" },
+    { id: 4, name: "Gội Massage", image: "assets/image/3.jpg", path: "/massageservice" },
+    { id: 5, name: "Lấy Ráy Tai", image: "assets/image/3.jpg", path: "/earcleaningservice" },
+    { id: 6, name: "Tất cả dịch vụ", image: "assets/image/3.jpg", path: "/all-service" },
+  ];
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      const api = createApiInstance();
+      try {
+        const response = await api.get("/api/Service/getAll");
+        const filteredServices = Array.isArray(response.data)
+          ? response.data.filter((service) => service.serviceEnity.status === true)
+          : [];
+        setApiServices(
+          filteredServices.map((service) => ({
+            ...service.serviceEnity,
+            name: service.serviceEnity.title,
+            image: service.image,
+          }))
+        );
+      } catch (error) {
+        console.error("Failed to fetch services:", error.message);
+        setApiServices([]);
+      }
+    };
+    fetchServices();
+  }, []);
+
+  const allServices = [...systemServices, ...apiServices];
 
   const moveToIndex = (newIndex) => {
     if (isAnimating) return;
-
     setIsAnimating(true);
     setActiveIndex((prevIndex) => {
       let index = newIndex;
-      if (index < 0) index = services.length - 1;
-      if (index >= services.length) index = 0;
+      if (index < 0) index = allServices.length - 1;
+      if (index >= allServices.length) index = 0;
       return index;
     });
-
     setTimeout(() => setIsAnimating(false), 700);
   };
 
@@ -65,29 +74,22 @@ const MainService = () => {
   };
 
   const getVisibleCards = () => {
+    if (allServices.length === 0) return [];
     const cards = [];
     for (let i = -2; i <= 2; i++) {
       let index = activeIndex + i;
-      if (index < 0) index = services.length + index;
-      if (index >= services.length) index = index - services.length;
-      cards.push({ index, service: services[index] });
+      if (index < 0) index = allServices.length + index;
+      if (index >= allServices.length) index = index - allServices.length;
+      cards.push({ index, service: allServices[index] });
     }
     return cards;
   };
 
   const getCardStyle = (position) => {
-    const baseScale =
-      position === 0 ? 1.2 : position === -1 || position === 1 ? 0.9 : 0.7;
-    const baseOpacity =
-      position === 0 ? 1 : position === -1 || position === 1 ? 0.8 : 0.4;
-    const baseZIndex =
-      position === 0 ? 3 : position === -1 || position === 1 ? 2 : 1;
-
-    return {
-      scale: baseScale,
-      opacity: baseOpacity,
-      zIndex: baseZIndex,
-    };
+    const baseScale = position === 0 ? 1.2 : position === -1 || position === 1 ? 0.9 : 0.7;
+    const baseOpacity = position === 0 ? 1 : position === -1 || position === 1 ? 0.8 : 0.4;
+    const baseZIndex = position === 0 ? 3 : position === -1 || position === 1 ? 2 : 1;
+    return { scale: baseScale, opacity: baseOpacity, zIndex: baseZIndex };
   };
 
   return (
@@ -101,7 +103,6 @@ const MainService = () => {
             {getVisibleCards().map(({ index, service }, arrayIndex) => {
               const { scale, opacity, zIndex } = getCardStyle(arrayIndex - 2);
               const isCenter = arrayIndex === 2;
-
               return (
                 <div
                   key={`${service.id}-${index}`}
@@ -116,21 +117,13 @@ const MainService = () => {
                   }}
                 >
                   <div
-                    className={`
-                    w-64 h-80 
-                    bg-[#FAEBD7] 
-                    rounded-xl 
-                    shadow-lg 
-                    overflow-hidden 
-                    cursor-pointer
-                    transition-all
-                    duration-700
-                    ease-out
-                    group
-                    hover:shadow-xl
-                    flex flex-col
-                    ${isCenter ? "border-2 border-[#CD853F] shadow-xl" : ""}
-                  `}
+                    className={`w-64 h-80 bg-[#FAEBD7] rounded-xl shadow-lg overflow-hidden cursor-pointer
+                      transition-all duration-700 ease-out group hover:shadow-xl flex flex-col
+                      ${
+                        isCenter
+                          ? "border-2 border-[#CD853F] shadow-xl"
+                          : ""
+                      }`}
                   >
                     <div className="w-full h-48 overflow-hidden">
                       <img
@@ -147,17 +140,11 @@ const MainService = () => {
                       <div className="mt-auto">
                         <button
                           onClick={(e) => handleLearnMore(e, service)}
-                          className={`
-                            w-full py-2 px-4 
-                            ${
-                              service.path
-                                ? "bg-[#CD853F] hover:bg-[#8B4513]"
-                                : "bg-gray-400 cursor-not-allowed"
-                            }
-                            text-white rounded-lg 
-                            transition-all duration-300
-                            focus:outline-none focus:ring-2 focus:ring-[#CD853F] focus:ring-opacity-50
-                          `}
+                          className={`w-full py-2 px-4 ${
+                            service.path
+                              ? "bg-[#CD853F] hover:bg-[#8B4513]"
+                              : "bg-gray-400 cursor-not-allowed"
+                          } text-white rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#CD853F] focus:ring-opacity-50`}
                           disabled={!service.path}
                         >
                           Tìm hiểu thêm

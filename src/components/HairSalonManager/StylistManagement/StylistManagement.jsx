@@ -4,13 +4,19 @@ import axios from "axios";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../ui/card";
 import { Button } from "../../../ui/button";
 import { Input } from "../../../ui/input";
-import { Search, UserPlus, Users } from "lucide-react";
+import { Search, Users, RefreshCw } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "../../../ui/dialog";
 import theme from "../../../theme";
 import Layout from "../Layout";
 
 // Import the components
-import StylistCard from "./components/StylishCard";
-import StylistDialog from "./components/StylishDialog";
+import StylistCard from "./components/StylistCard";
 
 // Axios configuration
 const api = axios.create({
@@ -28,7 +34,11 @@ const StylistManagement = () => {
   const [filteredStylist, setFilteredStylist] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  // New state for role update confirmation
+  const [selectedStylistForRoleUpdate, setSelectedStylistForRoleUpdate] =
+    useState(null);
+  const [isRoleUpdateDialogOpen, setIsRoleUpdateDialogOpen] = useState(false);
 
   // Fetch stylist data from API
   const fetchStylist = async () => {
@@ -50,21 +60,55 @@ const StylistManagement = () => {
     fetchStylist();
   }, []);
 
+  // New function to handle stylist role update
+  const handleUpdateStylistRole = async () => {
+    if (!selectedStylistForRoleUpdate) return;
+
+    try {
+      // Update user role to staff (roleId: 1)
+      await api.put("/api/User/updateUserRole", {
+        userId: selectedStylistForRoleUpdate.id,
+        roleId: 3, // Staff role
+      });
+
+      // Refresh stylist list
+      await fetchStylist();
+
+      // Close dialog and reset selection
+      setIsRoleUpdateDialogOpen(false);
+      setSelectedStylistForRoleUpdate(null);
+    } catch (error) {
+      console.error("Error updating stylist role:", error);
+      // Optionally, add error handling toast or notification
+      alert("Không thể thay đổi vai trò. Vui lòng thử lại.");
+    }
+  };
+
   // New function to handle stylist detail navigation
   const navigateToStylistDetail = (stylistId) => {
     navigate(`/stylist-detail/${stylistId}`);
   };
 
   // Search/Filter stylist
+  const removeAccents = (str) =>
+    str
+      .normalize("NFD") // Chuyển đổi sang dạng Unicode tổ hợp
+      .replace(/[\u0300-\u036f]/g, "") // Loại bỏ dấu
+      .toLowerCase(); // Chuyển về chữ thường
+
+  // Search/Filter staff
   useEffect(() => {
-    const filtered = stylist.filter(
-      (member) =>
-        member.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        member.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        member.role.toLowerCase().includes(searchTerm.toLowerCase())
+    const filtered = stylist.filter((member) =>
+      removeAccents(member.fullName).includes(removeAccents(searchTerm))
     );
     setFilteredStylist(filtered);
   }, [searchTerm, stylist]);
+
+  // Function to open role update confirmation dialog
+  const openRoleUpdateConfirmation = (member) => {
+    setSelectedStylistForRoleUpdate(member);
+    setIsRoleUpdateDialogOpen(true);
+  };
 
   return (
     <Layout>
@@ -107,7 +151,7 @@ const StylistManagement = () => {
                   className="text-sm ml-12"
                   style={{ color: theme.colors.text.secondary }}
                 >
-                  Quản lý thông tin và nhân sự của salon
+                  Quản lý thông tin nhân sự của salon
                 </p>
               </div>
               <div className="flex items-center space-x-4">
@@ -127,15 +171,6 @@ const StylistManagement = () => {
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
-                <Button
-                  onClick={() => setIsDialogOpen(true)}
-                  style={{
-                    backgroundColor: theme.colors.primary.DEFAULT,
-                    color: theme.colors.background.primary,
-                  }}
-                >
-                  <UserPlus className="mr-2" /> Thêm Stylist
-                </Button>
               </div>
             </div>
           </CardHeader>
@@ -152,30 +187,69 @@ const StylistManagement = () => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredStylist.map((member) => (
-                  <StylistCard
+                  <div
                     key={member.id || crypto.randomUUID()}
-                    member={{
-                      id: member.id,
-                      userName: member.userName || "Chưa cập nhật",
-                      fullName: member.fullName || "Không rõ",
-                      role: member.role || "Stylist",
-                      status: member.status || false,
-                      avatar: "",
-                    }}
-                    navigateToStylistDetail={navigateToStylistDetail}
-                  />
+                    className="relative"
+                  >
+                    <StylistCard
+                      member={{
+                        id: member.id,
+                        userName: member.email || "Chưa cập nhật",
+                        fullName: member.fullName || "Không rõ",
+                        role: member.role || "Stylist",
+                        status: member.status || false,
+                        avatar: "",
+                      }}
+                      navigateToStylistDetail={navigateToStylistDetail}
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="absolute top-2 right-2"
+                      onClick={() => openRoleUpdateConfirmation(member)}
+                    >
+                      <RefreshCw className="h-4 w-4 mr-2" /> Chuyển Vai Trò
+                    </Button>
+                  </div>
                 ))}
               </div>
             )}
           </CardContent>
         </Card>
 
-        {/* Stylist Dialog */}
-        <StylistDialog
-          isDialogOpen={isDialogOpen}
-          setIsDialogOpen={setIsDialogOpen}
-          onAddSuccess={fetchStylist}
-        />
+        {/* Role Update Confirmation Dialog */}
+        <Dialog
+          open={isRoleUpdateDialogOpen}
+          onOpenChange={setIsRoleUpdateDialogOpen}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Xác Nhận Chuyển Vai Trò</DialogTitle>
+              <DialogDescription>
+                Bạn có chắc chắn muốn chuyển vai trò của nhân viên{" "}
+                <strong>{selectedStylistForRoleUpdate?.fullName}</strong> từ
+                Stylist sang Staff không?
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex justify-end space-x-2 mt-4">
+              <Button
+                variant="outline"
+                onClick={() => setIsRoleUpdateDialogOpen(false)}
+              >
+                Hủy
+              </Button>
+              <Button
+                onClick={handleUpdateStylistRole}
+                style={{
+                  backgroundColor: theme.colors.primary.DEFAULT,
+                  color: theme.colors.background.primary,
+                }}
+              >
+                Xác Nhận
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </Layout>
   );

@@ -1,48 +1,79 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import {
-  DollarSign,
+  UserCheck,
   Users,
   Scissors,
-  UserCheck,
   Star,
   ChevronRight,
+  Layers,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../ui/card";
 import Layout from "../Layout";
-import RevenueChart from "../Revenue/RevenueChart/RevenueChart";
+import ServiceChart from "../Service/ServiceChart/ServiceChart";
 import CustomerChart from "../OverView/CustomerChart/CustomerChart";
 
-const OverviewDashboard = () => {
-  const [selectedPeriod, setSelectedPeriod] = useState("monthly");
+// Axios configuration
+const api = axios.create({
+  baseURL: "https://localhost:7081",
+  withCredentials: true,
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${localStorage.getItem("token")}`,
+  },
+});
 
-  // Comprehensive business overview data
-  const overviewData = {
-    revenue: {
-      totalThisMonth: 45000000,
-      comparison: "+12%",
-    },
-    stylists: {
-      total: 10,
-      active: 8,
-    },
-    appointments: {
-      total: 436,
-      completed: 389,
-      pending: 32,
-    },
-    staff: {
-      total: 15,
-      newThisMonth: 2,
-    },
-    customers: {
-      total: 1245,
-      membership: {
-        silver: 678,
-        gold: 423,
-        platinum: 144,
-      },
-    },
+const OverviewDashboard = () => {
+  const navigate = useNavigate(); // Add useNavigate hook
+  const [selectedPeriod, setSelectedPeriod] = useState("monthly");
+  const [userData, setUserData] = useState({
+    staff: [],
+    stylist: [],
+    user: [],
+    service: null,
+  });
+
+  const [serviceData, setServiceData] = useState({
+    services: [],
+    totalServices: 0,
+  });
+
+  // Fetch user data from API
+  const fetchUserData = async () => {
+    try {
+      const response = await api.get("/api/User/getAllUsers");
+      const filteredUsers = response.data.filter(
+        (user) => user.role === "user"
+      );
+      console.log("Filtered Users:", filteredUsers);
+      setUserData({
+        staff: response.data.filter((user) => user.role === "staff"),
+        stylist: response.data.filter((user) => user.role === "stylist"),
+        user: filteredUsers,
+        service: null,
+      });
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
   };
+
+  const fetchServiceData = async () => {
+    try {
+      const response = await api.get("/api/Service/getAll");
+      setServiceData({
+        services: response.data.items,
+        totalServices: response.data.totalCount,
+      });
+    } catch (error) {
+      console.error("Error fetching service data:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserData();
+    fetchServiceData();
+  }, []);
 
   // Reusable Section Preview Card Component
   const SectionPreviewCard = ({
@@ -80,21 +111,21 @@ const OverviewDashboard = () => {
     </Card>
   );
 
-  // Navigation handlers (placeholder for future implementation)
-  const handleViewRevenue = () => {
-    console.log("Chuyển sang trang Doanh Thu");
-  };
-
+  // Navigation handlers with React Router
   const handleViewStylists = () => {
-    console.log("Chuyển sang trang Quản Lý Stylist");
+    navigate("/stylist-management");
   };
 
   const handleViewStaff = () => {
-    console.log("Chuyển sang trang Quản Lý Nhân Viên");
+    navigate("/staff-management");
   };
 
   const handleViewCustomers = () => {
     console.log("Chuyển sang trang Quản Lý Khách Hàng");
+  };
+
+  const handleViewServices = () => {
+    navigate("/service-management");
   };
 
   return (
@@ -106,58 +137,66 @@ const OverviewDashboard = () => {
 
         {/* Preview Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {/* Revenue Preview Card */}
+          {/* Customers Preview Card */}
           <SectionPreviewCard
-            icon={DollarSign}
-            title="Doanh Thu"
+            icon={Users}
+            title="Số Lượng Khách Hàng"
             data={[
-              `Tháng này: ${overviewData.revenue.totalThisMonth.toLocaleString()} VND`,
-              `So với tháng trước: ${overviewData.revenue.comparison}`,
+              `Tổng số khách: ${userData.user.length}`,
+              `Đang hoạt động: ${
+                userData.user.filter((user) => user.status).length
+              } / Ngưng hoạt động: ${
+                userData.user.filter((user) => !user.status).length
+              }`,
             ]}
-            description="Nhấn để xem chi tiết báo cáo doanh thu"
-            buttonText="Xem Chi Tiết"
-            onViewDetail={handleViewRevenue}
-          />
-
-          {/* Stylists Preview Card */}
-          <SectionPreviewCard
-            icon={Scissors}
-            title="Quản Lý Stylist"
-            data={[
-              `Tổng số: ${overviewData.stylists.total} Stylist`,
-              `Đang hoạt động: ${overviewData.stylists.active} Stylist`,
-            ]}
-            description="Nhấn để quản lý danh sách stylist"
+            // description="Nhấn để quản lý khách hàng"
             buttonText="Quản Lý"
-            onViewDetail={handleViewStylists}
+            onViewDetail={handleViewCustomers}
           />
 
-          {/* Staff Preview Card */}
           <SectionPreviewCard
             icon={UserCheck}
             title="Quản Lý Nhân Viên"
             data={[
-              `Tổng số nhân viên: ${overviewData.staff.total}`,
-              `Nhân viên mới: ${overviewData.staff.newThisMonth}`,
+              `Tổng số nhân viên: ${userData.staff.length}`,
+              `Đang hoạt động: ${
+                userData.staff.filter((staff) => staff.status).length
+              } / Ngưng hoạt động: ${
+                userData.staff.filter((staff) => !staff.status).length
+              }`,
             ]}
             description="Nhấn để quản lý đội ngũ nhân viên"
             buttonText="Quản Lý"
             onViewDetail={handleViewStaff}
           />
 
-          {/* Customers Preview Card */}
           <SectionPreviewCard
-            icon={Users}
-            title="Quản Lý Khách Hàng"
+            icon={Scissors}
+            title="Quản Lý Stylist"
             data={[
-              `Tổng số khách: ${overviewData.customers.total}`,
-              `Silver: ${overviewData.customers.membership.silver}`,
-              `Gold: ${overviewData.customers.membership.gold}`,
-              `Platinum: ${overviewData.customers.membership.platinum}`,
+              `Tổng số: ${userData.stylist.length} Stylist`,
+              `Đang hoạt động: ${
+                userData.stylist.filter((stylist) => stylist.status).length
+              } / Ngưng hoạt động: ${
+                userData.stylist.filter((stylist) => !stylist.status).length
+              } `,
             ]}
-            description="Nhấn để quản lý khách hàng và membership"
+            description="Nhấn để quản lý danh sách stylist"
             buttonText="Quản Lý"
-            onViewDetail={handleViewCustomers}
+            onViewDetail={handleViewStylists}
+          />
+
+          {/* Services Preview Card */}
+          <SectionPreviewCard
+            icon={Layers}
+            title="Quản Lý Dịch Vụ"
+            data={[
+              `Tổng số dịch vụ: ${serviceData.totalServices}`,
+              `Dịch vụ mới: ${serviceData.services.length}`,
+            ]}
+            description="Nhấn để quản lý các dịch vụ"
+            buttonText="Quản Lý"
+            onViewDetail={handleViewServices}
           />
         </div>
 
@@ -191,13 +230,11 @@ const OverviewDashboard = () => {
               </div>
             </div>
 
-            <RevenueChart selectedPeriod={selectedPeriod} />
+            {<ServiceChart selectedPeriod={selectedPeriod} />}
           </div>
 
           {/* Customer Chart Section */}
-          <div className="w-1/2">
-            <CustomerChart />
-          </div>
+          <div className="w-1/2">{<CustomerChart />}</div>
         </div>
       </div>
     </Layout>

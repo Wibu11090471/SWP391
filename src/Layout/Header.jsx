@@ -53,7 +53,7 @@ const Header = () => {
           <button
             onClick={() => {
               setIsDropdownOpen(false);
-              navigate("/hairsalon-staff");
+              navigate("/selectedField");
             }}
             className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
           >
@@ -76,18 +76,18 @@ const Header = () => {
           />
         </div>
         <nav className="flex items-center space-x-6">
-          <a
-            href="#"
+          <Link
+            to="/"
             className="text-[#FDF5E6] hover:text-[#DEB887] font-medium"
           >
             Trang Chủ
-          </a>
-          <a
-            href="#"
+          </Link>
+          <Link
+            to="/introduction"
             className="text-[#FDF5E6] hover:text-[#DEB887] font-medium"
           >
-            Giới Thiệu
-          </a>
+            Giới thiệu
+          </Link>
           {user ? (
             <div className="relative">
               <button
@@ -105,7 +105,7 @@ const Header = () => {
                   <button
                     onClick={() => {
                       setIsDropdownOpen(false);
-                      navigate("/overview-management");
+                      navigate("/profile");
                     }}
                     className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   >
