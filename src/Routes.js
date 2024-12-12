@@ -51,12 +51,42 @@ const AppRoutes = () => {
       <Route path="/booking-service" element={<BookingService />} />
       <Route path="/all-service" element={<AllService />} />
       <Route path="/profile" element={<AccountProfile />} />
-      <Route path="/pickingstylist" element={<PickingStylish />} />
-      <Route path="/paymentcounter" element={<PaymentCounter />} />
-      <Route path="/SelectedField" element={<SalonStaffDashboard />} />
-      <Route path="/stylistcommission" element={<StylistCommission />} />
       {/* Route yêu cầu đăng nhập */}
 
+      <Route
+        path="/pickingstylist"
+        element={
+          <ProtectedRoute requiredRoles={["staff"]}>
+            <PickingStylish />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/paymentcounter"
+        element={
+          <ProtectedRoute requiredRoles={["staff"]}>
+            <PaymentCounter />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/SelectedField"
+        element={
+          <ProtectedRoute requiredRoles={["staff"]}>
+            <SalonStaffDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/stylistcommission"
+        element={
+          <ProtectedRoute requiredRoles={["staff"]}>
+            <StylistCommission />
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/booking-success"
         element={
