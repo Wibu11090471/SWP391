@@ -59,6 +59,14 @@ const SalonStaffDashboard = () => {
               Thống kê
             </a>
           </li>
+          <li>
+            <a
+              href="/stylistcommission"
+              className="block py-3 text-lg hover:bg-gray-700 px-4 rounded-lg transition-all duration-300 ease-in-out hover:text-yellow-400"
+            >
+              Quản Lý Thu Nhập Stylist
+            </a>
+          </li>
         </ul>
       </div>
 

@@ -31,6 +31,7 @@ import PaymentCounter from "./components/Dashboard/AppointmentManagement/Payment
 import DashboardSalonStaff from "./components/Dashboard/AppointmentManagement/DashboardSalonStaff";
 import SalonStaffDashboard from "./components/Dashboard/SalonStaffDashboard";
 import AccountProfile from "./components/Profile/AccountProfile";
+import StylistCommission from "./components/Dashboard/StylistCommission/StylistCommission";
 
 const AppRoutes = () => {
   return (
@@ -53,6 +54,7 @@ const AppRoutes = () => {
       <Route path="/pickingstylist" element={<PickingStylish />} />
       <Route path="/paymentcounter" element={<PaymentCounter />} />
       <Route path="/SelectedField" element={<SalonStaffDashboard />} />
+      <Route path="/stylistcommission" element={<StylistCommission />} />
       {/* Route yêu cầu đăng nhập */}
 
       <Route
