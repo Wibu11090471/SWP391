@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import CreateService from "./ServiceImageContainer/CreateService";
-import CreateImage from "./ServiceImageContainer/CreateImage";
+import CreateService from "./AppointmentManagement/ServiceImageContainer/CreateService";
+import CreateImage from "./AppointmentManagement/ServiceImageContainer/CreateImage";
 
 const ServiceImageContainer = () => {
   const [activeView, setActiveView] = useState("service");

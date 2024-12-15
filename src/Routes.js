@@ -10,11 +10,10 @@ import HairPermService from "./components/ServicePage/HairPermService/HairPermSe
 import HairCutServiceDetail from "./components/ServicePage/HairCutService/HairCutServiceDetail/HairCutServiceDetail";
 import HairDyeingServiceDetail from "./components/ServicePage/HairDyeingService/HairDyeingServiceDetail/HairDyeingServiceDetail";
 import HairPermServiceDetail from "./components/ServicePage/HairPermService/HairPermServiceDetail/HairPermServiceDetail";
-import EarCleaningServiceDetail from "./components/ServicePage/EarCleaningService/EarCleaningServiceDetail/EarCleaningServiceDetail";
 import BookingService from "./components/BookingService/BookingService";
 import NotFound from "./components/NotFound/NotFound";
-import CreateService from "./components/Dashboard/ServiceImageContainer/CreateService";
-import CreateImage from "./components/Dashboard/ServiceImageContainer/CreateImage";
+import CreateService from "./components/Dashboard/AppointmentManagement/ServiceImageContainer/CreateService";
+import CreateImage from "./components/Dashboard/AppointmentManagement/ServiceImageContainer/CreateImage";
 import ServiceImageContainer from "./components/Dashboard/ServiceImageContainer";
 import Notifications from "./components/Dashboard/Notifications";
 import Statistics from "./components/Dashboard/Statistics";
@@ -32,6 +31,7 @@ import PaymentCounter from "./components/Dashboard/AppointmentManagement/Payment
 import DashboardSalonStaff from "./components/Dashboard/AppointmentManagement/DashboardSalonStaff";
 import SalonStaffDashboard from "./components/Dashboard/SalonStaffDashboard";
 import AccountProfile from "./components/Profile/AccountProfile";
+import StylistCommission from "./components/Dashboard/StylistCommission/StylistCommission";
 
 const AppRoutes = () => {
   return (
@@ -46,8 +46,6 @@ const AppRoutes = () => {
       <Route path="/massageservice" element={<MassageRelaxService />} />
       <Route path="/earcleaningservice" element={<EarCleaningService />} />
       <Route path="/service/:id" element={<HairCutServiceDetail />} />
-      <Route path="/massage-service/:id" element={<MassageRelaxServiceDetail />} />
-      <Route path="/ear-service/:id" element={<EarCleaningServiceDetail />} />
       <Route path="/dyeing-service/:id" element={<HairDyeingServiceDetail />} />
       <Route path="/perm-service/:id" element={<HairPermServiceDetail />} />
       <Route path="/booking-service" element={<BookingService />} />
@@ -138,7 +136,7 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
-      {/* Route quản lý dành cho quản lý */}
+{/* Route quản lý dành cho quản lý */}
       <Route
         path="/statistics"
         element={
