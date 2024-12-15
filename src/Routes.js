@@ -18,12 +18,12 @@ import CreateImage from "./components/Dashboard/ServiceImageContainer/CreateImag
 import ServiceImageContainer from "./components/Dashboard/ServiceImageContainer";
 import Notifications from "./components/Dashboard/Notifications";
 import Statistics from "./components/Dashboard/Statistics";
-import SalonRevenueDashboard from "./components/HairSalonManager/Revenue/Revenue";
+import Service from "./components/HairSalonManager/Service/Service";
 import OverviewDashboard from "./components/HairSalonManager/OverView/OverView";
 import StaffManagement from "./components/HairSalonManager/StaffManagement/StaffManagement";
 import StaffDetailManagement from "./components/HairSalonManager/StaffManagement/StaffDetailManagement/StaffDetailManagement";
-import StylishManagement from "./components/HairSalonManager/StylishManagement/StylishManagement";
-import StylishDetailManagement from "./components/HairSalonManager/StylishManagement/StylishDetailManagement/StylishDetailManagement";
+import StylistManagement from "./components/HairSalonManager/StylistManagement/StylistManagement";
+import StylistDetailManagement from "./components/HairSalonManager/StylistManagement/StylistDetailManagement/StylistDetailManagement";
 import MassageRelaxService from "./components/ServicePage/MassageRelaxService/MassageRelaxService";
 import EarCleaningService from "./components/ServicePage/EarCleaningService/EarCleaningService";
 import BookingConfirmation from "./components/BookingService/BookingSuccess";
@@ -32,7 +32,6 @@ import PaymentCounter from "./components/Dashboard/AppointmentManagement/Payment
 import DashboardSalonStaff from "./components/Dashboard/AppointmentManagement/DashboardSalonStaff";
 import SalonStaffDashboard from "./components/Dashboard/SalonStaffDashboard";
 import AccountProfile from "./components/Profile/AccountProfile";
-import MassageRelaxServiceDetail from "./components/ServicePage/MassageRelaxService/MassageRelaxServiceDetail/MassageRelaxServiceDetail";
 
 const AppRoutes = () => {
   return (
@@ -40,7 +39,6 @@ const AppRoutes = () => {
       {/* Các route công khai */}
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
-
       {/* Route dịch vụ - có thể cho phép truy cập không cần đăng nhập */}
       <Route path="/haircutservice" element={<HairCutService />} />
       <Route path="/hairdyeingservice" element={<HairDyeingService />} />
@@ -55,11 +53,42 @@ const AppRoutes = () => {
       <Route path="/booking-service" element={<BookingService />} />
       <Route path="/all-service" element={<AllService />} />
       <Route path="/profile" element={<AccountProfile />} />
-      <Route path="/pickingstylist" element={<PickingStylish />} />
-      <Route path="/paymentcounter" element={<PaymentCounter />} />
-      <Route path="/SelectedField" element={<SalonStaffDashboard />} />
       {/* Route yêu cầu đăng nhập */}
 
+      <Route
+        path="/pickingstylist"
+        element={
+          <ProtectedRoute requiredRoles={["staff"]}>
+            <PickingStylish />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/paymentcounter"
+        element={
+          <ProtectedRoute requiredRoles={["staff"]}>
+            <PaymentCounter />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/SelectedField"
+        element={
+          <ProtectedRoute requiredRoles={["staff"]}>
+            <SalonStaffDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/stylistcommission"
+        element={
+          <ProtectedRoute requiredRoles={["staff"]}>
+            <StylistCommission />
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/booking-success"
         element={
@@ -120,10 +149,10 @@ const AppRoutes = () => {
       />
 
       <Route
-        path="/revenue-management"
+        path="/service-management"
         element={
           <ProtectedRoute requiredRoles={["admin"]}>
-            <SalonRevenueDashboard />
+            <Service />
           </ProtectedRoute>
         }
       />
@@ -156,19 +185,19 @@ const AppRoutes = () => {
       />
 
       <Route
-        path="/stylish-management"
+        path="/stylist-management"
         element={
           <ProtectedRoute requiredRoles={["admin"]}>
-            <StylishManagement />
+            <StylistManagement />
           </ProtectedRoute>
         }
       />
 
       <Route
-        path="/stylish-detail/:id"
+        path="/stylist-detail/:id"
         element={
           <ProtectedRoute requiredRoles={["admin"]}>
-            <StylishDetailManagement />
+            <StylistDetailManagement />
           </ProtectedRoute>
         }
       />
