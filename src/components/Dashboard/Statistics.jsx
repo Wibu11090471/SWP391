@@ -194,7 +194,7 @@ const Statistics = () => {
         <div className="bg-blue-100 p-6 rounded-lg shadow-md mt-6 text-center">
           <h2 className="text-xl font-bold mb-2">Tổng Doanh Thu</h2>
           <p className="text-2xl text-blue-600 font-semibold">
-            ${totalRevenue.toLocaleString()}
+            {totalRevenue.toLocaleString()} VNĐ
           </p>
         </div>
 
