@@ -62,10 +62,10 @@ const ServiceImageContainer = () => {
           </li>
           <li>
             <a
-              href="/notifications"
+              href="/history"
               className="block py-3 text-lg hover:bg-gray-700 px-4 rounded-lg transition-all duration-300 ease-in-out hover:text-yellow-400"
             >
-              Thông báo
+              Lịch sử giao dịch
             </a>
           </li>
           <li>
