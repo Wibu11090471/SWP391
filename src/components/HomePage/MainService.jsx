@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, Routes, Route } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const createApiInstance = () => {
@@ -109,7 +109,7 @@ const MainService = () => {
                 const isCenter = arrayIndex === 2;
                 return (
                   <div
-                    key={`${service.id}-${index}`}
+                    key={`${service.id}-${arrayIndex}`} // Updated key generation
                     onClick={() => moveToIndex(index)}
                     className="transform-gpu transition-all duration-700 ease-out hover:z-30"
                     style={{
