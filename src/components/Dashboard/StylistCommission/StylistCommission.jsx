@@ -138,7 +138,7 @@ const StylistCommission = () => {
       const stylistId = transaction.stylist.id;
       const stylistName = transaction.stylist.fullName;
       // Thay đổi tại đây: Chỉ lấy 50% tổng giá trị
-      const commissionAmount = transaction.totalPrice * 0.7;
+      const commissionAmount = transaction.totalPrice;
 
       if (!commissionMap[stylistId]) {
         commissionMap[stylistId] = {

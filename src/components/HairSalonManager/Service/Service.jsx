@@ -197,7 +197,7 @@ const Services = () => {
                             Thời Gian
                           </h4>
                           <p className="text-[#3E2723] text-sm">
-                            {selectedService.serviceEnity.timeService} giờ
+                            {selectedService.serviceEnity.timeService * 60} phút
                           </p>
                         </div>
                       </div>

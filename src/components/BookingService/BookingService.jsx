@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import { Card, CardContent } from "../../ui/card";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import {
   MapPin,
   Clock,
   ChevronRight,
   ChevronLeft,
-  Check,
   X,
+  Calendar,
 } from "lucide-react";
 import { format } from "date-fns";
 import { Alert, AlertDescription } from "../../ui/alert";
@@ -27,19 +26,19 @@ const createApiInstance = () => {
 
 const BookingService = () => {
   const navigate = useNavigate();
-  const [currentStep, setCurrentStep] = useState(1);
-  const [services, setServices] = useState([]);
+  const { serviceId } = useParams();
+  const [currentStep, setCurrentStep] = useState(2);
   const [selectedService, setSelectedService] = useState(null);
   const [selectedDateTime, setSelectedDateTime] = useState(null);
   const [availableTimes, setAvailableTimes] = useState([]);
   const [availableDates, setAvailableDates] = useState([]);
   const [user, setUser] = useState(null);
   const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [unavailableTimeIndexes, setUnavailableTimeIndexes] = useState(
     new Set()
   );
 
-  // Time slots configuration
   const TIME_SLOTS = [
     { time: "08:00", timeIndex: 0 },
     { time: "08:30", timeIndex: 1 },
@@ -67,15 +66,6 @@ const BookingService = () => {
     { time: "19:30", timeIndex: 23 },
     { time: "20:00", timeIndex: 24 },
   ];
-
-  useEffect(() => {
-    if (error) {
-      const timer = setTimeout(() => {
-        setError(null);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [error]);
 
   const generateAvailableDates = () => {
     const dates = [];
@@ -114,10 +104,9 @@ const BookingService = () => {
         payload
       );
 
-      // Cập nhật unavailableTimeIndexes với dữ liệu trả về từ API
       setUnavailableTimeIndexes(new Set(response.data));
     } catch (error) {
-      console.error("Error fetching available time indexes:", error.message); // Log error
+      console.error("Error fetching available time indexes:", error.message);
     }
   };
 
@@ -145,31 +134,37 @@ const BookingService = () => {
   };
 
   useEffect(() => {
-    const fetchServices = async () => {
+    const fetchServiceDetail = async () => {
+      setIsLoading(true);
+      const token = localStorage.getItem("token");
+      const storedUser = localStorage.getItem("user");
+
+      if (!token) {
+        navigate("/login");
+        return;
+      }
+
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      }
+
       try {
         const api = createApiInstance();
-        const response = await api.get("/api/Service/getAll");
-        setServices(response.data.items);
+        const response = await api.get(`/api/Service/detail/${serviceId}`);
+
+        setSelectedService(response.data);
+        setAvailableDates(generateAvailableDates());
       } catch (error) {
-        setError("Lỗi khi tải dịch vụ");
+        console.error("Failed to fetch service details:", error);
+        setError("Không thể tải chi tiết dịch vụ");
+        navigate(-1);
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    const token = localStorage.getItem("token");
-    const storedUser = localStorage.getItem("user");
-
-    if (!token) {
-      navigate("/login");
-      return;
-    }
-
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-
-    fetchServices();
-    setAvailableDates(generateAvailableDates());
-  }, [navigate]);
+    fetchServiceDetail();
+  }, [navigate, serviceId]);
 
   useEffect(() => {
     if (selectedDateTime?.date) {
@@ -186,40 +181,35 @@ const BookingService = () => {
   const handleBookingSubmit = async () => {
     try {
       const api = createApiInstance();
+      const service = selectedService.serviceEnity || selectedService.service;
+
+      // Thêm phần lấy ảnh
+      const serviceImages =
+        selectedService.images || service.categoryService?.images || [];
+
       const bookingData = {
+        serviceId: parseInt(serviceId),
         startTime: new Date(
-          `${selectedDateTime.date} ${selectedDateTime.time}`
+          `${selectedDateTime.date}T${selectedDateTime.time}:00.000`
         ).toISOString(),
-        serviceId: selectedService.serviceEnity.id,
         note: "Booking via web app",
       };
-
       const bookingResponse = await api.post(
         "/api/Booking/create",
         bookingData
       );
 
-      localStorage.setItem(
-        "lastBooking",
-        JSON.stringify({
-          serviceName: selectedService.serviceEnity.title,
-          servicePicture: selectedService.images?.[0]?.url || null,
-          bookingDate: selectedDateTime.date,
-          bookingTime: selectedDateTime.time,
-          servicePrice: selectedService.serviceEnity.price,
-        })
-      );
-
-      navigate("/booking-success", {
+      navigate("/booking-confirmation", {
         state: {
-          serviceName: selectedService.serviceEnity.title,
-          bookingDate: selectedDateTime.date,
-          bookingTime: selectedDateTime.time,
-          servicePrice: selectedService.serviceEnity.price,
-          serviceImage: selectedService.images?.[0]?.url || null,
+          bookingDetails: bookingResponse.data,
+          service: {
+            ...service,
+            images: serviceImages, // Thêm images vào đây
+          },
         },
       });
     } catch (error) {
+      console.error("Full Error:", error);
       setError(error.response?.data?.message || "Đặt lịch thất bại");
     }
   };
@@ -228,58 +218,40 @@ const BookingService = () => {
     if (currentStep < 3) {
       setCurrentStep(currentStep + 1);
     } else {
-      handleBookingSubmit();
+      handleBookingSubmit(); // Đặt lịch luôn ở bước 3
     }
   };
 
   const handleBack = () => {
-    if (currentStep > 1) setCurrentStep(currentStep - 1);
+    if (currentStep > 2) {
+      setCurrentStep(currentStep - 1);
+    } else {
+      navigate(-1);
+    }
   };
 
   const renderStep = () => {
-    switch (currentStep) {
-      case 1:
-        return (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {services.map((item) => {
-              const service = item.serviceEnity;
-              return (
-                <Card
-                  key={service.id}
-                  className={`cursor-pointer ${
-                    selectedService?.serviceEnity.id === service.id
-                      ? "border-2 border-[#8B4513]"
-                      : "hover:shadow-lg"
-                  }`}
-                  onClick={() => setSelectedService(item)}
-                >
-                  <CardContent className="p-0">
-                    <img
-                      src={
-                        item.images?.[0]?.url ||
-                        "https://via.placeholder.com/300x200?text=No+Image"
-                      }
-                      alt={service.title}
-                      className="w-full h-48 object-cover"
-                    />
-                    <div className="p-4">
-                      <h3 className="text-lg font-semibold">{service.title}</h3>
-                      <div className="flex items-center">
-                        <Clock className="w-4 h-4 mr-2" />
-                        <span>{service.timeService * 60} phút</span>
-                      </div>
-                      <p className="text-sm mt-2">{service.description}</p>
-                      <div className="mt-2 text-[#8B4513] font-bold">
-                        {service.price.toLocaleString()} VNĐ
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        );
+    if (isLoading) {
+      return (
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-[#8B4513]"></div>
+          <span className="ml-4">Đang tải...</span>
+        </div>
+      );
+    }
 
+    if (!selectedService) {
+      return (
+        <div className="text-center text-red-600">
+          Không tìm thấy thông tin dịch vụ
+        </div>
+      );
+    }
+
+    const service = selectedService.serviceEnity || selectedService.service;
+    const images = selectedService.images || [];
+
+    switch (currentStep) {
       case 2:
         return (
           <div>
@@ -325,10 +297,10 @@ const BookingService = () => {
                       key={timeObj.time}
                       className={`py-2 px-3 border rounded-md ${
                         selectedDateTime?.time === timeObj.time
-                          ? "bg-[#8B4513] text-white" // Được chọn
+                          ? "bg-[#8B4513] text-white"
                           : timeObj.disabled
-                          ? "bg-gray-200 text-gray-400 cursor-not-allowed opacity-50 line-through" // Không khả dụng
-                          : "bg-white text-[#8B4513] hover:bg-[#DEB887]/20" // Bình thường
+                          ? "bg-gray-200 text-gray-400 cursor-not-allowed opacity-50 line-through"
+                          : "bg-white text-[#8B4513] hover:bg-[#DEB887]/20"
                       }`}
                       onClick={() =>
                         !timeObj.disabled &&
@@ -352,29 +324,29 @@ const BookingService = () => {
         return (
           <div className="bg-white rounded-lg shadow-lg p-8">
             <div className="flex items-center justify-center mb-6">
-              <div className="bg-green-100 rounded-full p-4">
-                <Check className="w-12 h-12 text-green-600" />
+              <div className="bg-blue-100 rounded-full p-4">
+                <Calendar className="w-12 h-12 text-blue-600" />
               </div>
             </div>
             <h2 className="text-2xl font-bold text-center mb-6 text-[#8B4513]">
-              Xác Nhận Đặt Dịch Vụ
+              Kiểm Tra Thông Tin Dịch Vụ
             </h2>
             <div className="space-y-4">
-              <div className="flex items-center">
+              <div className="flex items-center mb-4">
                 <img
                   src={
-                    selectedService.images?.[0]?.url ||
+                    images?.[0]?.url ||
                     "https://via.placeholder.com/100x100?text=No+Image"
                   }
-                  alt={selectedService.serviceEnity.title}
+                  alt={service?.title || "Dịch vụ"}
                   className="w-24 h-24 object-cover rounded-lg mr-6"
                 />
                 <div>
                   <h3 className="text-xl font-semibold">
-                    {selectedService.serviceEnity.title}
+                    {service?.title || "Dịch vụ không xác định"}
                   </h3>
                   <p className="text-gray-600">
-                    {selectedService.serviceEnity.description}
+                    {service?.description || "Không có mô tả"}
                   </p>
                 </div>
               </div>
@@ -399,7 +371,8 @@ const BookingService = () => {
                     <span className="font-semibold">Giá dịch vụ</span>
                   </div>
                   <p className="text-[#8B4513] font-bold text-xl">
-                    {selectedService.serviceEnity.price.toLocaleString()} VNĐ
+                    {service?.price ? service.price.toLocaleString() : "N/A"}{" "}
+                    VNĐ
                   </p>
                 </div>
               </div>
@@ -427,27 +400,24 @@ const BookingService = () => {
           </Alert>
         </div>
       )}
-
       <div className="max-w-7xl mx-auto px-4">
         <div className="mb-8 flex justify-between items-center">
-          {["Chọn Dịch Vụ", "Chọn Ngày & Giờ", "Xác Nhận"].map(
-            (title, index) => (
-              <div key={index} className="flex items-center">
-                <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                    currentStep > index + 1
-                      ? "bg-[#8B4513] text-white"
-                      : currentStep === index + 1
-                      ? "bg-[#8B4513] text-white"
-                      : "bg-[#DEB887] text-[#3E2723]"
-                  }`}
-                >
-                  {index + 1}
-                </div>
-                <div className="ml-2">{title}</div>
+          {["Chọn Ngày & Giờ", "Kiểm Tra", "Xác Nhận"].map((title, index) => (
+            <div key={index} className="flex items-center">
+              <div
+                className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                  currentStep > index + 2
+                    ? "bg-[#8B4513] text-white"
+                    : currentStep === index + 2
+                    ? "bg-[#8B4513] text-white"
+                    : "bg-[#DEB887] text-[#3E2723]"
+                }`}
+              >
+                {index + 2}
               </div>
-            )
-          )}
+              <div className="ml-2">{title}</div>
+            </div>
+          ))}
         </div>
 
         <div className="mb-8">{renderStep()}</div>
@@ -455,12 +425,7 @@ const BookingService = () => {
         <div className="flex justify-between">
           <button
             onClick={handleBack}
-            className={`px-6 py-2 rounded-lg ${
-              currentStep === 1
-                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                : "bg-white text-[#8B4513] hover:bg-[#DEB887]/20"
-            }`}
-            disabled={currentStep === 1}
+            className="bg-white text-[#8B4513] hover:bg-[#DEB887]/20 px-6 py-2 rounded-lg flex items-center"
           >
             <ChevronLeft className="w-5 h-5 mr-2" />
             Quay lại
@@ -469,12 +434,12 @@ const BookingService = () => {
             onClick={handleNext}
             className="bg-[#8B4513] text-white px-6 py-2 rounded-lg flex items-center"
             disabled={
-              (currentStep === 1 && !selectedService) ||
               (currentStep === 2 &&
-                (!selectedDateTime?.date || !selectedDateTime?.time))
+                (!selectedDateTime?.date || !selectedDateTime?.time)) ||
+              (currentStep === 3 && !selectedService)
             }
           >
-            {currentStep === 3 ? "Hoàn tất" : "Tiếp tục"}
+            {currentStep === 3 ? "Xác Nhận Đặt Lịch" : "Tiếp tục"}
             <ChevronRight className="w-5 h-5 ml-2" />
           </button>
         </div>
