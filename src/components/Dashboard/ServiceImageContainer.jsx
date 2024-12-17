@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import CreateService from "./ServiceImageContainer/CreateService";
-import CreateImage from "./ServiceImageContainer/CreateImage";
+import CreateService from "./AppointmentManagement/ServiceImageContainer/CreateService";
+import CreateImage from "./AppointmentManagement/ServiceImageContainer/CreateImage";
 
 const ServiceImageContainer = () => {
   const [activeView, setActiveView] = useState("service");
@@ -62,10 +62,10 @@ const ServiceImageContainer = () => {
           </li>
           <li>
             <a
-              href="/notifications"
+              href="/history"
               className="block py-3 text-lg hover:bg-gray-700 px-4 rounded-lg transition-all duration-300 ease-in-out hover:text-yellow-400"
             >
-              Thông báo
+              Lịch sử giao dịch
             </a>
           </li>
           <li>

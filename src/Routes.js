@@ -4,10 +4,10 @@ import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import Login from "./components/Login/Login";
 import Home from "./components/HomePage/HairSalonHome";
 import NotFound from "./components/NotFound/NotFound";
-import CreateService from "./components/Dashboard/ServiceImageContainer/CreateService";
-import CreateImage from "./components/Dashboard/ServiceImageContainer/CreateImage";
+import CreateService from "./components/Dashboard/AppointmentManagement/ServiceImageContainer/CreateService";
+import CreateImage from "./components/Dashboard/AppointmentManagement/ServiceImageContainer/CreateImage";
 import ServiceImageContainer from "./components/Dashboard/ServiceImageContainer";
-import Notifications from "./components/Dashboard/Notifications";
+import HistoryPayment from "./components/Dashboard/HistoryPayment";
 import Statistics from "./components/Dashboard/Statistics";
 import Service from "./components/HairSalonManager/Service/Service";
 import OverviewDashboard from "./components/HairSalonManager/OverView/OverView";
@@ -84,10 +84,10 @@ const AppRoutes = () => {
         }
       />
       <Route
-        path="/notifications"
+        path="/history"
         element={
           <ProtectedRoute requiredRoles={["staff"]}>
-            <Notifications />
+            <HistoryPayment />
           </ProtectedRoute>
         }
       />
@@ -115,7 +115,7 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
-      {/* Route quản lý dành cho quản lý */}
+{/* Route quản lý dành cho quản lý */}
       <Route
         path="/statistics"
         element={
