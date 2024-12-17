@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Check, Clock, MapPin } from "lucide-react";
 
-const BookingConfirmation = () => {
+const BookingSuccess = () => {
   const navigate = useNavigate();
   const [countdown, setCountdown] = useState(5);
   const [bookingDetails, setBookingDetails] = useState(null);
@@ -84,4 +84,4 @@ const BookingConfirmation = () => {
   );
 };
 
-export default BookingConfirmation;
+export default BookingSuccess;

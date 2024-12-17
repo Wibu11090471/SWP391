@@ -38,7 +38,9 @@ const ServiceDetail = () => {
   }, [serviceId]);
 
   const handleBookService = () => {
-    navigate(`/booking/${serviceId}`);
+    navigate(`/booking/${serviceId}`, {
+      state: { service: serviceDetail.service },
+    });
   };
 
   const handleNextImage = () => {
@@ -131,7 +133,7 @@ const ServiceDetail = () => {
                 <div className="flex justify-between mb-2">
                   <span className="text-gray-600">Thời gian dịch vụ:</span>
                   <span className="font-semibold">
-                    {service.timeService} giờ
+                    {service.timeService * 60} phút
                   </span>
                 </div>
                 <div className="flex justify-between">

@@ -15,7 +15,6 @@ import StaffManagement from "./components/HairSalonManager/StaffManagement/Staff
 import StaffDetailManagement from "./components/HairSalonManager/StaffManagement/StaffDetailManagement/StaffDetailManagement";
 import StylistManagement from "./components/HairSalonManager/StylistManagement/StylistManagement";
 import StylistDetailManagement from "./components/HairSalonManager/StylistManagement/StylistDetailManagement/StylistDetailManagement";
-import BookingConfirmation from "./components/BookingService/BookingSuccess";
 import PickingStylish from "./components/Dashboard/AppointmentManagement/PickingStylist";
 import PaymentCounter from "./components/Dashboard/AppointmentManagement/PaymentCounter";
 import DashboardSalonStaff from "./components/Dashboard/AppointmentManagement/DashboardSalonStaff";
@@ -24,6 +23,8 @@ import AccountProfile from "./components/Profile/AccountProfile";
 import StylistCommission from "./components/Dashboard/StylistCommission/StylistCommission";
 import ServiceList from "./components/ServicePage/ServiceList/ServiceList";
 import ServiceDetail from "./components/ServicePage/ServiceDetail/ServiceDetail";
+import BookingService from "./components/BookingService/BookingService";
+import BookingConfirmation from "./components/BookingService/BookingConfirmation";
 
 const AppRoutes = () => {
   return (
@@ -35,6 +36,8 @@ const AppRoutes = () => {
       <Route path="/profile" element={<AccountProfile />} />
       <Route path="/services/:categoryId" element={<ServiceList />} />
       <Route path="/service/:serviceId" element={<ServiceDetail />} />
+      <Route path="/booking/:serviceId" element={<BookingService />} />
+      <Route path="/booking-confirmation" element={<BookingConfirmation />} />
       {/* Route yêu cầu đăng nhập */}
 
       <Route
@@ -68,14 +71,6 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute requiredRoles={["staff"]}>
             <StylistCommission />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/booking-success"
-        element={
-          <ProtectedRoute>
-            <BookingConfirmation />
           </ProtectedRoute>
         }
       />
