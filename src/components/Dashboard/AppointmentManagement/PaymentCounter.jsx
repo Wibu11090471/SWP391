@@ -3,7 +3,7 @@ import axios from "axios";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { Button } from "../../../ui/button";
-import { useNavigate } from "react-router-dom"; 
+import { useNavigate } from "react-router-dom";
 
 const api = axios.create({
   baseURL: "https://localhost:7081",
@@ -17,8 +17,8 @@ const PaymentCounter = () => {
   const [bookings, setBookings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [paymentSuccess, setPaymentSuccess] = useState(false); 
-  const navigate = useNavigate(); 
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchBookings();
@@ -99,7 +99,7 @@ const PaymentCounter = () => {
       await fetchBookings();
 
       setTimeout(() => {
-        setPaymentSuccess(false); 
+        setPaymentSuccess(false);
       }, 3000);
     } catch (error) {
       console.error("Lỗi khi thanh toán:", error);

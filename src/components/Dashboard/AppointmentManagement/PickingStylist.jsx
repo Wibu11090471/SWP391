@@ -134,17 +134,25 @@ const DashboardSalonStaff = () => {
 
   const handleCheckIn = async (bookingId) => {
     const token = localStorage.getItem("token");
+    const booking = bookings.find((b) => b.id === bookingId);
+    const currentTime = new Date();
+    const bookingStartTime = new Date(booking.startTime);
+
+    // Kiểm tra nếu thời gian hiện tại nhỏ hơn thời gian bắt đầu booking
+    if (currentTime < bookingStartTime) {
+      alert("Không được phép check-in khi chưa đến giờ hẹn");
+      return;
+    }
 
     try {
-      // Update booking status to check-in
+      // Giữ nguyên logic check-in như cũ
       await api.put(
         `/api/Booking/${bookingId}`,
         {
           status: "check-in",
           note: "Đã check-in",
-          // Keeping other details same as original booking
-          serviceId: bookings.find((b) => b.id === bookingId).service.id,
-          startTime: bookings.find((b) => b.id === bookingId).startTime,
+          serviceId: booking.service.id,
+          startTime: booking.startTime,
         },
         {
           headers: {
