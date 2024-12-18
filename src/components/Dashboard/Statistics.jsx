@@ -154,15 +154,15 @@ const Statistics = () => {
               href="/addserviceimage"
               className="block py-3 text-lg hover:bg-gray-700 px-4 rounded-lg transition-all duration-300 ease-in-out hover:text-yellow-400"
             >
-              Thêm Dịch Vụ
+              Thêm dịch vụ
             </a>
           </li>
           <li>
             <a
-              href="/notifications"
+              href="/history"
               className="block py-3 text-lg hover:bg-gray-700 px-4 rounded-lg transition-all duration-300 ease-in-out hover:text-yellow-400"
             >
-              Thông Báo
+              Lịch sử giao dịch
             </a>
           </li>
           <li>
@@ -170,7 +170,7 @@ const Statistics = () => {
               href="/statistics"
               className="block py-3 text-lg bg-gray-700 px-4 rounded-lg transition-all duration-300 ease-in-out text-yellow-400"
             >
-              Thống Kê
+              Thống kê
             </a>
           </li>
           <li>
