@@ -1,8 +1,16 @@
 import React, { useState } from "react";
 import { Button } from "../../../ui/button";
 import { Input } from "../../../ui/input";
-import { PlusCircle, X } from "lucide-react";
+import { PlusCircle, Plus } from "lucide-react";
 import axios from "axios";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "../../../ui/dialog";
+import { Label } from "../../../ui/label";
 import theme from "../../../theme";
 
 const AddServiceModal = ({ categoryId, isOpen, onClose, onServiceCreated }) => {
@@ -13,7 +21,7 @@ const AddServiceModal = ({ categoryId, isOpen, onClose, onServiceCreated }) => {
     discount: "",
     timeService: "",
     categoryServiceId: parseInt(categoryId),
-    status: true, // Thêm trường status mặc định là true
+    status: true,
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -56,7 +64,6 @@ const AddServiceModal = ({ categoryId, isOpen, onClose, onServiceCreated }) => {
 
     setLoading(true);
     try {
-      // Bước 1: Tạo service mới
       const createResponse = await api.post("/api/Service/create", {
         ...serviceData,
         price: parseFloat(serviceData.price),
@@ -65,12 +72,10 @@ const AddServiceModal = ({ categoryId, isOpen, onClose, onServiceCreated }) => {
         status: true,
       });
 
-      // Bước 2: Fetch lại toàn bộ danh sách services
       const servicesResponse = await api.get(
         `/api/Service/getAllServicesByCategoryId?categoryId=${categoryId}`
       );
 
-      // Bước 3: Fetch chi tiết cho từng service bao gồm cả images
       const servicesWithImages = await Promise.all(
         servicesResponse.data.map(async (service) => {
           const detailResponse = await api.get(
@@ -92,10 +97,7 @@ const AddServiceModal = ({ categoryId, isOpen, onClose, onServiceCreated }) => {
         })
       );
 
-      // Cập nhật state với danh sách services mới
       onServiceCreated(servicesWithImages);
-
-      // Reset form
       setServiceData({
         title: "",
         description: "",
@@ -105,8 +107,6 @@ const AddServiceModal = ({ categoryId, isOpen, onClose, onServiceCreated }) => {
         categoryServiceId: parseInt(categoryId),
         status: true,
       });
-
-      // Đóng modal
       onClose();
     } catch (error) {
       console.error("Service creation error:", error);
@@ -122,93 +122,202 @@ const AddServiceModal = ({ categoryId, isOpen, onClose, onServiceCreated }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div
-        className="bg-white rounded-lg p-6 w-full max-w-md mx-4"
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent
         style={{
           backgroundColor: theme.colors.background.secondary,
           color: theme.colors.text.primary,
+          maxWidth: "600px",
         }}
       >
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">Thêm Dịch Vụ Mới</h2>
-          <Button variant="ghost" size="icon" onClick={onClose}>
-            <X className="h-6 w-6" />
-          </Button>
-        </div>
+        <DialogHeader>
+          <div className="flex items-center space-x-2">
+            <Plus
+              style={{ color: theme.colors.primary.DEFAULT }}
+              className="h-6 w-6"
+            />
+            <DialogTitle style={{ color: theme.colors.text.primary }}>
+              Thêm Dịch Vụ Mới
+            </DialogTitle>
+          </div>
+          <DialogDescription style={{ color: theme.colors.text.secondary }}>
+            Điền thông tin để tạo dịch vụ mới
+          </DialogDescription>
+        </DialogHeader>
 
-        <form onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            <div>
-              <Input
-                name="title"
-                value={serviceData.title}
-                onChange={handleChange}
-                placeholder="Tên dịch vụ"
-              />
-              {errors.title && (
-                <p className="text-red-500 text-sm">{errors.title}</p>
-              )}
-            </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Tên dịch vụ */}
+          <div>
+            <Label style={{ color: theme.colors.text.primary }}>
+              Tên dịch vụ
+            </Label>
+            <Input
+              name="title"
+              value={serviceData.title}
+              onChange={handleChange}
+              placeholder="Nhập tên dịch vụ"
+              style={{
+                backgroundColor: theme.colors.background.primary,
+                borderColor: theme.colors.primary.light,
+                color: theme.colors.text.primary,
+              }}
+            />
+            {errors.title && (
+              <p style={{ color: theme.colors.error }} className="text-sm mt-1">
+                {errors.title}
+              </p>
+            )}
+          </div>
 
-            <div>
-              <Input
-                name="description"
-                value={serviceData.description}
-                onChange={handleChange}
-                placeholder="Mô tả dịch vụ"
-              />
-            </div>
+          {/* Mô tả */}
+          <div>
+            <Label style={{ color: theme.colors.text.primary }}>
+              Mô tả dịch vụ
+            </Label>
+            <Input
+              name="description"
+              value={serviceData.description}
+              onChange={handleChange}
+              placeholder="Nhập mô tả dịch vụ"
+              style={{
+                backgroundColor: theme.colors.background.primary,
+                borderColor: theme.colors.primary.light,
+                color: theme.colors.text.primary,
+              }}
+            />
+          </div>
 
+          <div className="grid grid-cols-2 gap-4">
+            {/* Giá */}
             <div>
+              <Label style={{ color: theme.colors.text.primary }}>
+                Giá dịch vụ
+              </Label>
               <Input
                 name="price"
                 type="number"
                 value={serviceData.price}
                 onChange={handleChange}
-                placeholder="Giá dịch vụ"
+                placeholder="Nhập giá dịch vụ"
+                style={{
+                  backgroundColor: theme.colors.background.primary,
+                  borderColor: theme.colors.primary.light,
+                  color: theme.colors.text.primary,
+                }}
               />
               {errors.price && (
-                <p className="text-red-500 text-sm">{errors.price}</p>
+                <p
+                  style={{ color: theme.colors.error }}
+                  className="text-sm mt-1"
+                >
+                  {errors.price}
+                </p>
               )}
             </div>
 
+            {/* Thời gian */}
             <div>
+              <Label style={{ color: theme.colors.text.primary }}>
+                Thời gian (giờ)
+              </Label>
               <Input
                 name="timeService"
                 type="number"
                 value={serviceData.timeService}
                 onChange={handleChange}
-                placeholder="Thời gian (phút)"
+                placeholder="Nhập thời gian dịch vụ"
+                style={{
+                  backgroundColor: theme.colors.background.primary,
+                  borderColor: theme.colors.primary.light,
+                  color: theme.colors.text.primary,
+                }}
               />
               {errors.timeService && (
-                <p className="text-red-500 text-sm">{errors.timeService}</p>
+                <p
+                  style={{ color: theme.colors.error }}
+                  className="text-sm mt-1"
+                >
+                  {errors.timeService}
+                </p>
               )}
             </div>
+          </div>
 
-            <div>
-              <Input
-                name="discount"
-                type="number"
-                value={serviceData.discount}
-                onChange={handleChange}
-                placeholder="Giảm giá (%)"
+          {/* Giảm giá */}
+          <div>
+            <Label style={{ color: theme.colors.text.primary }}>
+              Giảm giá (%)
+            </Label>
+            <Input
+              name="discount"
+              type="number"
+              value={serviceData.discount}
+              onChange={handleChange}
+              placeholder="Nhập phần trăm giảm giá"
+              style={{
+                backgroundColor: theme.colors.background.primary,
+                borderColor: theme.colors.primary.light,
+                color: theme.colors.text.primary,
+              }}
+            />
+          </div>
+
+          {/* Trạng thái */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Label style={{ color: theme.colors.text.primary }}>
+                Trạng thái
+              </Label>
+              <span
+                style={{ color: theme.colors.text.secondary }}
+                className="text-sm"
+              >
+                (Mặc định: Hoạt động)
+              </span>
+            </div>
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                checked={serviceData.status}
+                onChange={(e) =>
+                  setServiceData((prev) => ({
+                    ...prev,
+                    status: e.target.checked,
+                  }))
+                }
+                className="w-4 h-4"
               />
             </div>
           </div>
 
-          <div className="flex justify-end space-x-4 mt-6">
-            <Button type="button" variant="outline" onClick={onClose}>
+          {/* Action Buttons */}
+          <div className="flex justify-end space-x-2 mt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              style={{
+                color: theme.colors.text.secondary,
+                borderColor: theme.colors.primary.light,
+              }}
+            >
               Hủy
             </Button>
-            <Button type="submit" disabled={loading}>
+            <Button
+              type="submit"
+              disabled={loading}
+              style={{
+                backgroundColor: theme.colors.primary.DEFAULT,
+                color: "white",
+              }}
+            >
               <PlusCircle className="mr-2 h-4 w-4" />
-              {loading ? "Đang xử lý..." : "Tạo"}
+              {loading ? "Đang xử lý..." : "Tạo mới"}
             </Button>
           </div>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 

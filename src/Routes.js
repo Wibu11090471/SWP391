@@ -3,19 +3,11 @@ import { Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import Login from "./components/Login/Login";
 import Home from "./components/HomePage/HairSalonHome";
-import AllService from "./components/ServicePage/AllService/AllService";
-import HairCutService from "./components/ServicePage/HairCutService/HairCutService";
-import HairDyeingService from "./components/ServicePage/HairDyeingService/HairDyeingService";
-import HairPermService from "./components/ServicePage/HairPermService/HairPermService";
-import HairCutServiceDetail from "./components/ServicePage/HairCutService/HairCutServiceDetail/HairCutServiceDetail";
-import HairDyeingServiceDetail from "./components/ServicePage/HairDyeingService/HairDyeingServiceDetail/HairDyeingServiceDetail";
-import HairPermServiceDetail from "./components/ServicePage/HairPermService/HairPermServiceDetail/HairPermServiceDetail";
-import BookingService from "./components/BookingService/BookingService";
 import NotFound from "./components/NotFound/NotFound";
-import CreateService from "./components/Dashboard/ServiceImageContainer/CreateService";
-import CreateImage from "./components/Dashboard/ServiceImageContainer/CreateImage";
+import CreateService from "./components/Dashboard/AppointmentManagement/ServiceImageContainer/CreateService";
+import CreateImage from "./components/Dashboard/AppointmentManagement/ServiceImageContainer/CreateImage";
 import ServiceImageContainer from "./components/Dashboard/ServiceImageContainer";
-import Notifications from "./components/Dashboard/Notifications";
+import HistoryPayment from "./components/Dashboard/HistoryPayment";
 import Statistics from "./components/Dashboard/Statistics";
 import UserManagement from "./components/HairSalonManager/UserManagement/UserManagement";
 import UserDetailManagement from "./components/HairSalonManager/UserManagement/UserDetailManagement/UserDetailManagement";
@@ -24,9 +16,6 @@ import StaffManagement from "./components/HairSalonManager/StaffManagement/Staff
 import StaffDetailManagement from "./components/HairSalonManager/StaffManagement/StaffDetailManagement/StaffDetailManagement";
 import StylistManagement from "./components/HairSalonManager/StylistManagement/StylistManagement";
 import StylistDetailManagement from "./components/HairSalonManager/StylistManagement/StylistDetailManagement/StylistDetailManagement";
-import MassageRelaxService from "./components/ServicePage/MassageRelaxService/MassageRelaxService";
-import EarCleaningService from "./components/ServicePage/EarCleaningService/EarCleaningService";
-import BookingConfirmation from "./components/BookingService/BookingSuccess";
 import PickingStylish from "./components/Dashboard/AppointmentManagement/PickingStylist";
 import PaymentCounter from "./components/Dashboard/AppointmentManagement/PaymentCounter";
 import DashboardSalonStaff from "./components/Dashboard/AppointmentManagement/DashboardSalonStaff";
@@ -36,6 +25,7 @@ import StylistCommission from "./components/Dashboard/StylistCommission/StylistC
 import CategoryManagement from "./components/HairSalonManager/Category/CategoryManagement";
 import CategoryDetailManagement from "./components/HairSalonManager/Category/CategoryDetailManagement";
 import AddCategoryManagement from "./components/HairSalonManager/Category/AddCategoryManagement";
+import StylistSalary from "./components/StylistSalary/StylistSalary";
 
 const AppRoutes = () => {
   return (
@@ -44,16 +34,6 @@ const AppRoutes = () => {
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       {/* Route dịch vụ - có thể cho phép truy cập không cần đăng nhập */}
-      <Route path="/haircutservice" element={<HairCutService />} />
-      <Route path="/hairdyeingservice" element={<HairDyeingService />} />
-      <Route path="/hairpermservice" element={<HairPermService />} />
-      <Route path="/massageservice" element={<MassageRelaxService />} />
-      <Route path="/earcleaningservice" element={<EarCleaningService />} />
-      <Route path="/service/:id" element={<HairCutServiceDetail />} />
-      <Route path="/dyeing-service/:id" element={<HairDyeingServiceDetail />} />
-      <Route path="/perm-service/:id" element={<HairPermServiceDetail />} />
-      <Route path="/booking-service" element={<BookingService />} />
-      <Route path="/all-service" element={<AllService />} />
       <Route path="/profile" element={<AccountProfile />} />
       <Route path="/category-management" element={<CategoryManagement />} />
       <Route
@@ -69,6 +49,15 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute requiredRoles={["staff"]}>
             <PickingStylish />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/stylist-calender"
+        element={
+          <ProtectedRoute requiredRoles={["stylist"]}>
+            <StylistSalary />
           </ProtectedRoute>
         }
       />
@@ -98,14 +87,6 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
-      <Route
-        path="/booking-success"
-        element={
-          <ProtectedRoute>
-            <BookingConfirmation />
-          </ProtectedRoute>
-        }
-      />
       {/* Route dành cho nhân viên salon */}
       <Route
         path="/hairsalon-staff"
@@ -116,10 +97,10 @@ const AppRoutes = () => {
         }
       />
       <Route
-        path="/notifications"
+        path="/history"
         element={
           <ProtectedRoute requiredRoles={["staff"]}>
-            <Notifications />
+            <HistoryPayment />
           </ProtectedRoute>
         }
       />

@@ -1,8 +1,17 @@
 import React, { useState } from "react";
 import { Button } from "../../../ui/button";
 import { Input } from "../../../ui/input";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, Edit } from "lucide-react";
 import axios from "axios";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "../../../ui/dialog";
+import { Label } from "../../../ui/label";
+import theme from "../../../theme";
 
 const api = axios.create({
   baseURL: "https://localhost:7081",
@@ -25,13 +34,21 @@ const EditServiceModal = ({
   const [isLoading, setIsLoading] = useState(false);
   const [newImageUrl, setNewImageUrl] = useState("");
   const [imageError, setImageError] = useState("");
+  const [priceError, setPriceError] = useState("");
+  const [timeService, setTimeService] = useState("");
 
   if (!isOpen) return null;
 
   const handleServiceUpdate = async (serviceId, updatedServiceData) => {
+    if (parseFloat(updatedServiceData.price) <= 0) {
+      alert("Giá không được nhỏ hơn hoặc bằng 0");
+      return;
+    } else if (parseFloat(updatedServiceData.timeService) <= 0) {
+      alert("Thời gian không được nhỏ hơn hoặc bằng 0");
+      return;
+    }
     setIsLoading(true);
     try {
-      // Cập nhật dịch vụ
       await api.put(`/api/Service/update-all/${serviceId}`, {
         ...updatedServiceData,
         price: parseFloat(updatedServiceData.price),
@@ -41,7 +58,6 @@ const EditServiceModal = ({
         status: updatedServiceData.status,
       });
 
-      // Fetch lại chi tiết dịch vụ sau khi cập nhật
       const detailResponse = await api.get(`/api/Service/detail/${serviceId}`);
       const updatedService = {
         serviceEnity: {
@@ -58,7 +74,7 @@ const EditServiceModal = ({
       };
 
       alert("Dịch vụ đã được cập nhật thành công!");
-      onUpdateSuccess(); // Gọi callback để cập nhật danh sách dịch vụ
+      onUpdateSuccess();
       onClose();
     } catch (error) {
       console.error("Error updating service:", error);
@@ -87,13 +103,11 @@ const EditServiceModal = ({
 
     setIsLoading(true);
     try {
-      // Thêm ảnh mới
       await api.post("/api/Image/add", {
         url: newImageUrl,
         serviceId: currentService.id,
       });
 
-      // Fetch lại chi tiết dịch vụ để cập nhật danh sách ảnh
       const detailResponse = await api.get(
         `/api/Service/detail/${currentService.id}`
       );
@@ -102,7 +116,7 @@ const EditServiceModal = ({
       setNewImageUrl("");
       setImageError("");
       alert("Thêm ảnh thành công!");
-      onUpdateSuccess(); // Cập nhật lại danh sách dịch vụ
+      onUpdateSuccess();
     } catch (error) {
       alert("Lỗi khi thêm ảnh: " + (error.response?.data || error.message));
     } finally {
@@ -111,6 +125,19 @@ const EditServiceModal = ({
   };
 
   const handleInputChange = (field, value) => {
+    if (field === "price") {
+      if (parseFloat(value) < 0) {
+        setPriceError("Giá không được nhỏ hơn hoặc bằng 0");
+        return;
+      }
+      setPriceError("");
+    } else if (field === "timeService") {
+      if (parseFloat(value) < 0) {
+        setTimeService("Thời gian không được nhỏ hơn hoặc bằng 0");
+        return;
+      }
+    }
+
     setCurrentService((prev) => ({
       ...prev,
       [field]: value,
@@ -118,103 +145,152 @@ const EditServiceModal = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
-        <h2 className="text-xl font-bold mb-4">Chỉnh Sửa Dịch Vụ</h2>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent
+        style={{
+          backgroundColor: theme.colors.background.secondary,
+          color: theme.colors.text.primary,
+          maxWidth: "400px",
+        }}
+      >
+        <DialogHeader>
+          <div className="flex items-center space-x-2">
+            <Edit
+              style={{ color: theme.colors.primary.DEFAULT }}
+              className="h-6 w-6"
+            />
+            <DialogTitle style={{ color: theme.colors.text.primary }}>
+              Chỉnh Sửa Dịch Vụ
+            </DialogTitle>
+          </div>
+          <DialogDescription style={{ color: theme.colors.text.secondary }}>
+            Cập nhật thông tin cho dịch vụ
+          </DialogDescription>
+        </DialogHeader>
 
-        {/* Service Details Form */}
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleServiceUpdate(currentService.id, currentService);
-          }}
-          className="mb-6"
-        >
-          <div className="space-y-4">
-            {/* Tên dịch vụ */}
+        <div className="space-y-4">
+          {/* Tên dịch vụ */}
+          <div>
+            <Label style={{ color: theme.colors.text.primary }}>
+              Tên dịch vụ
+            </Label>
+            <Input
+              placeholder="Tên dịch vụ"
+              value={currentService.title}
+              onChange={(e) => handleInputChange("title", e.target.value)}
+              disabled={isLoading}
+              style={{
+                backgroundColor: theme.colors.background.primary,
+                borderColor: theme.colors.primary.light,
+                color: theme.colors.text.primary,
+              }}
+            />
+          </div>
+
+          {/* Mô tả dịch vụ */}
+          <div>
+            <Label style={{ color: theme.colors.text.primary }}>
+              Mô tả dịch vụ
+            </Label>
+            <Input
+              placeholder="Mô tả"
+              value={currentService.description}
+              onChange={(e) => handleInputChange("description", e.target.value)}
+              disabled={isLoading}
+              style={{
+                backgroundColor: theme.colors.background.primary,
+                borderColor: theme.colors.primary.light,
+                color: theme.colors.text.primary,
+              }}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            {/* Giá */}
             <div>
-              <p className="text-sm text-gray-600">Nhập tên dịch vụ</p>
+              <Label style={{ color: theme.colors.text.primary }}>
+                Giá dịch vụ
+              </Label>
               <Input
-                placeholder="Tên dịch vụ"
-                value={currentService.title}
-                onChange={(e) => handleInputChange("title", e.target.value)}
+                placeholder="Giá"
+                type="number"
+                value={currentService.price}
+                onChange={(e) => handleInputChange("price", e.target.value)}
                 disabled={isLoading}
+                style={{
+                  backgroundColor: theme.colors.background.primary,
+                  borderColor: theme.colors.primary.light,
+                  color: theme.colors.text.primary,
+                }}
               />
+              {priceError && (
+                <p
+                  style={{ color: theme.colors.error }}
+                  className="text-sm mt-1"
+                >
+                  {priceError}
+                </p>
+              )}
             </div>
 
-            {/* Mô tả dịch vụ */}
+            {/* Thời gian dịch vụ */}
             <div>
-              <p className="text-sm text-gray-600">Nhập mô tả về dịch vụ</p>
+              <Label style={{ color: theme.colors.text.primary }}>
+                Thời gian (giờ)
+              </Label>
               <Input
-                placeholder="Mô tả"
-                value={currentService.description}
+                placeholder="Thời gian (giờ)"
+                type="number"
+                value={currentService.timeService}
                 onChange={(e) =>
-                  handleInputChange("description", e.target.value)
+                  handleInputChange("timeService", e.target.value)
                 }
                 disabled={isLoading}
+                style={{
+                  backgroundColor: theme.colors.background.primary,
+                  borderColor: theme.colors.primary.light,
+                  color: theme.colors.text.primary,
+                }}
               />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              {/* Giá */}
-              <div>
-                <p className="text-sm text-gray-600">
-                  Nhập giá dịch vụ (vd: 100000đ)
+              {timeService && (
+                <p
+                  style={{ color: theme.colors.error }}
+                  className="text-sm mt-1"
+                >
+                  {timeService}
                 </p>
-                <Input
-                  placeholder="Giá"
-                  type="number"
-                  value={currentService.price}
-                  onChange={(e) => handleInputChange("price", e.target.value)}
-                  disabled={isLoading}
-                />
-              </div>
-
-              {/* Thời gian dịch vụ */}
-              <div>
-                <p className="text-sm text-gray-600">
-                  Nhập thời gian (vd: 1.5 giờ)
-                </p>
-                <Input
-                  placeholder="Thời gian (phút)"
-                  type="number"
-                  value={currentService.timeService}
-                  onChange={(e) =>
-                    handleInputChange("timeService", e.target.value)
-                  }
-                  disabled={isLoading}
-                />
-              </div>
-            </div>
-
-            {/* Trạng thái */}
-            <div>
-              <p className="text-sm text-gray-600">Chọn trạng thái dịch vụ</p>
-              <div className="flex items-center">
-                <label htmlFor="status" className="mr-2">
-                  Hoạt động
-                </label>
-                <input
-                  id="status"
-                  type="checkbox"
-                  checked={currentService.status}
-                  onChange={(e) =>
-                    handleInputChange("status", e.target.checked)
-                  }
-                  disabled={isLoading}
-                />
-              </div>
+              )}
             </div>
           </div>
-        </form>
 
-        {/* Images Section */}
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold mb-4">Hình Ảnh</h3>
+          {/* Trạng thái */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Label style={{ color: theme.colors.text.primary }}>
+                Trạng thái
+              </Label>
+              <span
+                style={{ color: theme.colors.text.secondary }}
+                className="text-sm"
+              >
+                ({currentService.status ? "Hoạt động" : "Ngừng hoạt động"})
+              </span>
+            </div>
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                checked={currentService.status}
+                onChange={(e) => handleInputChange("status", e.target.checked)}
+                disabled={isLoading}
+                className="w-4 h-4"
+              />
+            </div>
+          </div>
 
-          {/* Add New Image Section */}
-          <div className="mb-4">
-            <div className="flex gap-2">
+          {/* Images Section */}
+          <div>
+            <Label style={{ color: theme.colors.text.primary }}>Hình Ảnh</Label>
+            <div className="flex gap-2 mb-2">
               <Input
                 placeholder="Nhập URL hình ảnh mới"
                 value={newImageUrl}
@@ -223,62 +299,79 @@ const EditServiceModal = ({
                   setImageError("");
                 }}
                 disabled={isLoading}
+                style={{
+                  backgroundColor: theme.colors.background.primary,
+                  borderColor: theme.colors.primary.light,
+                  color: theme.colors.text.primary,
+                }}
               />
               <Button
                 type="button"
                 onClick={handleAddImage}
                 disabled={isLoading}
                 className="whitespace-nowrap"
+                style={{
+                  backgroundColor: theme.colors.primary.DEFAULT,
+                  color: "white",
+                }}
               >
                 <PlusCircle className="mr-2 h-4 w-4" />
                 {isLoading ? "Đang thêm..." : "Thêm Ảnh"}
               </Button>
             </div>
             {imageError && (
-              <p className="text-red-500 text-sm mt-1">{imageError}</p>
+              <p style={{ color: theme.colors.error }} className="text-sm mt-1">
+                {imageError}
+              </p>
             )}
-          </div>
 
-          {/* Display Current Images */}
-          <div className="grid grid-cols-2 gap-4">
-            {currentImages.length > 0 ? (
-              currentImages.map((image, index) => (
-                <div key={image.id} className="mb-4">
+            {/* Display Current Images */}
+            <div className="w-full">
+              {currentImages.length > 0 ? (
+                <div className="mb-4">
                   <img
-                    src={image.url}
-                    alt={`Hình ảnh ${index + 1}`}
-                    className="w-full h-40 object-cover rounded"
+                    src={[...currentImages].sort((a, b) => b.id - a.id)[0].url}
+                    alt="Hình ảnh dịch vụ"
+                    className="w-40 h-40 object-cover rounded"
                   />
                 </div>
-              ))
-            ) : (
-              <p>Không có hình ảnh nào để hiển thị.</p>
-            )}
+              ) : (
+                <p style={{ color: theme.colors.text.secondary }}>
+                  Không có hình ảnh nào để hiển thị.
+                </p>
+              )}
+            </div>
           </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex justify-end space-x-2">
+        <div className="flex justify-end space-x-2 mt-4">
           <Button
-            type="button"
             variant="outline"
             onClick={onClose}
             disabled={isLoading}
+            style={{
+              color: theme.colors.text.secondary,
+              borderColor: theme.colors.primary.light,
+            }}
           >
             Hủy
           </Button>
           <Button
-            type="button"
             onClick={() =>
               handleServiceUpdate(currentService.id, currentService)
             }
             disabled={isLoading}
+            style={{
+              backgroundColor: theme.colors.primary.DEFAULT,
+              color: "white",
+            }}
           >
             {isLoading ? "Đang lưu..." : "Lưu Thay Đổi"}
           </Button>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 

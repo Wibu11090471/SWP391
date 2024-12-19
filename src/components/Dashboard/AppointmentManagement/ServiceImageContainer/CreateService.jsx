@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios"; 
+import { XIcon } from "lucide-react";
 
 const CreateService = ({ 
-  onServiceCreated, 
-  redirectToImageDisabled = false 
+  categories,
+  onclose
 }) => {
   const createApiInstance = () => {
     const token = localStorage.getItem("token");
@@ -17,12 +18,18 @@ const CreateService = ({
     });
   };
 
+  useEffect(() => {
+    if (categories.length > 0) {
+      setServiceData((prev) => ({ ...prev, categoryServiceId: categories[0].id }));
+    }
+  }, [categories]);
   const [serviceData, setServiceData] = useState({
     title: "",
     description: "",
     price: 0,
     discount: 0,
     timeService: 0,
+    categoryServiceId: "",
   });
 
   const [submitStatus, setSubmitStatus] = useState({
@@ -35,7 +42,7 @@ const CreateService = ({
     setServiceData((prevState) => ({
       ...prevState,
       [name]:
-        name === "price" || name === "discount" || name === "timeService"
+        name === "price" || name === "discount" || name === "timeService" || name === "categoryServiceId"
           ? parseFloat(value)
           : value,
     }));
@@ -48,29 +55,14 @@ const CreateService = ({
     setSubmitStatus({ success: false, error: null });
 
     try {
-      const response = await api.post("/api/Service/create", serviceData);
-
+     const response = await api.post("/api/Service/create", serviceData);
       if (response.status === 201) {
         setSubmitStatus({
           success: true,
           error: null,
         });
-
-        // Gọi callback nếu được truyền
-        if (onServiceCreated) {
-          onServiceCreated(response.data.id);
-        }
-
         // Reset form nếu không được điều hướng
-        if (redirectToImageDisabled) {
-          setServiceData({
-            title: "",
-            description: "",
-            price: 0,
-            discount: 0,
-            timeService: 0,
-          });
-        }
+       
       } else {
         throw new Error("Failed to create service");
       }
@@ -85,8 +77,14 @@ const CreateService = ({
   };
 
   return (
-    <div className="bg-[#FDF5E6]  flex items-center justify-center pb-20">
-      <div className="w-full max-w-md bg-white shadow-lg rounded-xl p-8">
+    <div className="bg-[#FDF5E6]  flex items-center justify-center">
+      <div className="w-full max-w-md bg-white shadow-lg rounded-xl p-8 relative">
+        <button
+            onClick={onclose}
+            className="absolute top-4 right-4 text-gray-500 hover:text-gray-800"
+          >
+            <XIcon size={24} />
+        </button>
         <h2 className="text-2xl font-bold mb-6 text-center text-[#3E2723]">
           Tạo Dịch Vụ Mới
         </h2>
@@ -195,6 +193,26 @@ const CreateService = ({
                 step="5"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#CD853F]"
               />
+            </div>
+            <div>
+              <label
+                htmlFor="category"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Thể Loại
+              </label>
+              <select 
+               id="categoryServiceId"
+               name="categoryServiceId"
+               value={serviceData.category}
+               onChange={handleInputChange}
+              >
+                {categories.map((category,index) => (
+                  <option key={index} value={category.id}>
+                    {category.title}
+                  </option>
+                ))}
+              </select>
             </div>
           
           {submitStatus.error && (

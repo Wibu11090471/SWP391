@@ -27,51 +27,113 @@ const BookingDetailModal = ({ booking, onClose, onStatusChange }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-lg shadow-xl w-96">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-[#5D4037]">
+      <div className="bg-white p-8 rounded-lg shadow-2xl w-[700px] max-w-full">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-6 border-b pb-4">
+          <h2 className="text-2xl font-bold text-[#5D4037]">
             Chi tiết đặt lịch
           </h2>
           <button
             onClick={onClose}
-            className="text-[#8B4513] hover:text-[#915C38]"
+            className="text-[#8B4513] hover:text-[#915C38] text-2xl transition duration-300"
           >
             ✕
           </button>
         </div>
 
-        <div className="space-y-3">
+        {/* Content - Grid layout 2 columns */}
+        <div className="grid grid-cols-2 gap-x-8 gap-y-6 text-[#5D4037]">
+          {/* Dịch vụ */}
           <div>
-            <p className="font-semibold text-[#5D4037]">Dịch vụ:</p>
-            <p>{booking.service.title}</p>
+            <p className="font-semibold mb-1">Dịch vụ:</p>
+            <p className="text-gray-700">{booking.service?.title ?? "N/A"}</p>
           </div>
+
+          {/* Giá */}
           <div>
-            <p className="font-semibold text-[#5D4037]">Khách hàng:</p>
-            <p>{booking.createdBy.fullName}</p>
-          </div>
-          <div>
-            <p className="font-semibold text-[#5D4037]">Thời gian:</p>
-            <p>
-              {format(new Date(booking.startTime), "EEEE, dd/MM/yyyy HH:mm", {
-                locale: vi,
-              })}
+            <p className="font-semibold mb-1">Giá:</p>
+            <p className="text-gray-700">
+              {booking.service?.price?.toLocaleString() ?? "N/A"} VND
             </p>
           </div>
 
-          <div className="flex justify-between mt-4">
-            <button
-              onClick={() => handleStatusChange("confirmed")}
-              className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition"
-            >
-              Chấp nhận
-            </button>
-            <button
-              onClick={() => handleStatusChange("rejected")}
-              className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition"
-            >
-              Từ chối
-            </button>
+          {/* Mô tả */}
+          <div>
+            <p className="font-semibold mb-1">Mô tả:</p>
+            <p className="text-gray-700 whitespace-pre-wrap">
+              {booking.service?.description ?? "Không có mô tả"}
+            </p>
           </div>
+
+          {/* Giảm giá */}
+          <div>
+            <p className="font-semibold mb-1">Giảm giá:</p>
+            <p className="text-gray-700">{booking.discount ?? 0}%</p>
+          </div>
+
+          {/* Khách hàng */}
+          <div>
+            <p className="font-semibold mb-1">Khách hàng:</p>
+            <p className="text-gray-700">
+              {booking.createdBy?.fullName ?? "N/A"}
+            </p>
+          </div>
+
+          {/* Ghi chú */}
+          <div>
+            <p className="font-semibold mb-1">Ghi chú:</p>
+            <p className="text-gray-700">
+              {booking.note ?? "N/A"}
+            </p>
+          </div>
+
+          {/* Thời gian */}
+          <div>
+            <p className="font-semibold mb-1">Thời gian:</p>
+            <p className="text-gray-700">
+              {booking.startTime
+                ? format(
+                    new Date(booking.startTime),
+                    "HH:mm EEEE - dd/MM/yyyy",
+                    {
+                      locale: vi,
+                    }
+                  )
+                : "N/A"}
+            </p>
+          </div>
+
+          {/* Trạng thái */}
+          <div>
+            <p className="font-semibold mb-1">Trạng thái:</p>
+            <p
+              className={`text-gray-700 ${
+                booking.status === "confirmed"
+                  ? "text-green-600"
+                  : booking.status === "rejected"
+                  ? "text-red-600"
+                  : "text-yellow-600"
+              }`}
+            >
+              {booking.status ?? "N/A"}
+            </p>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex justify-center gap-8 mt-8 pt-6 border-t">
+          <button
+            onClick={() => handleStatusChange("confirmed")}
+            className="bg-green-500 text-white px-6 py-3 rounded-md shadow-md hover:bg-green-600 transition duration-300"
+          >
+            Chấp nhận
+          </button>
+          <button
+            onClick={() => handleStatusChange("rejected")}
+            className="bg-red-500 text-white px-6 py-3 rounded-md shadow-md hover:bg-red-600 transition duration-300"
+          >
+            Từ chối
+          </button>
         </div>
       </div>
     </div>

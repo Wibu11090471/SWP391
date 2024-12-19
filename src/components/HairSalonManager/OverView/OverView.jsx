@@ -8,13 +8,12 @@ import {
   Star,
   ChevronRight,
   Layers,
+  Grid,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../ui/card";
 import Layout from "../Layout";
-// import ServiceChart from "../Service/ServiceChart/ServiceChart";
 import CustomerChart from "../OverView/CustomerChart/CustomerChart";
 
-// Axios configuration
 const api = axios.create({
   baseURL: "https://localhost:7081",
   withCredentials: true,
@@ -25,7 +24,7 @@ const api = axios.create({
 });
 
 const OverviewDashboard = () => {
-  const navigate = useNavigate(); // Add useNavigate hook
+  const navigate = useNavigate();
   const [selectedPeriod, setSelectedPeriod] = useState("monthly");
   const [userData, setUserData] = useState({
     staff: [],
@@ -38,6 +37,8 @@ const OverviewDashboard = () => {
     services: [],
     totalServices: 0,
   });
+
+  const [categoryData, setCategoryData] = useState([]);
 
   // Fetch user data from API
   const fetchUserData = async () => {
@@ -69,9 +70,19 @@ const OverviewDashboard = () => {
     }
   };
 
+  const fetchCategoryData = async () => {
+    try {
+      const response = await api.get("/api/CategoryService/getAll");
+      setCategoryData(response.data);
+    } catch (error) {
+      console.error("Error fetching category data:", error);
+    }
+  };
+
   useEffect(() => {
     fetchUserData();
     fetchServiceData();
+    fetchCategoryData();
   }, []);
 
   // Reusable Section Preview Card Component
@@ -110,22 +121,12 @@ const OverviewDashboard = () => {
     </Card>
   );
 
-  // Navigation handlers with React Router
-  const handleViewStylists = () => {
-    navigate("/stylist-management");
-  };
-
-  const handleViewStaff = () => {
-    navigate("/staff-management");
-  };
-
-  const handleViewCustomers = () => {
-    navigate("/user-management");
-  };
-
-  const handleViewServices = () => {
-    navigate("/service-management");
-  };
+  // Navigation handlers
+  const handleViewStylists = () => navigate("/stylist-management");
+  const handleViewStaff = () => navigate("/staff-management");
+  const handleViewCustomers = () => navigate("/user-management");
+  const handleViewServices = () => navigate("/service-management");
+  const handleViewCategories = () => navigate("/category-management");
 
   return (
     <Layout>
@@ -135,7 +136,7 @@ const OverviewDashboard = () => {
         </h1>
 
         {/* Preview Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {/* Customers */}
           <SectionPreviewCard
             icon={Users}
@@ -185,6 +186,23 @@ const OverviewDashboard = () => {
             description="Nhấn để quản lý danh sách stylist"
             buttonText="Quản Lý"
             onViewDetail={handleViewStylists}
+          />
+
+          {/* Categories */}
+          <SectionPreviewCard
+            icon={Grid}
+            title="Quản Lý Danh Mục"
+            data={[
+              `Tổng số danh mục: ${categoryData.length}`,
+              `Đang hoạt động: ${
+                categoryData.filter((category) => category.status).length
+              } / Ngưng hoạt động: ${
+                categoryData.filter((category) => !category.status).length
+              }`,
+            ]}
+            description="Nhấn để quản lý danh mục dịch vụ"
+            buttonText="Quản Lý"
+            onViewDetail={handleViewCategories}
           />
         </div>
 

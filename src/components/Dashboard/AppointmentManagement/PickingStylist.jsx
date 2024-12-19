@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { format } from "date-fns";
-import { vi } from "date-fns/locale";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
 import {
   Select,
   SelectContent,
@@ -10,6 +11,8 @@ import {
   SelectValue,
 } from "../../../ui/select";
 import { Button } from "../../../ui/button";
+
+const MySwal = withReactContent(Swal);
 
 // Cấu hình axios
 const api = axios.create({
@@ -134,17 +137,31 @@ const DashboardSalonStaff = () => {
 
   const handleCheckIn = async (bookingId) => {
     const token = localStorage.getItem("token");
+    const booking = bookings.find((b) => b.id === bookingId);
+    const currentTime = new Date();
+    const bookingStartTime = new Date(booking.startTime);
+
+    // Kiểm tra nếu thời gian hiện tại nhỏ hơn thời gian bắt đầu booking
+    if (currentTime < bookingStartTime) {
+      MySwal.fire({
+        icon: "error",
+        title: "Không được phép check-in!",
+        text: "Thời gian hiện tại chưa đến giờ hẹn.",
+        confirmButtonText: "Đã hiểu",
+        confirmButtonColor: "#d33",
+      });
+      return;
+    }
 
     try {
-      // Update booking status to check-in
+      // Giữ nguyên logic check-in như cũ
       await api.put(
         `/api/Booking/${bookingId}`,
         {
           status: "check-in",
           note: "Đã check-in",
-          // Keeping other details same as original booking
-          serviceId: bookings.find((b) => b.id === bookingId).service.id,
-          startTime: bookings.find((b) => b.id === bookingId).startTime,
+          serviceId: booking.service.id,
+          startTime: booking.startTime,
         },
         {
           headers: {
@@ -153,11 +170,28 @@ const DashboardSalonStaff = () => {
         }
       );
 
+      // Thông báo thành công
+      MySwal.fire({
+        icon: "success",
+        title: "Check-in thành công!",
+        text: "Khách hàng đã được check-in thành công.",
+        confirmButtonText: "Tuyệt vời",
+        confirmButtonColor: "#3085d6",
+      });
+
       // Refetch bookings to update the list
       await fetchBookings();
     } catch (error) {
       console.error("Lỗi khi check-in:", error);
-      alert("Không thể check-in. Vui lòng thử lại.");
+
+      // Thông báo lỗi
+      MySwal.fire({
+        icon: "error",
+        title: "Không thể check-in",
+        text: "Có lỗi xảy ra trong quá trình check-in. Vui lòng thử lại.",
+        confirmButtonText: "Đã hiểu",
+        confirmButtonColor: "#d33",
+      });
     }
   };
 
@@ -197,29 +231,29 @@ const DashboardSalonStaff = () => {
             </div>
 
             <div className="mb-4">
-            <p className="font-semibold text-[#5D4037] mb-2">Chọn Stylist:</p>
-            <Select
-              value={selectedStylist}
-              onValueChange={setSelectedStylist}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Chọn stylist" />
-              </SelectTrigger>
-              <SelectContent>
-                {stylists.length > 0 ? (
-                  stylists.map((stylist) => (
-                    <SelectItem key={stylist.id} value={stylist.id}>
-                      {stylist.fullName}
-                    </SelectItem>
-                  ))
-                ) : (
-                  <SelectItem disabled>Không có stylist nào</SelectItem>
-                )}
-              </SelectContent>
-            </Select>
-          </div>
+              <p className="font-semibold text-[#5D4037] mb-2">Chọn Stylist:</p>
+              <Select
+                value={selectedStylist}
+                onValueChange={setSelectedStylist}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Chọn stylist" />
+                </SelectTrigger>
+                <SelectContent>
+                  {stylists.length > 0 ? (
+                    stylists.map((stylist) => (
+                      <SelectItem key={stylist.id} value={stylist.id}>
+                        {stylist.fullName}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem disabled>Không có stylist nào</SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
 
-            <div className="flex justify-end mt-4 pt-28">
+            <div className="flex justify-end mt-4 pt-20">
               <Button
                 onClick={onSubmit}
                 className="bg-[#8B4513] hover:bg-[#915C38] text-white"
