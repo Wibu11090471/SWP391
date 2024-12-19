@@ -35,12 +35,32 @@ const AppRoutes = () => {
       <Route path="/login" element={<Login />} />
       {/* Route dịch vụ - có thể cho phép truy cập không cần đăng nhập */}
       <Route path="/profile" element={<AccountProfile />} />
-      <Route path="/category-management" element={<CategoryManagement />} />
+
+      <Route
+        path="/category-management"
+        element={
+          <ProtectedRoute requiredRoles={["admin"]}>
+            <CategoryManagement />
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/category-detail/:categoryId"
-        element={<CategoryDetailManagement />}
+        element={
+          <ProtectedRoute requiredRoles={["admin"]}>
+            <CategoryDetailManagement />
+          </ProtectedRoute>
+        }
       />
-      <Route path="/add-category" element={<AddCategoryManagement />} />
+
+      <Route
+        path="/add-category"
+        element={
+          <ProtectedRoute requiredRoles={["admin"]}>
+            <AddCategoryManagement />
+          </ProtectedRoute>
+        }
+      />
 
       {/* Route yêu cầu đăng nhập */}
 
