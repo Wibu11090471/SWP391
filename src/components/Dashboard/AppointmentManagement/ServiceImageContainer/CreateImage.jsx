@@ -23,7 +23,7 @@ const CreateImage = ({ initialServiceId , onclose }) => {
         setCountdown((prev) => prev - 1);
       }, 1000);
     } else if (countdown === 0) {
-      navigate("/selectedField"); 
+      
     }
     return () => clearInterval(interval); 
   }, [submitStatus.success, countdown, navigate]);
@@ -69,7 +69,7 @@ const CreateImage = ({ initialServiceId , onclose }) => {
           error: null,
         });
 
-        setTimeout(() => navigate("/selectedField"), 3000);
+        setTimeout(() => navigate("/addserviceimage"), 3000);
       } else {
         throw new Error("Failed to add image");
       }
