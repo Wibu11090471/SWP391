@@ -18,10 +18,10 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const StaffDetailManagement = () => {
+const UserDetailManagement = () => {
   const { id } = useParams();
   const [activeTab, setActiveTab] = useState("profile");
-  const [staff, setStaff] = useState(null);
+  const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showMenu, setShowMenu] = useState(false);
@@ -36,22 +36,22 @@ const StaffDetailManagement = () => {
   });
 
   useEffect(() => {
-    const fetchStaffDetails = async () => {
+    const fetchUserDetails = async () => {
       try {
         const response = await api.get("/api/User/getAllUsers");
-        const staffMember = response.data.find(
-          (user) => user.id === parseInt(id) && user.role === "staff"
+        const userMember = response.data.find(
+          (user) => user.id === parseInt(id) && user.role === "user"
         );
-        if (staffMember) setStaff(staffMember);
+        if (userMember) setUser(userMember);
         else setError(new Error("Nhân viên không tồn tại"));
         setIsLoading(false);
       } catch (err) {
-        console.error("Error fetching staff details:", err);
+        console.error("Error fetching user details:", err);
         setError(err);
         setIsLoading(false);
       }
     };
-    fetchStaffDetails();
+    fetchUserDetails();
   }, [id]);
 
   const handleSoftDelete = async () => {
@@ -63,7 +63,7 @@ const StaffDetailManagement = () => {
     try {
       await api.put(`/api/User/sorfDelete/${id}`);
       toast.success("Đã ngưng tài khoản thành công!");
-      setStaff((prev) => ({ ...prev, status: false }));
+      setUser((prev) => ({ ...prev, status: false }));
     } catch (error) {
       console.error("Error performing soft delete:", error);
       toast.error("ngưng tài khoản thất bại!");
@@ -79,7 +79,7 @@ const StaffDetailManagement = () => {
     try {
       await api.put(`/api/User/activeAccount/${id}`);
       toast.success("Kích hoạt tài khoản thành công!");
-      setStaff((prev) => ({ ...prev, status: true }));
+      setUser((prev) => ({ ...prev, status: true }));
     } catch (error) {
       console.error("Error activating account:", error);
       toast.error("Kích hoạt tài khoản thất bại!");
@@ -95,7 +95,7 @@ const StaffDetailManagement = () => {
       </Layout>
     );
 
-  if (error || !staff)
+  if (error || !user)
     return (
       <Layout>
         <div className="flex justify-center items-center min-h-screen">
@@ -112,36 +112,36 @@ const StaffDetailManagement = () => {
         {
           icon: AtSign,
           label: "Email",
-          value: staff.email || "Chưa cập nhật",
+          value: user.email || "Chưa cập nhật",
         },
         {
           icon: UserCircle2,
           label: "Username",
-          value: staff.userName || "Chưa cập nhật",
+          value: user.userName || "Chưa cập nhật",
         },
         {
           icon: MapPin,
           label: "Địa chỉ",
-          value: staff.address || "Chưa cập nhật",
+          value: user.address || "Chưa cập nhật",
         },
         {
           icon: Gift,
           label: "Ngày sinh",
-          value: staff.dob
-            ? new Date(staff.dob).toLocaleDateString("vi-VN")
+          value: user.dob
+            ? new Date(user.dob).toLocaleDateString("vi-VN")
             : "Chưa cập nhật",
         },
         {
           icon: CalendarCheck,
           label: "Ngày bắt đầu",
-          value: staff.createdOn
-            ? new Date(staff.createdOn).toLocaleDateString("vi-VN")
+          value: user.createdOn
+            ? new Date(user.createdOn).toLocaleDateString("vi-VN")
             : "Chưa cập nhật",
         },
         {
           icon: UserCheck,
           label: "Trạng thái",
-          value: staff.status ? "Đang hoạt động" : "Ngưng hoạt động",
+          value: user.status ? "Đang hoạt động" : "Ngưng hoạt động",
         },
       ].map(({ icon: Icon, label, value }, index) => (
         <div
@@ -184,18 +184,18 @@ const StaffDetailManagement = () => {
                 style={{ backgroundColor: theme.colors.primary.light }}
                 className="text-lg"
               >
-                {staff.fullName.charAt(0).toUpperCase()}
+                {user.fullName.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div className="ml-6 space-y-2">
-              <h2 className="text-3xl font-bold">{staff.fullName}</h2>
+              <h2 className="text-3xl font-bold">{user.fullName}</h2>
               <p className="text-sm flex items-center">
                 <UserIcon
                   className="mr-2"
                   size={16}
                   style={{ color: theme.colors.primary.light }}
                 />
-                {staff.role || "Chưa xác định"}
+                {user.role || "Chưa xác định"}
               </p>
             </div>
 
@@ -248,4 +248,4 @@ const StaffDetailManagement = () => {
   );
 };
 
-export default StaffDetailManagement;
+export default UserDetailManagement;

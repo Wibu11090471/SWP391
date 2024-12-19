@@ -26,6 +26,9 @@ import ServiceDetail from "./components/ServicePage/ServiceDetail/ServiceDetail"
 import BookingService from "./components/BookingService/BookingService";
 import BookingConfirmation from "./components/BookingService/BookingConfirmation";
 import CategoryService from "./components/Dashboard/CategoryService";
+import CategoryManagement from "./components/HairSalonManager/Category/CategoryManagement";
+import CategoryDetailManagement from "./components/HairSalonManager/Category/CategoryDetailManagement";
+import AddCategoryManagement from "./components/HairSalonManager/Category/AddCategoryManagement";
 import StylistSalary from "./components/StylistSalary/StylistSalary";
 
 const AppRoutes = () => {
@@ -42,6 +45,32 @@ const AppRoutes = () => {
       <Route path="/booking-confirmation" element={<BookingConfirmation />} />
 
       {/* Route yêu cầu đăng nhập */}
+
+      <Route
+        path="/category-management"
+        element={
+          <ProtectedRoute requiredRoles={["admin"]}>
+            <CategoryManagement />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/category-detail/:categoryId"
+        element={
+          <ProtectedRoute requiredRoles={["admin"]}>
+            <CategoryDetailManagement />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/add-category"
+        element={
+          <ProtectedRoute requiredRoles={["admin"]}>
+            <AddCategoryManagement />
+          </ProtectedRoute>
+        }
+      />
 
       <Route
         path="/pickingstylist"
@@ -135,7 +164,7 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
-{/* Route quản lý dành cho quản lý */}
+      {/* Route quản lý dành cho quản lý */}
       <Route
         path="/statistics"
         element={

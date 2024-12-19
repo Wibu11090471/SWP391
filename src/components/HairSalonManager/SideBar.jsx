@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Home, DollarSign, Users, Shirt, Menu } from "lucide-react";
+import { Home, UserIcon, Users, Shirt, Menu, Folder } from "lucide-react";
 
 const Sidebar = ({ topOffset = 80, bottomOffset = 0, className = "" }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -16,10 +16,16 @@ const Sidebar = ({ topOffset = 80, bottomOffset = 0, className = "" }) => {
       route: "/overview-management",
     },
     {
-      id: "service",
-      label: "Service",
-      icon: DollarSign,
-      route: "/service-management",
+      id: "category",
+      label: "Category Management",
+      icon: Folder,
+      route: "/category-management",
+    },
+    {
+      id: "user",
+      label: "User Management",
+      icon: UserIcon,
+      route: "/user-management",
     },
     {
       id: "staff-management",
