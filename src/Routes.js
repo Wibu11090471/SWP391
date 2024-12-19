@@ -25,6 +25,7 @@ import ServiceList from "./components/ServicePage/ServiceList/ServiceList";
 import ServiceDetail from "./components/ServicePage/ServiceDetail/ServiceDetail";
 import BookingService from "./components/BookingService/BookingService";
 import BookingConfirmation from "./components/BookingService/BookingConfirmation";
+import StylistSalary from "./components/StylistSalary/StylistSalary";
 
 const AppRoutes = () => {
   return (
@@ -38,6 +39,7 @@ const AppRoutes = () => {
       <Route path="/service/:serviceId" element={<ServiceDetail />} />
       <Route path="/booking/:serviceId" element={<BookingService />} />
       <Route path="/booking-confirmation" element={<BookingConfirmation />} />
+
       {/* Route yêu cầu đăng nhập */}
 
       <Route
@@ -45,6 +47,15 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute requiredRoles={["staff"]}>
             <PickingStylish />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/stylist-calender"
+        element={
+          <ProtectedRoute requiredRoles={["stylist"]}>
+            <StylistSalary />
           </ProtectedRoute>
         }
       />
@@ -115,7 +126,7 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
-{/* Route quản lý dành cho quản lý */}
+      {/* Route quản lý dành cho quản lý */}
       <Route
         path="/statistics"
         element={
