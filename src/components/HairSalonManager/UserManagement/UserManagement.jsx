@@ -8,7 +8,7 @@ import theme from "../../../theme";
 import Layout from "../Layout";
 
 // Import the components
-import StylistCard from "./components/StylistCard";
+import UserCard from "./components/UserCard";
 
 // Axios configuration
 const api = axios.create({
@@ -20,41 +20,39 @@ const api = axios.create({
   },
 });
 
-const StylistManagement = () => {
+const UserManagement = () => {
   const navigate = useNavigate();
-  const [stylist, setStylist] = useState([]);
-  const [filteredStylist, setFilteredStylist] = useState([]);
+  const [user, setUser] = useState([]);
+  const [filteredUser, setFilteredUser] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
   // New state for role update confirmation
 
-  // Fetch stylist data from API
-  const fetchStylist = async () => {
+  // Fetch user data from API
+  const fetchUser = async () => {
     try {
       const response = await api.get("/api/User/getAllUsers");
-      const stylistData = response.data.filter(
-        (user) => user.role === "stylist"
-      );
-      setStylist(stylistData);
-      setFilteredStylist(stylistData);
+      const userData = response.data.filter((user) => user.role === "user");
+      setUser(userData);
+      setFilteredUser(userData);
       setIsLoading(false);
     } catch (error) {
-      console.error("Error fetching stylist:", error);
+      console.error("Error fetching user:", error);
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchStylist();
+    fetchUser();
   }, []);
 
-  // New function to handle stylist detail navigation
-  const navigateToStylistDetail = (stylistId) => {
-    navigate(`/stylist-detail/${stylistId}`);
+  // New function to handle user detail navigation
+  const navigateToUserDetail = (userId) => {
+    navigate(`/user-detail/${userId}`);
   };
 
-  // Search/Filter stylist
+  // Search/Filter user
   const removeAccents = (str) =>
     str
       .normalize("NFD") // Chuyển đổi sang dạng Unicode tổ hợp
@@ -63,11 +61,11 @@ const StylistManagement = () => {
 
   // Search/Filter staff
   useEffect(() => {
-    const filtered = stylist.filter((member) =>
+    const filtered = user.filter((member) =>
       removeAccents(member.fullName).includes(removeAccents(searchTerm))
     );
-    setFilteredStylist(filtered);
-  }, [searchTerm, stylist]);
+    setFilteredUser(filtered);
+  }, [searchTerm, user]);
 
   // Function to open role update confirmation dialog
 
@@ -105,14 +103,14 @@ const StylistManagement = () => {
                     className="text-2xl font-bold"
                     style={{ color: theme.colors.text.primary }}
                   >
-                    Quản Lý Stylist Salon
+                    Quản Lý Users Salon
                   </CardTitle>
                 </div>
                 <p
                   className="text-sm ml-12"
                   style={{ color: theme.colors.text.secondary }}
                 >
-                  Quản lý thông tin nhân sự của salon
+                  Quản lý thông tin người dùng của salon
                 </p>
               </div>
               <div className="flex items-center space-x-4">
@@ -122,7 +120,7 @@ const StylistManagement = () => {
                     style={{ color: theme.colors.primary.dark }}
                   />
                   <Input
-                    placeholder="Tìm kiếm Stylist..."
+                    placeholder="Tìm kiếm User..."
                     className="pl-10 w-64 shadow-sm"
                     style={{
                       borderColor: theme.colors.primary.light,
@@ -136,32 +134,32 @@ const StylistManagement = () => {
             </div>
           </CardHeader>
 
-          {/* Stylist List Section */}
+          {/* User List Section */}
           <CardContent
             className="p-6"
             style={{ backgroundColor: theme.colors.background.primary }}
           >
             {isLoading ? (
               <div className="text-center">Đang tải...</div>
-            ) : filteredStylist.length === 0 ? (
-              <div className="text-center">Không có nhân viên nào</div>
+            ) : filteredUser.length === 0 ? (
+              <div className="text-center">Không có người dùng nào</div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredStylist.map((member) => (
+                {filteredUser.map((member) => (
                   <div
                     key={member.id || crypto.randomUUID()}
                     className="relative"
                   >
-                    <StylistCard
+                    <UserCard
                       member={{
                         id: member.id,
                         userName: member.email || "Chưa cập nhật",
                         fullName: member.fullName || "Không rõ",
-                        role: member.role || "Stylist",
+                        role: member.role || "User",
                         status: member.status || false,
                         avatar: "",
                       }}
-                      navigateToStylistDetail={navigateToStylistDetail}
+                      navigateToUserDetail={navigateToUserDetail}
                     />
                   </div>
                 ))}
@@ -176,4 +174,4 @@ const StylistManagement = () => {
   );
 };
 
-export default StylistManagement;
+export default UserManagement;

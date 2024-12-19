@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../ui/card";
 import Layout from "../Layout";
-import ServiceChart from "../Service/ServiceChart/ServiceChart";
+// import ServiceChart from "../Service/ServiceChart/ServiceChart";
 import CustomerChart from "../OverView/CustomerChart/CustomerChart";
 
 // Axios configuration
@@ -120,7 +120,7 @@ const OverviewDashboard = () => {
   };
 
   const handleViewCustomers = () => {
-    console.log("Chuyển sang trang Quản Lý Khách Hàng");
+    navigate("/user-management");
   };
 
   const handleViewServices = () => {
@@ -131,15 +131,15 @@ const OverviewDashboard = () => {
     <Layout>
       <div className="container mx-auto px-4 py-16 bg-[#FDF5E6] pt-24">
         <h1 className="text-4xl font-bold text-center mb-12 text-[#3E2723]">
-          Tổng Quan Kinh Doanh
+          Tổng Quan Salon
         </h1>
 
         {/* Preview Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {/* Customers Preview Card */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          {/* Customers */}
           <SectionPreviewCard
             icon={Users}
-            title="Số Lượng Khách Hàng"
+            title="Quản Lý Khách Hàng"
             data={[
               `Tổng số khách: ${userData.user.length}`,
               `Đang hoạt động: ${
@@ -148,11 +148,12 @@ const OverviewDashboard = () => {
                 userData.user.filter((user) => !user.status).length
               }`,
             ]}
-            // description="Nhấn để quản lý khách hàng"
+            description="Nhấn để quản lý khách hàng"
             buttonText="Quản Lý"
             onViewDetail={handleViewCustomers}
           />
 
+          {/* Staff */}
           <SectionPreviewCard
             icon={UserCheck}
             title="Quản Lý Nhân Viên"
@@ -169,71 +170,32 @@ const OverviewDashboard = () => {
             onViewDetail={handleViewStaff}
           />
 
+          {/* Stylist */}
           <SectionPreviewCard
             icon={Scissors}
             title="Quản Lý Stylist"
             data={[
-              `Tổng số: ${userData.stylist.length} Stylist`,
+              `Tổng số stylist: ${userData.stylist.length}`,
               `Đang hoạt động: ${
                 userData.stylist.filter((stylist) => stylist.status).length
               } / Ngưng hoạt động: ${
                 userData.stylist.filter((stylist) => !stylist.status).length
-              } `,
+              }`,
             ]}
             description="Nhấn để quản lý danh sách stylist"
             buttonText="Quản Lý"
             onViewDetail={handleViewStylists}
           />
-
-          {/* Services Preview Card */}
-          <SectionPreviewCard
-            icon={Layers}
-            title="Quản Lý Dịch Vụ"
-            data={[
-              `Tổng số dịch vụ: ${serviceData.totalServices}`,
-              `Dịch vụ mới: ${serviceData.services.length}`,
-            ]}
-            description="Nhấn để quản lý các dịch vụ"
-            buttonText="Quản Lý"
-            onViewDetail={handleViewServices}
-          />
         </div>
 
         {/* Charts Section */}
-        <div className="flex space-x-6 mt-6">
-          {/* Revenue Chart Section */}
-          <div className="w-1/2">
-            {/* Period Toggle */}
-            <div className="flex justify-center mb-4">
-              <div className="bg-[#FAEBD7] rounded-lg p-1 flex shadow-md">
-                <button
-                  onClick={() => setSelectedPeriod("monthly")}
-                  className={`px-4 py-2 rounded-lg transition-colors ${
-                    selectedPeriod === "monthly"
-                      ? "bg-[#8B4513] text-[#FDF5E6]"
-                      : "text-[#5D4037] hover:bg-[#915C38]/10"
-                  }`}
-                >
-                  Theo Tháng
-                </button>
-                <button
-                  onClick={() => setSelectedPeriod("daily")}
-                  className={`px-4 py-2 rounded-lg transition-colors ${
-                    selectedPeriod === "daily"
-                      ? "bg-[#8B4513] text-[#FDF5E6]"
-                      : "text-[#5D4037] hover:bg-[#915C38]/10"
-                  }`}
-                >
-                  Theo Ngày
-                </button>
-              </div>
-            </div>
-
-            {<ServiceChart selectedPeriod={selectedPeriod} />}
+        <div className="mt-10 bg-[#FAEBD7] rounded-lg shadow p-6">
+          <h2 className="text-2xl font-semibold text-[#3E2723] mb-4">
+            Thống Kê Khách Hàng
+          </h2>
+          <div className="w-full overflow-hidden">
+            <CustomerChart />
           </div>
-
-          {/* Customer Chart Section */}
-          <div className="w-1/2">{<CustomerChart />}</div>
         </div>
       </div>
     </Layout>

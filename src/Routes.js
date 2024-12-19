@@ -17,7 +17,8 @@ import CreateImage from "./components/Dashboard/ServiceImageContainer/CreateImag
 import ServiceImageContainer from "./components/Dashboard/ServiceImageContainer";
 import Notifications from "./components/Dashboard/Notifications";
 import Statistics from "./components/Dashboard/Statistics";
-import Service from "./components/HairSalonManager/Service/Service";
+import UserManagement from "./components/HairSalonManager/UserManagement/UserManagement";
+import UserDetailManagement from "./components/HairSalonManager/UserManagement/UserDetailManagement/UserDetailManagement";
 import OverviewDashboard from "./components/HairSalonManager/OverView/OverView";
 import StaffManagement from "./components/HairSalonManager/StaffManagement/StaffManagement";
 import StaffDetailManagement from "./components/HairSalonManager/StaffManagement/StaffDetailManagement/StaffDetailManagement";
@@ -32,6 +33,9 @@ import DashboardSalonStaff from "./components/Dashboard/AppointmentManagement/Da
 import SalonStaffDashboard from "./components/Dashboard/SalonStaffDashboard";
 import AccountProfile from "./components/Profile/AccountProfile";
 import StylistCommission from "./components/Dashboard/StylistCommission/StylistCommission";
+import CategoryManagement from "./components/HairSalonManager/Category/CategoryManagement";
+import CategoryDetailManagement from "./components/HairSalonManager/Category/CategoryDetailManagement";
+import AddCategoryManagement from "./components/HairSalonManager/Category/AddCategoryManagement";
 
 const AppRoutes = () => {
   return (
@@ -51,6 +55,13 @@ const AppRoutes = () => {
       <Route path="/booking-service" element={<BookingService />} />
       <Route path="/all-service" element={<AllService />} />
       <Route path="/profile" element={<AccountProfile />} />
+      <Route path="/category-management" element={<CategoryManagement />} />
+      <Route
+        path="/category-detail/:categoryId"
+        element={<CategoryDetailManagement />}
+      />
+      <Route path="/add-category" element={<AddCategoryManagement />} />
+
       {/* Route yêu cầu đăng nhập */}
 
       <Route
@@ -147,10 +158,18 @@ const AppRoutes = () => {
       />
 
       <Route
-        path="/service-management"
+        path="/user-management"
         element={
           <ProtectedRoute requiredRoles={["admin"]}>
-            <Service />
+            <UserManagement />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/user-detail/:id"
+        element={
+          <ProtectedRoute requiredRoles={["admin"]}>
+            <UserDetailManagement />
           </ProtectedRoute>
         }
       />
