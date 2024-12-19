@@ -127,6 +127,14 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/addCategoryService"
+        element={
+          <ProtectedRoute requiredRoles={["staff"]}>
+            <CategoryService />
+          </ProtectedRoute>
+        }
+      />
 {/* Route quản lý dành cho quản lý */}
       <Route
         path="/statistics"
