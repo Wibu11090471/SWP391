@@ -9,8 +9,7 @@ import CreateImage from "./components/Dashboard/AppointmentManagement/ServiceIma
 import ServiceImageContainer from "./components/Dashboard/ServiceImageContainer";
 import HistoryPayment from "./components/Dashboard/HistoryPayment";
 import Statistics from "./components/Dashboard/Statistics";
-import UserManagement from "./components/HairSalonManager/UserManagement/UserManagement";
-import UserDetailManagement from "./components/HairSalonManager/UserManagement/UserDetailManagement/UserDetailManagement";
+import Service from "./components/HairSalonManager/Service/Service";
 import OverviewDashboard from "./components/HairSalonManager/OverView/OverView";
 import StaffManagement from "./components/HairSalonManager/StaffManagement/StaffManagement";
 import StaffDetailManagement from "./components/HairSalonManager/StaffManagement/StaffDetailManagement/StaffDetailManagement";
@@ -22,6 +21,11 @@ import DashboardSalonStaff from "./components/Dashboard/AppointmentManagement/Da
 import SalonStaffDashboard from "./components/Dashboard/SalonStaffDashboard";
 import AccountProfile from "./components/Profile/AccountProfile";
 import StylistCommission from "./components/Dashboard/StylistCommission/StylistCommission";
+import ServiceList from "./components/ServicePage/ServiceList/ServiceList";
+import ServiceDetail from "./components/ServicePage/ServiceDetail/ServiceDetail";
+import BookingService from "./components/BookingService/BookingService";
+import BookingConfirmation from "./components/BookingService/BookingConfirmation";
+import CategoryService from "./components/Dashboard/CategoryService";
 import CategoryManagement from "./components/HairSalonManager/Category/CategoryManagement";
 import CategoryDetailManagement from "./components/HairSalonManager/Category/CategoryDetailManagement";
 import AddCategoryManagement from "./components/HairSalonManager/Category/AddCategoryManagement";
@@ -35,6 +39,12 @@ const AppRoutes = () => {
       <Route path="/login" element={<Login />} />
       {/* Route dịch vụ - có thể cho phép truy cập không cần đăng nhập */}
       <Route path="/profile" element={<AccountProfile />} />
+      <Route path="/services/:categoryId" element={<ServiceList />} />
+      <Route path="/service/:serviceId" element={<ServiceDetail />} />
+      <Route path="/booking/:serviceId" element={<BookingService />} />
+      <Route path="/booking-confirmation" element={<BookingConfirmation />} />
+
+      {/* Route yêu cầu đăng nhập */}
 
       <Route
         path="/category-management"
@@ -61,8 +71,6 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
-
-      {/* Route yêu cầu đăng nhập */}
 
       <Route
         path="/pickingstylist"
@@ -148,6 +156,14 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/addCategoryService"
+        element={
+          <ProtectedRoute requiredRoles={["staff"]}>
+            <CategoryService />
+          </ProtectedRoute>
+        }
+      />
       {/* Route quản lý dành cho quản lý */}
       <Route
         path="/statistics"
@@ -159,18 +175,10 @@ const AppRoutes = () => {
       />
 
       <Route
-        path="/user-management"
+        path="/service-management"
         element={
           <ProtectedRoute requiredRoles={["admin"]}>
-            <UserManagement />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/user-detail/:id"
-        element={
-          <ProtectedRoute requiredRoles={["admin"]}>
-            <UserDetailManagement />
+            <Service />
           </ProtectedRoute>
         }
       />
