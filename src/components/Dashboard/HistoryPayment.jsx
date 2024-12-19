@@ -16,29 +16,24 @@ const createApiInstance = () => {
 };
 
 const HistoryPayment = () => {
-  const [bookings, setBookings] = useState([]);
+  const [transaction, setTransaction] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       const apiInstance = createApiInstance();
       try {
-        // Fetch all bookings from the API
-        const bookingResponse = await apiInstance.get("/api/Booking/listAll");
-
-        // Check if the response contains the 'items' field
-        if (bookingResponse.data && Array.isArray(bookingResponse.data.items)) {
-          const rejectedBookings = bookingResponse.data.items
-            .filter((booking) => booking.status === "rejected") // Filter out rejected bookings
-            .map((booking) => ({
-              service: booking.service?.title || "N/A",
-              customer: booking.createdBy?.fullName || "N/A",
-              createdOn: booking.createdOn,
-              status: booking.status,
+        const bookingResponse = await apiInstance.get("/api/PaymentTransaction/getWithRejectAndPaid");
+        console.log("res", bookingResponse.data.paymentTransactions);
+        if (bookingResponse.data && Array.isArray(bookingResponse.data.paymentTransactions)) {
+          const rejectedTransaction = bookingResponse.data.paymentTransactions
+            .map((transactions) => ({
+              service: transactions.service?.title || "N/A",
+              customer: transactions.createdBy?.fullName || "N/A",
+              createdOn: transactions.booking.service.createdOn,
+              status: transactions.booking.status,
             }));
-
-          // Set the rejected bookings in state
-          setBookings(rejectedBookings);
+          setTransaction(rejectedTransaction);
         } else {
           console.error("Booking response data is not in the expected format.");
         }
@@ -75,8 +70,16 @@ const HistoryPayment = () => {
               href="/addserviceimage"
               className="block py-3 text-lg hover:bg-gray-700 px-4 rounded-lg transition-all duration-300 ease-in-out hover:text-yellow-400"
             >
-              Thêm Dịch Vụ
+              Thêm dịch vụ
             </a>
+          </li>
+          <li>
+           <a
+             href="/addCategoryService"
+             className="block py-3 text-lg hover:bg-gray-700 px-4 rounded-lg transition-all duration-300 ease-in-out hover:text-yellow-400"
+           >
+             Thêm loại dịch vụ
+           </a>
           </li>
           <li>
             <a
@@ -91,7 +94,7 @@ const HistoryPayment = () => {
               href="/statistics"
               className="block py-3 text-lg hover:bg-gray-700 px-4 rounded-lg transition-all duration-300 ease-in-out hover:text-yellow-400"
             >
-              Thống Kê
+              Thống kê
             </a>
           </li>
           <li>
@@ -119,7 +122,7 @@ const HistoryPayment = () => {
                   Khách hàng
                 </th>
                 <th className="px-3 py-3 text-left text-xs font-medium text-[#5D4037] uppercase tracking-wider">
-                  Ngày tạo
+                  Thời gian
                 </th>
                 <th className="px-3 py-3 text-left text-xs font-medium text-[#5D4037] uppercase tracking-wider">
                   Trạng thái
@@ -127,17 +130,17 @@ const HistoryPayment = () => {
               </tr>
             </thead>
             <tbody>
-              {bookings.map((booking, index) => (
+              {transaction.map((transactions, index) => (
                 <tr key={index}>
-                  <td className="border p-3">{booking.service}</td>
-                  <td className="border p-3">{booking.createdBy.fullName}</td>
+                  <td className="border p-3">{transactions.service}</td>
+                  <td className="border p-3">{transactions.customer}</td>
                   <td className="border p-3">
-                    {format(new Date(booking.createdOn), "dd/MM/yyyy", {
+                    {format(new Date(transactions.createdOn), "dd/MM/yyyy", {
                       locale: vi,
                     })}
                   </td>
-                  <td className="border p-3 text-red-500 font-semibold">
-                    {booking.status === "rejected" ? "Bị từ chối" : "N/A"}
+                  <td className="border p-3 text-green-500 font-semibold">
+                    {transactions.status === "paid" ? "Đã thanh toán" : "N/A"}
                   </td>
                 </tr>
               ))}

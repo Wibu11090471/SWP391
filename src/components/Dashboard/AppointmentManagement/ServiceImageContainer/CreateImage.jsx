@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { XIcon } from "lucide-react";
 
-const CreateImage = ({ initialServiceId = "", onBackToService }) => {
+const CreateImage = ({ initialServiceId , onclose }) => {
   const [imageUrl, setImageUrl] = useState("");
-  const [serviceId, setServiceId] = useState(initialServiceId);
+  const [serviceId, setServiceId] = useState("");
   const [submitStatus, setSubmitStatus] = useState({
     success: false,
     error: null,
@@ -22,7 +23,7 @@ const CreateImage = ({ initialServiceId = "", onBackToService }) => {
         setCountdown((prev) => prev - 1);
       }, 1000);
     } else if (countdown === 0) {
-      navigate("/selectedField"); 
+      
     }
     return () => clearInterval(interval); 
   }, [submitStatus.success, countdown, navigate]);
@@ -68,7 +69,7 @@ const CreateImage = ({ initialServiceId = "", onBackToService }) => {
           error: null,
         });
 
-        setTimeout(() => navigate("/selectedField"), 3000);
+        setTimeout(() => navigate("/addserviceimage"), 3000);
       } else {
         throw new Error("Failed to add image");
       }
@@ -87,8 +88,14 @@ const CreateImage = ({ initialServiceId = "", onBackToService }) => {
   };
 
   return (
-    <div className="bg-[#FDF5E6] flex items-center justify-center pb-20">
-      <div className="w-full max-w-md bg-white shadow-lg rounded-xl p-8">
+    <div className="bg-[#FDF5E6] flex items-center justify-center ">
+      <div className="w-full max-w-md bg-white shadow-lg rounded-xl p-8 relative">
+        <button
+              onClick={onclose}
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-800"
+            >
+              <XIcon size={24} />
+          </button>
         <h2 className="text-2xl font-bold mb-6 text-center text-[#3E2723]">
           Thêm URL Ảnh Cho Dịch Vụ
         </h2>
@@ -99,7 +106,7 @@ const CreateImage = ({ initialServiceId = "", onBackToService }) => {
               htmlFor="serviceId"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Nhập ID Dịch Vụ
+             ID Dịch Vụ
             </label>
             <input
               type="text"

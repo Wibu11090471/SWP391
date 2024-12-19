@@ -25,6 +25,7 @@ import ServiceList from "./components/ServicePage/ServiceList/ServiceList";
 import ServiceDetail from "./components/ServicePage/ServiceDetail/ServiceDetail";
 import BookingService from "./components/BookingService/BookingService";
 import BookingConfirmation from "./components/BookingService/BookingConfirmation";
+import CategoryService from "./components/Dashboard/CategoryService";
 import StylistSalary from "./components/StylistSalary/StylistSalary";
 
 const AppRoutes = () => {
@@ -126,7 +127,15 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
-      {/* Route quản lý dành cho quản lý */}
+      <Route
+        path="/addCategoryService"
+        element={
+          <ProtectedRoute requiredRoles={["staff"]}>
+            <CategoryService />
+          </ProtectedRoute>
+        }
+      />
+{/* Route quản lý dành cho quản lý */}
       <Route
         path="/statistics"
         element={

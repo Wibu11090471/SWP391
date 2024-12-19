@@ -1,12 +1,8 @@
 import React, { useEffect, useState } from "react";
-import CreateService from "./AppointmentManagement/ServiceImageContainer/CreateService";
-import CreateImage from "./AppointmentManagement/ServiceImageContainer/CreateImage";
 import axios from "axios";
-import { format } from "date-fns";
-import { vi } from "date-fns/locale";
-import UpdateService from "./AppointmentManagement/ServiceImageContainer/UpdateService";
+import CreateCategory from "./AppointmentManagement/Category/CreateCategory";
 
-/******  7248c50b-2bae-4bf5-b9c0-31bf4dd27299  *******/const createApiInstance = () => {
+const createApiInstance = () => {
   const token = localStorage.getItem("token");
   return axios.create({
     baseURL: "https://localhost:7081",
@@ -18,34 +14,16 @@ import UpdateService from "./AppointmentManagement/ServiceImageContainer/UpdateS
   });
 };
 
-const ServiceImageContainer = () => {
-  const [service, setService] = useState([]);
+const CategoryService = () => {
   const [categories, setCategory] = useState([]);
   const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
-  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-  const [isUpdateModalOpen, setIisUpdateModalOpen] = useState(false);
-  const [addImageServiceId, setAddImageServiceId] = useState("");
-  const [updateService, setUpdateService] = useState({});
 
-  useEffect(() => {
-      const fetchData = async () => {
-        const apiInstance = createApiInstance();
-        try {
-          const bookingResponse = await apiInstance.get("/api/Service/getAllService");
-          setService(bookingResponse.data.items);
-        } catch (error) {
-          console.error("Error fetching data:", error.message);
-        }
-      };
-  
-      fetchData();
-    }, []);
 
     useEffect(() => {
       const fetchData = async () => {
         const apiInstance = createApiInstance();
         try {
-          const bookingResponse = await apiInstance.get("/api/CategoryService/getActive");
+          const bookingResponse = await apiInstance.get("/api/CategoryService/getAll");
           setCategory(bookingResponse.data);
         } catch (error) {
           console.error("Error fetching data:", error.message);
@@ -55,21 +33,10 @@ const ServiceImageContainer = () => {
       fetchData();
     }, []);
 
-  const HandleAddImage = (service) => {
-    setIsImageModalOpen(true);
-    setAddImageServiceId(service.id);
-  };
-
-  const HandleUpdateService = (service) => {
-    setIisUpdateModalOpen(true);
-    setUpdateService(service);
-  };
-
-  const HandleChangeStatus = (service) => {
-    service.status = !service.status;
+  const HandleChangeStatus = (category) => {
     const apiInstance = createApiInstance();
     apiInstance
-      .put(`/api/Service/update-all/${service.id}`, service)
+      .put(`/api/CategoryService/changeStatus/${category.id}`)
       .then((response) => {
         console.log(response.data);
         window.location.reload();
@@ -149,7 +116,7 @@ const ServiceImageContainer = () => {
                onClick={() => setIsServiceModalOpen(true)}
                className={`px-6 py-2 rounded-lg transition-all duration-300 bg-[#8B4513] text-white`}
              >
-               Tạo Dịch Vụ
+               Tạo Thể Loại
          </button>
        </div>
        <div className="bg-white shadow-md rounded-lg overflow-hidden">
@@ -160,64 +127,30 @@ const ServiceImageContainer = () => {
                  Thể Loại
                </th>
                <th className="px-4 py-3 text-left text-xs font-medium text-[#5D4037] uppercase tracking-wider">
-                 Dịch vụ
-               </th>
-               <th className="px-4 py-3 text-left text-xs font-medium text-[#5D4037] uppercase tracking-wider">
-                 Giá
-               </th>
-               <th className="px-4 py-3 text-left text-xs font-medium text-[#5D4037] uppercase tracking-wider">
-                 Thời Gian
-               </th>
-               <th className="px-3 py-3 text-left text-xs font-medium text-[#5D4037] uppercase tracking-wider">
-                 Discount
-               </th>
-               <th className="px-3 py-3 text-left text-xs font-medium text-[#5D4037] uppercase tracking-wider">
                  Mô tả
                </th>
                <th className="px-3 py-3 text-left text-xs font-medium text-[#5D4037] uppercase tracking-wider">
                  Trạng thái
                </th>
-               <th className="px-3 py-3 text-left text-xs font-medium text-[#5D4037] uppercase tracking-wider">
-                 Thao tác
-               </th>
              </tr>
            </thead>
            <tbody>
-             {service.map((s, index) => (
+             {categories.map((c, index) => (
                <tr key={index}>
-                 <td className="border p-3">{s.categoryService.title}</td>
-                 <td className="border p-3">{s.title}</td>
-                 <td className="border p-3">{s.price}</td> 
-                 <td className="border p-3">{s.timeService}</td> 
-                 <td className="border p-3">{s.discount ? s.discount : "0"}</td>
-                 <td className="border p-3 w-[250px]">{s.description}</td> 
+                 <td className="border p-3">{c.title}</td>
+                 <td className="border p-3">{c.description}</td> 
                  <td className="border p-3 text-green-500 font-semibold">
-                  {s.status ? 
+                  {c.status ? 
                     <button
-                      onClick={() => HandleChangeStatus(s)}
+                      onClick={() => HandleChangeStatus(c)}
                      className={`px-3 py-2 rounded-lg transition-all duration-300 bg-[#FFF0E1] text-green-500 hover:bg-[#e89248]`} >
                        Active
                    </button>
                   :<button 
-                    onClick={() => HandleChangeStatus(s)}
+                    onClick={() => HandleChangeStatus(c)}
                     className={`px-3 py-2 rounded-lg transition-all duration-300 bg-[#FFF0E1] text-[#5D4037] hover:bg-[#e89248]`} >
                       InActive
                     </button>}
-                 </td>
-                 <td className="border p-2 w-[250px] font-semibold">
-                   <button
-                       onClick={() => HandleAddImage(s)}
-                       className={`px-3 py-2 mr-2 rounded-lg transition-all duration-300 bg-[#FFF0E1] text-[#5D4037] hover:bg-[#e89248]`}
-                     >
-                       Thêm Ảnh
-                   </button>
-
-                   <button
-                       onClick={() => HandleUpdateService(s)}
-                       className={`px-3 py-2 rounded-lg transition-all duration-300 bg-[#FFF0E1] text-[#5D4037] hover:bg-[#e89248]`}
-                     >
-                       Update
-                   </button>
                  </td>
                </tr>
              ))}
@@ -230,30 +163,13 @@ const ServiceImageContainer = () => {
    {/* Service Modal */}
    {isServiceModalOpen && (
            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-             <CreateService
-               categories={categories}
+             <CreateCategory
                onclose={() => setIsServiceModalOpen(null)}
              />
            </div>
-    )}
-   {isImageModalOpen && 
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-          <CreateImage
-            initialServiceId={addImageServiceId}
-            onclose={() => setIsImageModalOpen(null)}
-          />
-        </div>
-    }
-    {isUpdateModalOpen && 
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-          <UpdateService
-            service={updateService}
-            onclose={() => setIisUpdateModalOpen(null)}
-          />
-        </div>
-    }
-    </>
+         )}
+   </>
   );
 };
 
-export default ServiceImageContainer;
+export default CategoryService;

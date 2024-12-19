@@ -297,6 +297,14 @@ const StylistCommission = () => {
             </a>
           </li>
           <li>
+           <a
+             href="/addCategoryService"
+             className="block py-3 text-lg hover:bg-gray-700 px-4 rounded-lg transition-all duration-300 ease-in-out hover:text-yellow-400"
+           >
+             Thêm Thể Loại Dịch Vụ
+           </a>
+          </li>
+          <li>
             <a
               href="/history"
               className="block py-3 text-lg hover:bg-gray-700 px-4 rounded-lg transition-all duration-300 ease-in-out hover:text-yellow-400"
