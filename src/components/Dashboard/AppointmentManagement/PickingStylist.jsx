@@ -140,7 +140,7 @@ const DashboardSalonStaff = () => {
     const booking = bookings.find((b) => b.id === bookingId);
     const currentTime = new Date();
     const bookingStartTime = new Date(booking.startTime);
-  
+
     // Kiểm tra nếu thời gian hiện tại nhỏ hơn thời gian bắt đầu booking
     if (currentTime < bookingStartTime) {
       MySwal.fire({
@@ -152,7 +152,7 @@ const DashboardSalonStaff = () => {
       });
       return;
     }
-  
+
     try {
       // Giữ nguyên logic check-in như cũ
       await api.put(
@@ -169,7 +169,7 @@ const DashboardSalonStaff = () => {
           },
         }
       );
-  
+
       // Thông báo thành công
       MySwal.fire({
         icon: "success",
@@ -178,12 +178,12 @@ const DashboardSalonStaff = () => {
         confirmButtonText: "Tuyệt vời",
         confirmButtonColor: "#3085d6",
       });
-  
+
       // Refetch bookings to update the list
       await fetchBookings();
     } catch (error) {
       console.error("Lỗi khi check-in:", error);
-  
+
       // Thông báo lỗi
       MySwal.fire({
         icon: "error",

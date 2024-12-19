@@ -1,15 +1,24 @@
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { format } from "date-fns";
-import { Check, Calendar, MapPin, User, Printer, Home } from "lucide-react";
+import {
+  Check,
+  Calendar,
+  MapPin,
+  User,
+  Printer,
+  Home,
+  Clock,
+} from "lucide-react";
 
 const BookingConfirmation = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Safely extract booking details and service
+  // Safely extract booking details, service, and selected time slots
   const bookingDetails = location.state?.bookingDetails || {};
   const service = location.state?.service || {};
+  const selectedTimeSlots = location.state?.selectedTimeSlots || [];
 
   // Safely extract images with a fallback
   const images =
@@ -27,6 +36,23 @@ const BookingConfirmation = () => {
   const handleBackToServices = () => {
     navigate("/");
   };
+
+  // Function to extract unique dates from bookingDetails
+  const getBookedDates = () => {
+    if (!Array.isArray(bookingDetails)) return [];
+
+    const uniqueDates = [
+      ...new Set(
+        bookingDetails.map((booking) =>
+          format(new Date(booking.startTime), "dd/MM/yyyy")
+        )
+      ),
+    ];
+
+    return uniqueDates;
+  };
+
+  const bookedDates = getBookedDates();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#FDF5E6] to-[#FAEBD7] py-12 px-4 pt-24 flex items-center justify-center">
@@ -74,31 +100,75 @@ const BookingConfirmation = () => {
               </div>
             </div>
 
-            {/* Booking Time */}
-            <div className="bg-[#FAEBD7] p-5 rounded-xl flex items-center shadow-sm">
-              <Calendar className="w-8 h-8 mr-4 text-[#8B4513]" />
+            <div className="bg-[#FAEBD7] p-5 rounded-xl shadow-sm">
+              <Calendar className="w-8 h-8 mb-4 text-[#8B4513]" />
+              <h3 className="font-semibold text-[#5D4037] mb-2">
+                Ngày Đặt Lịch
+              </h3>
+              {selectedTimeSlots.length > 0 ? (
+                <div className="space-y-2">
+                  {selectedTimeSlots.map((slot, index) => (
+                    <div
+                      key={index}
+                      className="bg-[#DEB887]/20 p-3 rounded-lg flex justify-between items-center"
+                    >
+                      <div>
+                        <p className="text-[#3E2723] font-semibold">
+                          {format(new Date(slot.date), "EEEE, dd/MM/yyyy")} -{" "}
+                          {slot.time}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-[#3E2723]">Không có slot nào được chọn</p>
+              )}
+            </div>
+
+            {/* Chi tiết đặt lịch */}
+            <div className="bg-[#FAEBD7] p-5 rounded-xl shadow-sm">
+              <User className="w-8 h-8 mr-4 text-[#8B4513]" />
               <div>
-                <h3 className="font-semibold text-[#5D4037]">
-                  Thời Gian Đặt Lịch
+                <h3 className="font-semibold text-[#5D4037] mb-2">
+                  Chi Tiết Đặt Lịch
                 </h3>
-                <p className="text-[#3E2723]">
-                  {bookingDetails.startTime
-                    ? format(
-                        new Date(bookingDetails.startTime),
-                        "EEEE, dd/MM/yyyy HH:mm"
-                      )
-                    : "Thời gian chưa xác định"}
-                </p>
+                {Array.isArray(bookingDetails) && bookingDetails.length > 0 ? (
+                  <div className="space-y-2">
+                    {bookingDetails.map((booking, index) => (
+                      <div
+                        key={index}
+                        className="bg-[#DEB887]/20 p-3 rounded-lg flex justify-between items-center"
+                      >
+                        <div>
+                          <p className="text-[#3E2723]">
+                            {format(
+                              new Date(booking.startTime),
+                              "EEEE, dd/MM/yyyy HH:mm"
+                            )}
+                          </p>
+                        </div>
+                        <div className="bg-[#8B4513] text-white px-2 py-1 rounded text-sm">
+                          {booking.bookingCode}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-[#3E2723]">Không có chi tiết đặt lịch</p>
+                )}
               </div>
             </div>
 
-            {/* Booking Code */}
+            {/* Mã Đặt Lịch Tổng */}
             <div className="bg-[#FAEBD7] p-5 rounded-xl flex items-center shadow-sm">
               <User className="w-8 h-8 mr-4 text-[#8B4513]" />
               <div>
-                <h3 className="font-semibold text-[#5D4037]">Mã Đặt Lịch</h3>
+                <h3 className="font-semibold text-[#5D4037]">
+                  Mã Đặt Lịch Tổng
+                </h3>
                 <p className="text-[#CD853F] font-bold text-xl tracking-wider">
-                  {bookingDetails.bookingCode || "Chưa có mã đặt lịch"}
+                  {bookingDetails[0]?.bookingGroupCode || "Chưa có mã đặt lịch"}
                 </p>
               </div>
             </div>

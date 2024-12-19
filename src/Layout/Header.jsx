@@ -48,6 +48,20 @@ const Header = () => {
             <LayoutDashboard className="mr-2 w-4 h-4" /> Admin Dashboard
           </button>
         );
+
+      case "stylist":
+        return (
+          <button
+            onClick={() => {
+              setIsDropdownOpen(false);
+              navigate("/stylist-calender");
+            }}
+            className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+          >
+            <LayoutDashboard className="mr-2 w-4 h-4" /> Stylist Calender
+          </button>
+        );
+
       case "staff":
         return (
           <button

@@ -32,6 +32,7 @@ const BookingService = () => {
   const [selectedDateTime, setSelectedDateTime] = useState(null);
   const [availableTimes, setAvailableTimes] = useState([]);
   const [availableDates, setAvailableDates] = useState([]);
+  const [selectedTimeSlots, setSelectedTimeSlots] = useState([]);
   const [user, setUser] = useState(null);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -80,6 +81,10 @@ const BookingService = () => {
 
   const fetchAvailableTimeIndexes = async (selectedDate) => {
     try {
+      const service = selectedService.serviceEnity || selectedService.service;
+      const serviceDuration = service.duration || service.timeService * 60;
+      console.log("serviceDuration", serviceDuration);
+
       const listTime = TIME_SLOTS.map((slot) => {
         const startMinutes = parseInt(slot.time.split(":")[1]);
         const endMinutes = startMinutes + 30;
@@ -104,7 +109,27 @@ const BookingService = () => {
         payload
       );
 
-      setUnavailableTimeIndexes(new Set(response.data));
+      const unavailableIndexes = new Set(response.data);
+
+      const finalUnavailableIndexes = new Set();
+
+      TIME_SLOTS.forEach((slot, index) => {
+        // Kiểm tra xem slot không khả dụng
+        if (unavailableIndexes.has(index)) {
+          // Tính toán số lượng slot cần chặn dựa trên thời lượng dịch vụ
+          const blockedSlotsCount = Math.ceil(serviceDuration / 30);
+
+          // Chặn các slot từ slot không khả dụng trở về trước
+          for (let i = 0; i < blockedSlotsCount; i++) {
+            const blockIndex = index - i;
+            if (blockIndex >= 0) {
+              finalUnavailableIndexes.add(blockIndex);
+            }
+          }
+        }
+      });
+
+      setUnavailableTimeIndexes(finalUnavailableIndexes);
     } catch (error) {
       console.error("Error fetching available time indexes:", error.message);
     }
@@ -183,34 +208,34 @@ const BookingService = () => {
       const api = createApiInstance();
       const service = selectedService.serviceEnity || selectedService.service;
 
-      // Thêm phần lấy ảnh
-      const serviceImages =
-        selectedService.images || service.categoryService?.images || [];
+      // Chuyển đổi selectedTimeSlots thành startTimes
+      const startTimes = selectedTimeSlots.map((slot) =>
+        new Date(`${slot.date}T${slot.time}:00.000`).toISOString()
+      );
 
       const bookingData = {
         serviceId: parseInt(serviceId),
-        startTime: new Date(
-          `${selectedDateTime.date}T${selectedDateTime.time}:00.000`
-        ).toISOString(),
-        note: "Booking via web app",
+        startTimes: startTimes,
+        note: "Booking multiple slots via web app",
       };
+
       const bookingResponse = await api.post(
-        "/api/Booking/create",
+        "/api/Booking/create-multiple",
         bookingData
       );
 
       navigate("/booking-confirmation", {
         state: {
           bookingDetails: bookingResponse.data,
-          service: {
-            ...service,
-            images: serviceImages, // Thêm images vào đây
-          },
+          service: service,
+          selectedTimeSlots: selectedTimeSlots,
         },
       });
     } catch (error) {
-      console.error("Full Error:", error);
-      setError(error.response?.data?.message || "Đặt lịch thất bại");
+      console.error("Booking Error:", error);
+      setError(
+        error.response?.data?.message || "Không thể đặt lịch. Vui lòng thử lại."
+      );
     }
   };
 
@@ -227,6 +252,39 @@ const BookingService = () => {
       setCurrentStep(currentStep - 1);
     } else {
       navigate(-1);
+    }
+  };
+
+  const handleDateTimeSelection = (date, time, timeIndex) => {
+    // Kiểm tra xem đã có slot nào trong ngày này chưa
+    const existingSlotSameDay = selectedTimeSlots.find(
+      (slot) => slot.date === date
+    );
+
+    if (existingSlotSameDay) {
+      // Nếu đã có slot trong ngày này, thì loại bỏ slot cũ và thêm slot mới
+      const newSelectedTimeSlots = selectedTimeSlots.filter(
+        (slot) => slot.date !== date
+      );
+
+      setSelectedTimeSlots([
+        ...newSelectedTimeSlots,
+        {
+          date,
+          time,
+          timeIndex,
+        },
+      ]);
+    } else {
+      // Nếu chưa có slot nào trong ngày này, thêm mới
+      setSelectedTimeSlots([
+        ...selectedTimeSlots,
+        {
+          date,
+          time,
+          timeIndex,
+        },
+      ]);
     }
   };
 
@@ -264,16 +322,16 @@ const BookingService = () => {
                   <button
                     key={date}
                     className={`py-3 px-4 border rounded-lg text-center ${
-                      selectedDateTime?.date === date
+                      selectedTimeSlots.some((slot) => slot.date === date)
                         ? "bg-[#8B4513] text-white"
                         : "bg-white text-[#8B4513] hover:bg-[#DEB887]/20"
                     }`}
-                    onClick={() =>
+                    onClick={() => {
                       setSelectedDateTime((prev) => ({
                         date: date,
                         time: null,
-                      }))
-                    }
+                      }));
+                    }}
                     disabled={new Date(date) < new Date().setHours(0, 0, 0, 0)}
                   >
                     <div className="font-semibold">
@@ -292,29 +350,65 @@ const BookingService = () => {
                   Chọn giờ
                 </label>
                 <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
-                  {availableTimes.map((timeObj) => (
-                    <button
-                      key={timeObj.time}
-                      className={`py-2 px-3 border rounded-md ${
-                        selectedDateTime?.time === timeObj.time
-                          ? "bg-[#8B4513] text-white"
-                          : timeObj.disabled
-                          ? "bg-gray-200 text-gray-400 cursor-not-allowed opacity-50 line-through"
-                          : "bg-white text-[#8B4513] hover:bg-[#DEB887]/20"
-                      }`}
-                      onClick={() =>
-                        !timeObj.disabled &&
-                        setSelectedDateTime((prev) => ({
-                          ...prev,
-                          time: timeObj.time,
-                        }))
-                      }
-                      disabled={timeObj.disabled}
-                    >
-                      {timeObj.time}
-                    </button>
-                  ))}
+                  {availableTimes.map((timeObj) => {
+                    const isSelected = selectedTimeSlots.some(
+                      (slot) =>
+                        slot.date === selectedDateTime.date &&
+                        slot.time === timeObj.time
+                    );
+
+                    return (
+                      <button
+                        key={timeObj.time}
+                        className={`py-2 px-3 border rounded-md ${
+                          isSelected
+                            ? "bg-[#8B4513] text-white"
+                            : timeObj.disabled
+                            ? "bg-gray-200 text-gray-400 cursor-not-allowed opacity-50 line-through"
+                            : "bg-white text-[#8B4513] hover:bg-[#DEB887]/20"
+                        }`}
+                        onClick={() =>
+                          !timeObj.disabled &&
+                          handleDateTimeSelection(
+                            selectedDateTime.date,
+                            timeObj.time,
+                            timeObj.timeIndex
+                          )
+                        }
+                        disabled={timeObj.disabled}
+                      >
+                        {timeObj.time}
+                      </button>
+                    );
+                  })}
                 </div>
+                {selectedTimeSlots.length > 0 && (
+                  <div className="mt-4">
+                    <h3 className="font-semibold mb-2">Các slot đã chọn:</h3>
+                    <ul className="space-y-2">
+                      {selectedTimeSlots.map((slot, index) => (
+                        <li
+                          key={index}
+                          className="bg-[#DEB887]/20 p-2 rounded flex justify-between items-center"
+                        >
+                          {format(new Date(slot.date), "dd/MM/yyyy")} -{" "}
+                          {slot.time}
+                          <button
+                            onClick={() => {
+                              const newSlots = selectedTimeSlots.filter(
+                                (_, i) => i !== index
+                              );
+                              setSelectedTimeSlots(newSlots);
+                            }}
+                            className="text-red-500"
+                          >
+                            Xóa
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -322,61 +416,62 @@ const BookingService = () => {
 
       case 3:
         return (
-          <div className="bg-white rounded-lg shadow-lg p-8">
-            <div className="flex items-center justify-center mb-6">
-              <div className="bg-blue-100 rounded-full p-4">
-                <Calendar className="w-12 h-12 text-blue-600" />
-              </div>
-            </div>
-            <h2 className="text-2xl font-bold text-center mb-6 text-[#8B4513]">
-              Kiểm Tra Thông Tin Dịch Vụ
-            </h2>
-            <div className="space-y-4">
-              <div className="flex items-center mb-4">
-                <img
-                  src={
-                    images?.[0]?.url ||
-                    "https://via.placeholder.com/100x100?text=No+Image"
-                  }
-                  alt={service?.title || "Dịch vụ"}
-                  className="w-24 h-24 object-cover rounded-lg mr-6"
-                />
-                <div>
-                  <h3 className="text-xl font-semibold">
-                    {service?.title || "Dịch vụ không xác định"}
-                  </h3>
-                  <p className="text-gray-600">
-                    {service?.description || "Không có mô tả"}
-                  </p>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-[#FDF5E6] p-4 rounded-lg">
-                  <div className="flex items-center mb-2">
-                    <Clock className="w-5 h-5 mr-2 text-[#8B4513]" />
-                    <span className="font-semibold">Thời gian</span>
+          <div>
+            {selectedTimeSlots.map((slot, index) => (
+              <div
+                key={index}
+                className="bg-white rounded-lg shadow-lg p-6 mb-4"
+              >
+                <h3 className="text-xl font-bold mb-4 text-[#8B4513]">
+                  Dịch Vụ: {service.serviceName}
+                </h3>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-4">
+                    <div className="bg-[#FDF5E6] p-4 rounded-lg">
+                      <div className="flex items-center mb-2">
+                        <Clock className="mr-2 text-[#8B4513]" size={20} />
+                        <span className="font-semibold">Thời gian</span>
+                      </div>
+                      <p>
+                        {format(new Date(slot.date), "EEEE, dd/MM/yyyy")}
+                        <br />
+                        {slot.time}
+                      </p>
+                    </div>
+                    <div className="bg-[#FDF5E6] p-4 rounded-lg">
+                      <div className="flex items-center mb-2">
+                        <MapPin className="mr-2 text-[#8B4513]" size={20} />
+                        <span className="font-semibold">Địa điểm</span>
+                      </div>
+                      <p>{selectedService.branchName || "Chưa xác định"}</p>
+                    </div>
                   </div>
-                  <p className="text-gray-700">
-                    {format(
-                      new Date(selectedDateTime.date),
-                      "EEEE, dd/MM/yyyy"
-                    )}
-                    <br />
-                    {selectedDateTime.time}
-                  </p>
-                </div>
-                <div className="bg-[#FDF5E6] p-4 rounded-lg">
-                  <div className="flex items-center mb-2">
-                    <MapPin className="w-5 h-5 mr-2 text-[#8B4513]" />
-                    <span className="font-semibold">Giá dịch vụ</span>
+                  <div className="bg-[#FDF5E6] p-4 rounded-lg">
+                    <div className="flex items-center mb-2">
+                      <Calendar className="mr-2 text-[#8B4513]" size={20} />
+                      <span className="font-semibold">Chi tiết dịch vụ</span>
+                    </div>
+                    <div>
+                      <p>
+                        <strong>Tên dịch vụ:</strong> {service.serviceName}
+                      </p>
+                      <p>
+                        <strong>Giá:</strong> {service.price.toLocaleString()}{" "}
+                        VNĐ
+                      </p>
+                      <p>
+                        <strong>Thời lượng:</strong> {service.duration} phút
+                      </p>
+                      {service.description && (
+                        <p className="mt-2 text-sm">
+                          <strong>Mô tả:</strong> {service.description}
+                        </p>
+                      )}
+                    </div>
                   </div>
-                  <p className="text-[#8B4513] font-bold text-xl">
-                    {service?.price ? service.price.toLocaleString() : "N/A"}{" "}
-                    VNĐ
-                  </p>
                 </div>
               </div>
-            </div>
+            ))}
           </div>
         );
 
@@ -434,8 +529,7 @@ const BookingService = () => {
             onClick={handleNext}
             className="bg-[#8B4513] text-white px-6 py-2 rounded-lg flex items-center"
             disabled={
-              (currentStep === 2 &&
-                (!selectedDateTime?.date || !selectedDateTime?.time)) ||
+              (currentStep === 2 && selectedTimeSlots.length === 0) ||
               (currentStep === 3 && !selectedService)
             }
           >
