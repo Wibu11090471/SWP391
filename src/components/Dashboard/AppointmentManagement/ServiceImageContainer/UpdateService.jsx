@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios"; 
 import { XIcon } from "lucide-react";
 
-const CreateService = ({ 
-  categories,
+const UpdateService = ({ 
+  service,
   onclose
 }) => {
   const createApiInstance = () => {
@@ -18,18 +18,13 @@ const CreateService = ({
     });
   };
 
-  useEffect(() => {
-    if (categories.length > 0) {
-      setServiceData((prev) => ({ ...prev, categoryServiceId: categories[0].id }));
-    }
-  }, [categories]);
   const [serviceData, setServiceData] = useState({
-    title: "",
-    description: "",
-    price: 0,
-    discount: 0,
-    timeService: 0,
-    categoryServiceId: "",
+    title: service.title,
+    description: service.description,
+    price: service.price,
+    discount: service.discount,
+    timeService: service.timeService,
+    categoryServiceId: service.categoryServiceId,
   });
 
   const [submitStatus, setSubmitStatus] = useState({
@@ -55,17 +50,28 @@ const CreateService = ({
     setSubmitStatus({ success: false, error: null });
 
     try {
-     const response = await api.post("/api/Service/create", serviceData);
-      if (response.status === 201) {
+        console.log('check service data',serviceData);
+        
+     const rs = await api.put(`/api/Service/update-all/${service.id}`, serviceData)
+     .then((response) => {
+      
+    
+      return response; // Return the response object
+     })
+     .catch((error) => {
+       console.error("Error fetching data:", error.message);
+     });
+     
+      if (rs.data.status === 201) {
         setSubmitStatus({
           success: true,
           error: null,
         });
-        // Reset form nếu không được điều hướng
        
       } else {
         throw new Error("Failed to create service");
       }
+         window.location.reload();
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || error.message || "Unknown error";
@@ -86,7 +92,7 @@ const CreateService = ({
             <XIcon size={24} />
         </button>
         <h2 className="text-2xl font-bold mb-6 text-center text-[#3E2723]">
-          Tạo Dịch Vụ Mới
+          Cập Nhật Dịch Vụ
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -194,33 +200,13 @@ const CreateService = ({
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#CD853F]"
               />
             </div>
-            <div>
-              <label
-                htmlFor="category"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Thể Loại
-              </label>
-              <select 
-               id="categoryServiceId"
-               name="categoryServiceId"
-               value={serviceData.category}
-               onChange={handleInputChange}
-              >
-                {categories.map((category,index) => (
-                  <option key={index} value={category.id}>
-                    {category.title}
-                  </option>
-                ))}
-              </select>
-            </div>
           
           {submitStatus.error && (
             <p className="text-red-600 text-center mt-4">{submitStatus.error}</p>
           )}
           {submitStatus.success && (
             <p className="text-green-600 text-center mt-4">
-              Dịch vụ đã được tạo thành công!
+              Dịch vụ đã được cập nhật thành công!
             </p>
           )}
 
@@ -228,7 +214,7 @@ const CreateService = ({
             type="submit"
             className="w-full bg-[#CD853F] text-white py-3 rounded-md hover:bg-[#8B4513] transition duration-300"
           >
-            Tạo Dịch Vụ
+            Cập Nhật Dịch Vụ
           </button>
         </form>
       </div>
@@ -236,4 +222,4 @@ const CreateService = ({
   );
 };
 
-export default CreateService;
+export default UpdateService;

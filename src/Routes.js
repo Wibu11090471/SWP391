@@ -25,6 +25,7 @@ import ServiceList from "./components/ServicePage/ServiceList/ServiceList";
 import ServiceDetail from "./components/ServicePage/ServiceDetail/ServiceDetail";
 import BookingService from "./components/BookingService/BookingService";
 import BookingConfirmation from "./components/BookingService/BookingConfirmation";
+import CategoryService from "./components/Dashboard/CategoryService";
 
 const AppRoutes = () => {
   return (
@@ -112,6 +113,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute requiredRoles={["staff"]}>
             <ServiceImageContainer />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/addCategoryService"
+        element={
+          <ProtectedRoute requiredRoles={["staff"]}>
+            <CategoryService />
           </ProtectedRoute>
         }
       />
