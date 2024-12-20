@@ -11,6 +11,7 @@ import {
   DialogDescription,
 } from "../../../ui/dialog";
 import { Label } from "../../../ui/label";
+import { Alert, AlertDescription, AlertTitle } from "../../../ui/alert";
 import theme from "../../../theme";
 
 const AddServiceModal = ({ categoryId, isOpen, onClose, onServiceCreated }) => {
@@ -25,6 +26,11 @@ const AddServiceModal = ({ categoryId, isOpen, onClose, onServiceCreated }) => {
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [alertInfo, setAlertInfo] = useState({
+    show: false,
+    message: "",
+    type: "",
+  });
 
   const api = axios.create({
     baseURL: "https://localhost:7081",
@@ -38,16 +44,31 @@ const AddServiceModal = ({ categoryId, isOpen, onClose, onServiceCreated }) => {
   const validateForm = () => {
     const newErrors = {};
     if (!serviceData.title.trim()) {
-      newErrors.title = "Tên dịch vụ không được để trống";
+      setAlertInfo({
+        show: true,
+        message: "Tên dịch vụ không được để trống",
+        type: "error",
+      });
+      return false;
     }
     if (!parseFloat(serviceData.price) || parseFloat(serviceData.price) < 0) {
-      newErrors.price = "Giá phải là số dương";
+      setAlertInfo({
+        show: true,
+        message: "Giá phải là số dương",
+        type: "error",
+      });
+      return false;
     }
     if (
       !parseFloat(serviceData.timeService) ||
       parseFloat(serviceData.timeService) <= 0
     ) {
-      newErrors.timeService = "Thời gian dịch vụ phải lớn hơn 0";
+      setAlertInfo({
+        show: true,
+        message: "Thời gian dịch vụ phải lớn hơn 0",
+        type: "error",
+      });
+      return false;
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -56,6 +77,10 @@ const AddServiceModal = ({ categoryId, isOpen, onClose, onServiceCreated }) => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setServiceData((prev) => ({ ...prev, [name]: value }));
+    // Reset alert when user starts typing
+    if (alertInfo.show) {
+      setAlertInfo({ show: false, message: "", type: "" });
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -97,23 +122,33 @@ const AddServiceModal = ({ categoryId, isOpen, onClose, onServiceCreated }) => {
         })
       );
 
-      onServiceCreated(servicesWithImages);
-      setServiceData({
-        title: "",
-        description: "",
-        price: "",
-        discount: "",
-        timeService: "",
-        categoryServiceId: parseInt(categoryId),
-        status: true,
+      setAlertInfo({
+        show: true,
+        message: `Đã thêm dịch vụ "${serviceData.title}" thành công!`,
+        type: "success",
       });
-      onClose();
+
+      // Delay closing and resetting
+      setTimeout(() => {
+        onServiceCreated(servicesWithImages);
+        setServiceData({
+          title: "",
+          description: "",
+          price: "",
+          discount: "",
+          timeService: "",
+          categoryServiceId: parseInt(categoryId),
+          status: true,
+        });
+        onClose();
+      }, 1500);
     } catch (error) {
-      console.error("Service creation error:", error);
-      alert(
-        "Lỗi khi tạo dịch vụ: " +
-          (error.response?.data?.message || error.message)
-      );
+      setAlertInfo({
+        show: true,
+        message:
+          error.response?.data?.message || "Có lỗi xảy ra khi tạo dịch vụ",
+        type: "error",
+      });
     } finally {
       setLoading(false);
     }
@@ -144,6 +179,34 @@ const AddServiceModal = ({ categoryId, isOpen, onClose, onServiceCreated }) => {
             Điền thông tin để tạo dịch vụ mới
           </DialogDescription>
         </DialogHeader>
+
+        {alertInfo.show && (
+          <Alert
+            className={`mb-6 ${
+              alertInfo.type === "success"
+                ? "bg-green-50 border-green-500"
+                : "bg-red-50 border-red-500"
+            }`}
+            style={{
+              borderWidth: "1px",
+            }}
+          >
+            <AlertTitle
+              className={
+                alertInfo.type === "success" ? "text-green-800" : "text-red-800"
+              }
+            >
+              {alertInfo.type === "success" ? "Thành công!" : "Lỗi!"}
+            </AlertTitle>
+            <AlertDescription
+              className={
+                alertInfo.type === "success" ? "text-green-700" : "text-red-700"
+              }
+            >
+              {alertInfo.message}
+            </AlertDescription>
+          </Alert>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Tên dịch vụ */}

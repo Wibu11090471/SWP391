@@ -11,6 +11,7 @@ import {
   DialogDescription,
 } from "../../../ui/dialog";
 import { Label } from "../../../ui/label";
+import { Alert, AlertDescription, AlertTitle } from "../../../ui/alert";
 import theme from "../../../theme";
 
 const api = axios.create({
@@ -36,17 +37,31 @@ const EditServiceModal = ({
   const [imageError, setImageError] = useState("");
   const [priceError, setPriceError] = useState("");
   const [timeService, setTimeService] = useState("");
+  const [alertInfo, setAlertInfo] = useState({
+    show: false,
+    message: "",
+    type: "",
+  });
 
   if (!isOpen) return null;
 
   const handleServiceUpdate = async (serviceId, updatedServiceData) => {
     if (parseFloat(updatedServiceData.price) <= 0) {
-      alert("Giá không được nhỏ hơn hoặc bằng 0");
+      setAlertInfo({
+        show: true,
+        message: "Giá không được nhỏ hơn hoặc bằng 0",
+        type: "error",
+      });
       return;
     } else if (parseFloat(updatedServiceData.timeService) <= 0) {
-      alert("Thời gian không được nhỏ hơn hoặc bằng 0");
+      setAlertInfo({
+        show: true,
+        message: "Thời gian không được nhỏ hơn hoặc bằng 0",
+        type: "error",
+      });
       return;
     }
+
     setIsLoading(true);
     try {
       await api.put(`/api/Service/update-all/${serviceId}`, {
@@ -73,14 +88,24 @@ const EditServiceModal = ({
         images: detailResponse.data.images || [],
       };
 
-      alert("Dịch vụ đã được cập nhật thành công!");
-      onUpdateSuccess();
-      onClose();
+      setAlertInfo({
+        show: true,
+        message: "Dịch vụ đã được cập nhật thành công!",
+        type: "success",
+      });
+
+      setTimeout(() => {
+        onUpdateSuccess();
+        onClose();
+      }, 1500);
     } catch (error) {
-      console.error("Error updating service:", error);
-      alert(
-        `Lỗi khi cập nhật dịch vụ: ${error.response?.data || error.message}`
-      );
+      setAlertInfo({
+        show: true,
+        message: `Lỗi khi cập nhật dịch vụ: ${
+          error.response?.data || error.message
+        }`,
+        type: "error",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -115,10 +140,18 @@ const EditServiceModal = ({
 
       setNewImageUrl("");
       setImageError("");
-      alert("Thêm ảnh thành công!");
+      setAlertInfo({
+        show: true,
+        message: "Thêm ảnh thành công!",
+        type: "success",
+      });
       onUpdateSuccess();
     } catch (error) {
-      alert("Lỗi khi thêm ảnh: " + (error.response?.data || error.message));
+      setAlertInfo({
+        show: true,
+        message: "Lỗi khi thêm ảnh: " + (error.response?.data || error.message),
+        type: "error",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -142,6 +175,11 @@ const EditServiceModal = ({
       ...prev,
       [field]: value,
     }));
+
+    // Reset alert when user makes changes
+    if (alertInfo.show) {
+      setAlertInfo({ show: false, message: "", type: "" });
+    }
   };
 
   return (
@@ -167,6 +205,34 @@ const EditServiceModal = ({
             Cập nhật thông tin cho dịch vụ
           </DialogDescription>
         </DialogHeader>
+
+        {alertInfo.show && (
+          <Alert
+            className={`mb-6 ${
+              alertInfo.type === "success"
+                ? "bg-green-50 border-green-500"
+                : "bg-red-50 border-red-500"
+            }`}
+            style={{
+              borderWidth: "1px",
+            }}
+          >
+            <AlertTitle
+              className={
+                alertInfo.type === "success" ? "text-green-800" : "text-red-800"
+              }
+            >
+              {alertInfo.type === "success" ? "Thành công!" : "Lỗi!"}
+            </AlertTitle>
+            <AlertDescription
+              className={
+                alertInfo.type === "success" ? "text-green-700" : "text-red-700"
+              }
+            >
+              {alertInfo.message}
+            </AlertDescription>
+          </Alert>
+        )}
 
         <div className="space-y-4">
           {/* Tên dịch vụ */}

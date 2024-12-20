@@ -4,8 +4,8 @@ import axios from "axios";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../ui/card";
 import { Input } from "../../../ui/input";
 import { Button } from "../../../ui/button";
+import { Alert, AlertDescription, AlertTitle } from "../../../ui/alert";
 import { PlusCircle, Folder } from "lucide-react";
-import { toast, Toaster } from "react-hot-toast";
 import theme from "../../../theme";
 import Layout from "../Layout";
 
@@ -23,6 +23,11 @@ const AddCategoryManagement = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [alertInfo, setAlertInfo] = useState({
+    show: false,
+    message: "",
+    type: "",
+  });
 
   const navigate = useNavigate();
 
@@ -32,11 +37,16 @@ const AddCategoryManagement = () => {
 
     // Validate inputs
     if (!title.trim()) {
-      toast.error("Tên danh mục không được để trống");
+      setAlertInfo({
+        show: true,
+        message: "Tên danh mục không được để trống",
+        type: "error",
+      });
       return;
     }
 
     setIsSubmitting(true);
+    setAlertInfo({ show: false, message: "", type: "" });
 
     try {
       // Prepare payload
@@ -46,19 +56,24 @@ const AddCategoryManagement = () => {
       };
 
       // Send POST request to add category
-      const response = await api.post("/api/CategoryService/add", payload);
+      await api.post("/api/CategoryService/add", payload);
 
-      // Show success toast
-      toast.success("Thêm danh mục thành công!");
+      // Show success alert
+      setAlertInfo({
+        show: true,
+        message: "Thêm danh mục thành công!",
+        type: "success",
+      });
 
       // Reset form
       setTitle("");
       setDescription("");
 
-      // Optional: Navigate back to category management or stay on the page
-      navigate("/category-management");
+      // Navigate after delay
+      setTimeout(() => {
+        navigate("/category-management");
+      }, 1500);
     } catch (error) {
-      // Handle error
       console.error("Error adding category:", error);
 
       // Check if there's a specific error message from the server
@@ -67,7 +82,11 @@ const AddCategoryManagement = () => {
         error.response?.data ||
         "Đã có lỗi xảy ra khi thêm danh mục";
 
-      toast.error(errorMessage);
+      setAlertInfo({
+        show: true,
+        message: errorMessage,
+        type: "error",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -80,25 +99,6 @@ const AddCategoryManagement = () => {
 
   return (
     <Layout>
-      {/* Add Toaster for notifications */}
-      <Toaster
-        position="top-right"
-        toastOptions={{
-          success: {
-            style: {
-              background: theme.colors.primary.DEFAULT,
-              color: "white",
-            },
-          },
-          error: {
-            style: {
-              background: "red",
-              color: "white",
-            },
-          },
-        }}
-      />
-
       <div
         className="min-h-screen pt-24 pl-5 pr-5"
         style={{
@@ -135,6 +135,38 @@ const AddCategoryManagement = () => {
           </CardHeader>
 
           <CardContent className="p-6">
+            {alertInfo.show && (
+              <Alert
+                className={`mb-6 ${
+                  alertInfo.type === "success"
+                    ? "bg-green-50 border-green-500"
+                    : "bg-red-50 border-red-500"
+                }`}
+                style={{
+                  borderWidth: "1px",
+                }}
+              >
+                <AlertTitle
+                  className={
+                    alertInfo.type === "success"
+                      ? "text-green-800"
+                      : "text-red-800"
+                  }
+                >
+                  {alertInfo.type === "success" ? "Thành công!" : "Lỗi!"}
+                </AlertTitle>
+                <AlertDescription
+                  className={
+                    alertInfo.type === "success"
+                      ? "text-green-700"
+                      : "text-red-700"
+                  }
+                >
+                  {alertInfo.message}
+                </AlertDescription>
+              </Alert>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label
@@ -185,6 +217,9 @@ const AddCategoryManagement = () => {
                   variant="outline"
                   onClick={handleCancel}
                   disabled={isSubmitting}
+                  style={{
+                    borderColor: theme.colors.primary.light,
+                  }}
                 >
                   Hủy
                 </Button>

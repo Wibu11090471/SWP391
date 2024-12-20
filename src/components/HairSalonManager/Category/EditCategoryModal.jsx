@@ -10,6 +10,7 @@ import {
 import { Button } from "../../../ui/button";
 import { Input } from "../../../ui/input";
 import { Label } from "../../../ui/label";
+import { Alert, AlertDescription, AlertTitle } from "../../../ui/alert";
 import { Edit } from "lucide-react";
 import theme from "../../../theme";
 
@@ -62,6 +63,11 @@ const EditCategoryModal = ({ isOpen, onClose, category, onUpdateSuccess }) => {
   const [status, setStatus] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [alertInfo, setAlertInfo] = useState({
+    show: false,
+    message: "",
+    type: "",
+  });
 
   useEffect(() => {
     if (category) {
@@ -71,7 +77,6 @@ const EditCategoryModal = ({ isOpen, onClose, category, onUpdateSuccess }) => {
     }
   }, [category]);
 
-  // Thêm hàm fetchUpdatedCategory để lấy dữ liệu mới nhất
   const fetchUpdatedCategory = async (categoryId) => {
     try {
       const response = await api.get(`/api/CategoryService/${categoryId}`);
@@ -90,6 +95,7 @@ const EditCategoryModal = ({ isOpen, onClose, category, onUpdateSuccess }) => {
 
     setIsLoading(true);
     setError("");
+    setAlertInfo({ show: false, message: "", type: "" });
 
     try {
       // Update category info
@@ -109,13 +115,27 @@ const EditCategoryModal = ({ isOpen, onClose, category, onUpdateSuccess }) => {
       // Call the success callback with fresh data
       onUpdateSuccess && onUpdateSuccess(updatedCategory);
 
-      // Show success message (optional)
-      console.log("Cập nhật danh mục thành công!");
+      // Show success message
+      setAlertInfo({
+        show: true,
+        message: "Cập nhật danh mục thành công!",
+        type: "success",
+      });
 
-      // Close modal
-      onClose();
+      // Close modal after delay
+      setTimeout(() => {
+        setAlertInfo({ show: false, message: "", type: "" });
+        onClose();
+      }, 2000);
     } catch (error) {
       console.error("Lỗi cập nhật danh mục:", error);
+      setAlertInfo({
+        show: true,
+        message:
+          error.response?.data?.message ||
+          "Không thể cập nhật danh mục. Vui lòng thử lại.",
+        type: "error",
+      });
       setError(
         error.response?.data?.message ||
           "Không thể cập nhật danh mục. Vui lòng thử lại."
@@ -128,6 +148,7 @@ const EditCategoryModal = ({ isOpen, onClose, category, onUpdateSuccess }) => {
   const handleClose = () => {
     onClose();
     setError("");
+    setAlertInfo({ show: false, message: "", type: "" });
     if (category) {
       setTitle(category.title || "");
       setDescription(category.description || "");
@@ -157,6 +178,34 @@ const EditCategoryModal = ({ isOpen, onClose, category, onUpdateSuccess }) => {
             Cập nhật thông tin cho danh mục dịch vụ
           </DialogDescription>
         </DialogHeader>
+
+        {alertInfo.show && (
+          <Alert
+            className={`mb-4 ${
+              alertInfo.type === "success"
+                ? "bg-green-50 border-green-500"
+                : "bg-red-50 border-red-500"
+            }`}
+            style={{
+              borderWidth: "1px",
+            }}
+          >
+            <AlertTitle
+              className={
+                alertInfo.type === "success" ? "text-green-800" : "text-red-800"
+              }
+            >
+              {alertInfo.type === "success" ? "Thành công!" : "Lỗi!"}
+            </AlertTitle>
+            <AlertDescription
+              className={
+                alertInfo.type === "success" ? "text-green-700" : "text-red-700"
+              }
+            >
+              {alertInfo.message}
+            </AlertDescription>
+          </Alert>
+        )}
 
         <div className="space-y-4">
           <div>

@@ -175,15 +175,6 @@ const AppRoutes = () => {
       />
 
       <Route
-        path="/service-management"
-        element={
-          <ProtectedRoute requiredRoles={["admin"]}>
-            <Service />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
         path="/overview-management"
         element={
           <ProtectedRoute requiredRoles={["admin"]}>
